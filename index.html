@@ -1,0 +1,2251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Info Dock</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --text: #18212f;
+      --muted: #697586;
+      --line: #e6e9ef;
+      --primary: #2563eb;
+      --primary-soft: #e8f0ff;
+      --danger: #dc2626;
+      --danger-soft: #fee2e2;
+      --ok: #16a34a;
+      --ok-soft: #dcfce7;
+      --warning: #d97706;
+      --warning-soft: #fef3c7;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 34rem),
+        radial-gradient(circle at top right, rgba(22, 163, 74, 0.10), transparent 30rem),
+        var(--bg);
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: 0;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .app {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 96px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: #111827;
+      color: white;
+      box-shadow: var(--shadow);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 46px);
+      line-height: 1.05;
+      letter-spacing: -0.06em;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 760px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.72);
+      white-space: nowrap;
+      backdrop-filter: blur(10px);
+    }
+
+    .pill.status-ok {
+      color: var(--ok);
+      background: var(--ok-soft);
+      border-color: rgba(22, 163, 74, 0.22);
+    }
+
+    .pill.status-warn {
+      color: var(--warning);
+      background: var(--warning-soft);
+      border-color: rgba(217, 119, 6, 0.26);
+    }
+
+    #storageBadge {
+      position: fixed;
+      top: 14px;
+      right: 16px;
+      z-index: 110;
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(230, 233, 239, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .search-card {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+    }
+
+    .search-main {
+      display: grid;
+      gap: 12px;
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .search-input {
+      width: 100%;
+      min-height: 58px;
+      padding: 0 18px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      outline: none;
+      background: white;
+      color: var(--text);
+      font-size: 18px;
+      transition: border 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .copy-search-btn {
+      min-height: 58px;
+      padding: 0 18px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      color: var(--muted);
+      background: white;
+      font-weight: 650;
+    }
+
+    .copy-search-btn:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .field,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: white;
+      color: var(--text);
+      outline: none;
+      padding: 11px 12px;
+      transition: border 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    textarea {
+      min-height: 84px;
+      resize: vertical;
+    }
+
+    .search-input:focus,
+    .field:focus,
+    textarea:focus,
+    select:focus {
+      border-color: rgba(37, 99, 235, 0.65);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .status-msg {
+      min-height: 22px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .status-msg:empty {
+      display: none;
+    }
+
+    .platform-dock {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -0.03em;
+    }
+
+    .platforms-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .platform-card {
+      min-height: 62px;
+      padding: 9px;
+      border-radius: 15px;
+      border: 1px solid var(--line);
+      background: white;
+      text-align: left;
+      display: grid;
+      align-content: start;
+      gap: 6px;
+      transition: transform 0.12s ease, border 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .platform-card:hover,
+    .platform-card:focus-visible {
+      transform: translateY(-1px);
+      border-color: rgba(37, 99, 235, 0.45);
+      box-shadow: 0 12px 28px rgba(37, 99, 235, 0.10);
+      outline: none;
+    }
+
+    .platform-card h3 {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: -0.02em;
+    }
+
+    .platform-card-main {
+      grid-column: 1 / -1;
+      min-height: 54px;
+      padding: 0 16px;
+      align-content: center;
+      background: #111827;
+      color: white;
+      cursor: pointer;
+    }
+
+    .platform-card-main h3 {
+      font-size: 18px;
+    }
+
+    .platform-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .platform-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .platform-actions .tiny-btn {
+      min-height: 28px;
+      padding: 0 8px;
+      font-size: 12px;
+    }
+
+    .platform-card-sort-control {
+      min-height: 62px;
+      place-items: center;
+      text-align: center;
+      color: var(--primary);
+      background: var(--primary-soft);
+      font-weight: 800;
+    }
+
+    .platform-card-sort-control.active {
+      color: var(--warning);
+      background: var(--warning-soft);
+      border-color: rgba(217, 119, 6, 0.35);
+    }
+
+    .platform-card.sorting {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .platform-card.sorting.selected {
+      border-color: rgba(37, 99, 235, 0.65);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .sort-hint {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .platform-card.add {
+      min-height: 62px;
+      border-style: dashed;
+      background: rgba(255, 255, 255, 0.65);
+      place-items: center;
+      text-align: center;
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .focus-flash {
+      animation: flashCard 1.2s ease;
+    }
+
+    @keyframes flashCard {
+      0%, 100% { box-shadow: var(--shadow); }
+      30% { box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.14), var(--shadow); }
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin: 22px 0 14px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      width: fit-content;
+    }
+
+    .tab-btn {
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 750;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: grid;
+      gap: 14px;
+    }
+
+    .toolbar {
+      padding: 14px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+
+    .toolbar.two {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .history-toolbar {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .history-search-field {
+      grid-column: 1 / -1;
+    }
+
+
+    .label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .item {
+      padding: 12px;
+      display: grid;
+      gap: 9px;
+    }
+
+    .item-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+      gap: 10px;
+    }
+
+    .item-title {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.32;
+      word-break: break-word;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 0 8px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: #f3f5f8;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .tag.ok {
+      color: var(--ok);
+      background: var(--ok-soft);
+    }
+
+    .tag.warn {
+      color: var(--warning);
+      background: var(--warning-soft);
+    }
+
+    .tag.danger {
+      color: var(--danger);
+      background: var(--danger-soft);
+    }
+
+    .edit-grid {
+      display: grid;
+      grid-template-columns: 160px minmax(0, 1fr);
+      gap: 8px;
+      align-items: start;
+    }
+
+    .wide {
+      grid-column: 1 / -1;
+    }
+
+    .item .label {
+      gap: 4px;
+      font-size: 12px;
+    }
+
+    .item .field,
+    .item textarea,
+    .item select {
+      padding: 8px 10px;
+      border-radius: 12px;
+    }
+
+    .item textarea {
+      min-height: 58px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-end;
+      align-content: start;
+    }
+
+    .item .actions .tiny-btn,
+    .item .actions .danger-btn {
+      min-height: 30px;
+      padding: 0 10px;
+      font-size: 12px;
+    }
+
+    .primary-btn,
+    .ghost-btn,
+    .danger-btn,
+    .tiny-btn {
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 650;
+      transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+      text-decoration: none;
+    }
+
+    .primary-btn:hover,
+    .ghost-btn:hover,
+    .danger-btn:hover,
+    .tiny-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .primary-btn {
+      color: white;
+      background: var(--primary);
+      box-shadow: 0 10px 18px rgba(37, 99, 235, 0.22);
+    }
+
+    .ghost-btn {
+      color: var(--text);
+      background: white;
+      border: 1px solid var(--line);
+    }
+
+    .danger-btn {
+      color: var(--danger);
+      background: var(--danger-soft);
+    }
+
+    .tiny-btn {
+      min-height: 32px;
+      padding: 0 10px;
+      font-size: 13px;
+      color: var(--text);
+      background: #f3f5f8;
+      border: 1px solid var(--line);
+    }
+
+    .empty {
+      padding: 34px 20px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed #cbd5e1;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .later-form {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .form-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .form-title h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -0.03em;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(15, 23, 42, 0.36);
+      z-index: 99;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-backdrop.sheet {
+      align-items: flex-end;
+      padding: 0;
+    }
+
+    .modal {
+      width: min(560px, 100%);
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+      max-height: min(84vh, 760px);
+      overflow: auto;
+    }
+
+    .sheet-panel {
+      width: min(680px, 100%);
+      border-radius: 26px 26px 0 0;
+      padding-bottom: calc(18px + env(safe-area-inset-bottom));
+    }
+
+    .modal h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .modal-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .entrance-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .entrance-btn {
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: white;
+      text-align: left;
+      display: grid;
+      gap: 4px;
+      transition: transform 0.12s ease, border 0.12s ease;
+    }
+
+    .entrance-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(37, 99, 235, 0.45);
+    }
+
+    .entrance-btn strong {
+      font-size: 15px;
+    }
+
+    .entrance-btn span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .entrance-btn.warn {
+      border-color: rgba(217, 119, 6, 0.35);
+      background: rgba(254, 243, 199, 0.45);
+    }
+
+    .entrance-btn:disabled {
+      opacity: 0.58;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      max-width: min(520px, calc(100% - 32px));
+      padding: 12px 14px;
+      border-radius: 999px;
+      color: white;
+      background: #111827;
+      box-shadow: var(--shadow);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      z-index: 120;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        width: min(100% - 22px, 1120px);
+        padding-top: 16px;
+        padding-bottom: 72px;
+      }
+
+      .brand-row,
+      .form-title {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .item-head {
+        grid-template-columns: 1fr;
+      }
+
+      .brand-row {
+        gap: 10px;
+      }
+
+      .brand {
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .logo {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        flex: 0 0 auto;
+      }
+
+      h1 {
+        font-size: clamp(26px, 9vw, 34px);
+        letter-spacing: -0.045em;
+      }
+
+      .subtitle {
+        margin-top: 4px;
+        max-width: 100%;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .pill {
+        align-self: flex-start;
+        max-width: 100%;
+        padding: 7px 10px;
+        white-space: normal;
+        font-size: 12px;
+      }
+
+      .toolbar,
+      .toolbar.two,
+      .edit-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .history-toolbar {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .history-search-field {
+        grid-column: 1 / -1;
+      }
+
+      .search-card {
+        top: 8px;
+        padding: 12px;
+        gap: 10px;
+        border-radius: 18px;
+      }
+
+      .search-main {
+        gap: 9px;
+      }
+
+      .section-title {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .section-title .hint {
+        margin: 0;
+      }
+
+      .status-msg {
+        min-height: 0;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .search-input,
+      .copy-search-btn {
+        min-height: 46px;
+      }
+
+      .search-input {
+        font-size: 16px;
+        padding: 0 13px;
+      }
+
+      .copy-search-btn {
+        padding: 0 12px;
+      }
+
+
+      .platform-dock {
+        padding: 10px;
+      }
+
+      .platforms-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .platform-card {
+        min-height: 58px;
+        padding: 8px;
+        border-radius: 14px;
+      }
+
+      .platform-card-main {
+        min-height: 50px;
+        padding: 0 14px;
+      }
+
+      .platform-card h3 {
+        font-size: 15px;
+      }
+
+      #storageBadge {
+        top: 10px;
+        right: 11px;
+        max-width: 46%;
+        font-size: 12px;
+      }
+
+      .tabs {
+        width: 100%;
+      }
+
+      .tab-btn {
+        flex: 1;
+      }
+
+      .actions {
+        justify-content: stretch;
+      }
+
+      .actions button,
+      .actions a {
+        flex: 1;
+      }
+
+      .item {
+        padding: 10px;
+        gap: 8px;
+      }
+
+      .item .actions .tiny-btn,
+      .item .actions .danger-btn {
+        min-height: 32px;
+      }
+
+      .modal-backdrop:not(.sheet) {
+        padding: 12px;
+      }
+
+      .toast {
+        bottom: calc(22px + env(safe-area-inset-bottom));
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <div class="brand-row">
+        <div class="brand">
+          <div class="logo">ID</div>
+          <div>
+            <h1>Info Dock</h1>
+            <p class="subtitle">输入关键词后直接选择平台入口；搜索历史和稍后看默认只保存在本机浏览器。</p>
+          </div>
+        </div>
+        <div class="pill" id="storageBadge">本地保存：检测中</div>
+      </div>
+
+      <section class="card search-card" aria-label="统一搜索入口">
+        <div class="search-main">
+          <div class="search-row">
+            <input id="searchInput" class="search-input" type="search" placeholder="今天我要找什么？" autocomplete="off" />
+            <button class="ghost-btn copy-search-btn" id="copySearchBtn" type="button">复制</button>
+          </div>
+        </div>
+        <div class="status-msg" id="statusMsg"></div>
+      </section>
+
+      <section class="card platform-dock" id="platformDock" aria-label="平台入口">
+        <div class="platforms-grid" id="platformCards"></div>
+      </section>
+</header>
+
+    <nav class="tabs" aria-label="内容切换">
+      <button class="tab-btn active" type="button" data-tab="historySection">搜索历史</button>
+      <button class="tab-btn" type="button" data-tab="laterSection">稍后看清单</button>
+    </nav>
+
+    <section id="historySection" class="section active" aria-label="搜索历史">
+      <div class="card toolbar history-toolbar">
+        <select id="historyPlatformFilter"></select>
+        <select id="historyStatusFilter"></select>
+        <select id="historySort">
+          <option value="newest">排序</option>
+          <option value="oldest">最早优先</option>
+        </select>
+        <input id="historyTextFilter" class="field history-search-field" type="search" placeholder="搜索关键词、入口、备注" />
+      </div>
+      <div class="list" id="historyList"></div>
+    </section>
+
+    <section id="laterSection" class="section" aria-label="稍后看清单">
+      <div class="card later-form">
+        <div class="form-title">
+          <h2>从外部页面一键加入</h2>
+          <button class="ghost-btn" id="copyBookmarkletBtn" type="button">复制收藏脚本</button>
+        </div>
+        <p class="hint">把下面这个按钮拖到浏览器书签栏。在任意搜索结果页或内容页点击该书签，即可把当前页标题和链接带回 Info Dock，并自动加入稍后看清单。</p>
+        <div class="actions">
+          <a class="primary-btn" id="bookmarkletLink" href="#">拖到书签栏：加入 Info Dock</a>
+        </div>
+        <p class="hint">说明：这个小工具只保存当前页面的标题和链接，不抓取平台搜索结果。若浏览器拦截弹窗，或禁止外部网页打开 file:// 本地文件，会复制一条导入链接作为兜底。</p>
+      </div>
+
+      <form class="card later-form" id="laterForm">
+        <div class="form-title">
+          <h2>添加稍后看</h2>
+          <button class="primary-btn" type="submit">添加</button>
+        </div>
+        <div class="edit-grid">
+          <label class="label">标题
+            <input id="laterTitle" class="field" type="text" placeholder="这是什么内容？" required />
+          </label>
+          <label class="label">链接
+            <input id="laterUrl" class="field" type="url" placeholder="https://..." />
+          </label>
+          <label class="label">来源平台
+            <select id="laterSource"></select>
+          </label>
+          <label class="label">预计耗时
+            <input id="laterEstimate" class="field" type="text" placeholder="例如：10 分钟 / 1 小时" />
+          </label>
+          <label class="label wide">为什么想看
+            <textarea id="laterReason" placeholder="先记录目的，避免只是因为推荐标题吸引人。"></textarea>
+          </label>
+        </div>
+      </form>
+
+      <div class="card toolbar two">
+        <label class="label">来源平台
+          <select id="laterSourceFilter"></select>
+        </label>
+        <label class="label">状态
+          <select id="laterStatusFilter"></select>
+        </label>
+        <label class="label">关键词
+          <input id="laterTextFilter" class="field" type="search" placeholder="搜索标题、原因、结论" />
+        </label>
+      </div>
+      <div class="list" id="laterList"></div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="addPlatformModal" aria-hidden="true">
+    <section class="card modal" role="dialog" aria-modal="true" aria-labelledby="addPlatformModalTitle">
+      <div class="modal-title-row">
+        <div>
+          <h2 id="addPlatformModalTitle">添加搜索平台</h2>
+          <p class="hint">搜索地址模板可以使用 <strong>{query}</strong> 作为关键词占位符。留空则网页搜索使用 Bing 兜底；站点域名用于 Bing site 搜索。</p>
+        </div>
+        <button class="ghost-btn" type="button" id="cancelPlatformBtn">关闭</button>
+      </div>
+      <label class="label">平台名称
+        <input id="newPlatformName" class="field" type="text" placeholder="例如：Google / 豆瓣 / GitHub" />
+      </label>
+      <label class="label">推荐搜索方式
+        <input id="newPlatformRecommendation" class="field" type="text" placeholder="例如：关键词 + 年份 / site 搜索 / 问题式" />
+      </label>
+      <label class="label">网页搜索地址模板
+        <input id="newPlatformUrl" class="field" type="text" placeholder="例如：https://www.google.com/search?q={query}" />
+      </label>
+      <label class="label">移动版搜索地址模板，可选
+        <input id="newPlatformMobileUrl" class="field" type="text" placeholder="例如：https://m.example.com/search?q={query}" />
+      </label>
+      <label class="label">站点域名，可选
+        <input id="newPlatformDomain" class="field" type="text" placeholder="例如：douban.com，用于 Bing/Google site 搜索" />
+      </label>
+      <label class="label">App 打开 URL Scheme，可选
+        <input id="newPlatformAppUrl" class="field" type="text" placeholder="例如：example://search?q={query}" />
+      </label>
+      <div class="actions">
+        <button class="primary-btn" id="savePlatformBtn" type="button">保存平台</button>
+      </div>
+    </section>
+  </div>
+<div class="toast" id="toast"></div>
+
+  <script>
+    const SEARCH_STATUSES = ["未处理", "有用", "已解决", "没找到", "转入稍后看", "放弃"];
+    const LATER_STATUSES = ["未看", "已看", "有用", "没用", "转成项目任务", "删除"];
+    const LATER_SOURCES_BASE = ["必应", "知乎", "微博", "小红书", "B站", "抖音", "播客", "GitHub", "微信/公众号", "其他"];
+
+    const DEFAULT_PLATFORMS = [
+      {
+        id: "bing",
+        name: "必应",
+        goodFor: "全网资料、官方页面、跨平台验证",
+        recommendation: "组合词 + 年份 + 真实评价",
+        domain: "bing.com",
+        urlTemplate: "https://www.bing.com/search?q={query}",
+        mobileUrlTemplate: "https://www.bing.com/search?q={query}",
+        appUrlTemplate: ""
+      },
+      {
+        id: "zhihu",
+        name: "知乎",
+        goodFor: "经验判断、长回答、观点交叉验证",
+        recommendation: "问题式：怎么选 / 有哪些坑",
+        domain: "zhihu.com",
+        urlTemplate: "https://www.zhihu.com/search?type=content&q={query}",
+        mobileUrlTemplate: "https://www.zhihu.com/search?type=content&q={query}",
+        appUrlTemplate: "zhihu://search?q={query}"
+      },
+      {
+        id: "weibo",
+        name: "微博",
+        goodFor: "实时反馈、舆情、活动和突发信息",
+        recommendation: "短词 + 时间 / 地点 / 事件名",
+        domain: "weibo.com",
+        urlTemplate: "https://s.weibo.com/weibo?q={query}",
+        mobileUrlTemplate: "https://m.weibo.cn/search?containerid=100103type%3D1%26q%3D{query}",
+        appUrlTemplate: "sinaweibo://searchall?q={query}"
+      },
+      {
+        id: "xiaohongshu",
+        name: "小红书",
+        goodFor: "消费体验、生活方式、踩坑和清单",
+        recommendation: "短词 + 场景词：避坑 / 攻略 / 真实",
+        domain: "xiaohongshu.com",
+        urlTemplate: "https://www.xiaohongshu.com/search_result?keyword={query}",
+        mobileUrlTemplate: "https://www.xiaohongshu.com/search_result?keyword={query}",
+        appUrlTemplate: "xhsdiscover://search/result?keyword={query}"
+      },
+      {
+        id: "bilibili",
+        name: "B站",
+        goodFor: "教程、测评、长视频攻略和案例演示",
+        recommendation: "教程式：攻略 / 教程 / 2026",
+        domain: "bilibili.com",
+        urlTemplate: "https://search.bilibili.com/all?keyword={query}",
+        mobileUrlTemplate: "https://m.bilibili.com/search?keyword={query}",
+        appUrlTemplate: "bilibili://search?keyword={query}"
+      },
+      {
+        id: "douyin",
+        name: "抖音",
+        goodFor: "短视频体验、口语化建议、地点和生活场景",
+        recommendation: "口语短词：哪里方便 / 怎么避坑",
+        domain: "douyin.com",
+        urlTemplate: "https://www.douyin.com/search/{query}",
+        mobileUrlTemplate: "https://so.douyin.com/s?keyword={query}",
+        appUrlTemplate: "snssdk1128://search?keyword={query}"
+      }
+    ];
+
+    const STORAGE_KEYS = {
+      platforms: "infoDock.platforms.v1",
+      history: "infoDock.history.v1",
+      later: "infoDock.later.v1"
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+
+    const elements = {
+      searchInput: $("#searchInput"),
+      copySearchBtn: $("#copySearchBtn"),
+      statusMsg: $("#statusMsg"),
+      platformDock: $("#platformDock"),
+      platformCards: $("#platformCards"),
+      historyPlatformFilter: $("#historyPlatformFilter"),
+      historyStatusFilter: $("#historyStatusFilter"),
+      historyTextFilter: $("#historyTextFilter"),
+      historySort: $("#historySort"),
+      historyList: $("#historyList"),
+      bookmarkletLink: $("#bookmarkletLink"),
+      copyBookmarkletBtn: $("#copyBookmarkletBtn"),
+      laterForm: $("#laterForm"),
+      laterTitle: $("#laterTitle"),
+      laterUrl: $("#laterUrl"),
+      laterSource: $("#laterSource"),
+      laterEstimate: $("#laterEstimate"),
+      laterReason: $("#laterReason"),
+      laterSourceFilter: $("#laterSourceFilter"),
+      laterStatusFilter: $("#laterStatusFilter"),
+      laterTextFilter: $("#laterTextFilter"),
+      laterList: $("#laterList"),
+      addPlatformModal: $("#addPlatformModal"),
+      newPlatformName: $("#newPlatformName"),
+      newPlatformRecommendation: $("#newPlatformRecommendation"),
+      newPlatformUrl: $("#newPlatformUrl"),
+      newPlatformMobileUrl: $("#newPlatformMobileUrl"),
+      newPlatformDomain: $("#newPlatformDomain"),
+      newPlatformAppUrl: $("#newPlatformAppUrl"),
+      cancelPlatformBtn: $("#cancelPlatformBtn"),
+      savePlatformBtn: $("#savePlatformBtn"),
+      toast: $("#toast"),
+      storageBadge: $("#storageBadge")
+    };
+
+    let platforms = [];
+    let historyItems = [];
+    let laterItems = [];
+    let isSortingPlatforms = false;
+    let selectedSortPlatformId = "";
+
+    boot();
+
+    function boot() {
+      ensureLocalStorageAvailable();
+
+      platforms = normalizePlatforms(load(STORAGE_KEYS.platforms, DEFAULT_PLATFORMS));
+      historyItems = normalizeHistoryItems(load(STORAGE_KEYS.history, []));
+      laterItems = normalizeLaterItems(load(STORAGE_KEYS.later, []));
+      persistCoreData();
+      consumeIncomingLaterItem();
+      renderAll();
+      bindEvents();
+    }
+
+    function bindEvents() {
+      elements.copySearchBtn.addEventListener("click", () => copyCurrentKeyword());
+
+      elements.searchInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          const firstPlatform = platforms[0];
+          if (firstPlatform) runPlatformEntrance(firstPlatform.id, "web");
+        }
+      });
+
+      $$(".tab-btn").forEach((button) => {
+        button.addEventListener("click", () => activateTab(button.dataset.tab));
+      });
+
+      [elements.historyPlatformFilter, elements.historyStatusFilter, elements.historyTextFilter, elements.historySort]
+        .forEach((control) => control.addEventListener("input", renderHistory));
+
+      [elements.laterSourceFilter, elements.laterStatusFilter, elements.laterTextFilter]
+        .forEach((control) => control.addEventListener("input", renderLater));
+
+      elements.copyBookmarkletBtn.addEventListener("click", () => {
+        const bookmarklet = buildBookmarklet();
+        elements.bookmarkletLink.href = bookmarklet;
+        copyText(bookmarklet);
+        toast("已复制收藏脚本。也可以直接把蓝色按钮拖到书签栏。");
+      });
+
+      elements.bookmarkletLink.addEventListener("click", (event) => {
+        event.preventDefault();
+        const bookmarklet = buildBookmarklet();
+        elements.bookmarkletLink.href = bookmarklet;
+        copyText(bookmarklet);
+        toast("已复制收藏脚本。请拖到书签栏，或新建书签后粘贴到网址栏。");
+      });
+
+      elements.bookmarkletLink.addEventListener("dragstart", (event) => {
+        const bookmarklet = buildBookmarklet();
+        elements.bookmarkletLink.href = bookmarklet;
+        if (event.dataTransfer) {
+          event.dataTransfer.setData("text/uri-list", bookmarklet);
+          event.dataTransfer.setData("text/plain", bookmarklet);
+          event.dataTransfer.effectAllowed = "copyLink";
+        }
+      });
+
+      elements.laterForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        addLaterItem();
+      });
+
+      elements.cancelPlatformBtn.addEventListener("click", closeAddPlatformModal);
+      elements.savePlatformBtn.addEventListener("click", addPlatform);
+      elements.addPlatformModal.addEventListener("click", (event) => {
+        if (event.target === elements.addPlatformModal) closeAddPlatformModal();
+      });
+
+      document.addEventListener("click", handleGlobalClick);
+      document.addEventListener("input", handleGlobalInput);
+      document.addEventListener("change", handleGlobalInput);
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeAddPlatformModal();
+        }
+      });
+    }
+
+    function renderAll() {
+      renderPlatformCards();
+      renderFilters();
+      renderBookmarklet();
+      renderHistory();
+      renderLater();
+    }
+
+    function activateTab(tabId) {
+      $$(".tab-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.tab === tabId);
+      });
+      $$(".section").forEach((section) => {
+        section.classList.toggle("active", section.id === tabId);
+      });
+    }
+
+    function load(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : clone(fallback);
+      } catch (error) {
+        console.warn("读取本地数据失败：", error);
+        return clone(fallback);
+      }
+    }
+
+    function save(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function clone(value) {
+      if (typeof structuredClone === "function") return structuredClone(value);
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function persistCoreData() {
+      save(STORAGE_KEYS.platforms, platforms);
+      save(STORAGE_KEYS.history, historyItems);
+      save(STORAGE_KEYS.later, laterItems);
+    }
+
+    function ensureLocalStorageAvailable() {
+      try {
+        localStorage.setItem("infoDock.storageTest", "1");
+        localStorage.removeItem("infoDock.storageTest");
+        elements.storageBadge.textContent = "本地保存：已启用";
+        elements.storageBadge.classList.add("status-ok");
+        elements.storageBadge.classList.remove("status-warn");
+      } catch (error) {
+        elements.storageBadge.textContent = "本地保存：不可用";
+        elements.storageBadge.classList.add("status-warn");
+        elements.storageBadge.classList.remove("status-ok");
+        toast("当前浏览器可能禁用了 localStorage，刷新后数据可能丢失。");
+      }
+    }
+
+    function normalizePlatforms(rawPlatforms) {
+      const raw = Array.isArray(rawPlatforms) ? rawPlatforms : [];
+      const defaultIds = new Set(DEFAULT_PLATFORMS.map((item) => item.id));
+      const defaultNames = new Set(DEFAULT_PLATFORMS.map((item) => item.name));
+
+      const normalizedDefaults = DEFAULT_PLATFORMS.map((defaultPlatform) => {
+        const saved = raw.find((item) =>
+          item &&
+          (item.id === defaultPlatform.id || normalizePlatformName(item.name) === defaultPlatform.name)
+        );
+        return normalizePlatformConfig({
+          ...defaultPlatform,
+          ...(saved || {}),
+          id: defaultPlatform.id,
+          name: defaultPlatform.name,
+          goodFor: saved?.goodFor || defaultPlatform.goodFor,
+          recommendation: saved?.recommendation || defaultPlatform.recommendation,
+          domain: saved?.domain || defaultPlatform.domain,
+          mobileUrlTemplate: saved?.mobileUrlTemplate || defaultPlatform.mobileUrlTemplate,
+          appUrlTemplate: saved?.appUrlTemplate || defaultPlatform.appUrlTemplate,
+          urlTemplate: saved?.urlTemplate || defaultPlatform.urlTemplate
+        });
+      });
+
+      const custom = raw
+        .filter((item) => {
+          if (!item || !item.name) return false;
+          const normalizedName = normalizePlatformName(item.name);
+          return !defaultIds.has(item.id) && !defaultNames.has(normalizedName);
+        })
+        .map((item) => normalizePlatformConfig(item));
+
+      const allPlatforms = [...normalizedDefaults, ...custom];
+      const bing = allPlatforms.find((item) => item.id === "bing") || allPlatforms.find((item) => item.name === "必应");
+      const ordered = [];
+
+      raw.forEach((saved) => {
+        if (!saved) return;
+        const savedName = normalizePlatformName(saved.name);
+        const match = allPlatforms.find((item) => item.id === saved.id || item.name === savedName);
+        if (match && match !== bing && !ordered.some((item) => item.id === match.id)) {
+          ordered.push(match);
+        }
+      });
+
+      allPlatforms.forEach((item) => {
+        if (item !== bing && !ordered.some((entry) => entry.id === item.id)) {
+          ordered.push(item);
+        }
+      });
+
+      return bing ? [bing, ...ordered] : ordered;
+    }
+
+    function normalizePlatformConfig(platform) {
+      const urlTemplate = String(platform.urlTemplate || "");
+      const mobileUrlTemplate = String(platform.mobileUrlTemplate || "");
+      const appUrlTemplate = String(platform.appUrlTemplate || "");
+      const domain = cleanDomain(platform.domain || inferDomain(urlTemplate) || inferDomain(mobileUrlTemplate));
+      const name = normalizePlatformName(platform.name || "未命名平台");
+      return {
+        id: platform.id || createId(),
+        name,
+        goodFor: platform.goodFor || "自定义信息源",
+        recommendation: platform.recommendation || "先用精准关键词，再用复制兜底",
+        domain,
+        urlTemplate,
+        mobileUrlTemplate,
+        appUrlTemplate
+      };
+    }
+
+    function normalizeHistoryItems(rawItems) {
+      const raw = Array.isArray(rawItems) ? rawItems : [];
+      return raw.map((item) => {
+        const platformName = normalizePlatformName(item.platform || "其他");
+        return {
+          id: item.id || createId(),
+          keyword: item.keyword || item.query || "",
+          platform: platformName,
+          platformId: item.platformId || findPlatformIdByName(platformName),
+          entranceType: item.entranceType || item.actionLabel || "网页搜索",
+          entranceLabel: item.entranceLabel || item.entranceType || item.actionLabel || "网页搜索",
+          time: item.time || item.createdAt || new Date().toISOString(),
+          status: normalizeSearchStatus(item.status || (item.solved ? "已解决" : "未处理")),
+          solved: Boolean(item.solved),
+          note: item.note || "",
+          url: item.url || ""
+        };
+      });
+    }
+
+    function normalizeLaterItems(rawItems) {
+      const raw = Array.isArray(rawItems) ? rawItems : [];
+      return raw.map((item) => ({
+        id: item.id || createId(),
+        title: item.title || item.url || "未命名内容",
+        url: item.url || "",
+        source: normalizeLaterSource(item.source || detectSourceFromUrl(item.url || "")),
+        reason: item.reason || "",
+        estimate: item.estimate || "",
+        status: LATER_STATUSES.includes(item.status) ? item.status : "未看",
+        conclusion: item.conclusion || "",
+        createdAt: item.createdAt || new Date().toISOString(),
+        relatedHistoryId: item.relatedHistoryId || ""
+      }));
+    }
+
+    function normalizeSearchStatus(status) {
+      if (SEARCH_STATUSES.includes(status)) return status;
+      return "未处理";
+    }
+
+    function normalizePlatformName(name) {
+      const value = String(name || "").trim();
+      if (["B 站", "哔哩哔哩", "bilibili", "Bilibili"].includes(value)) return "B站";
+      return value || "其他";
+    }
+
+    function renderPlatformCards() {
+      const bing = platforms.find((platform) => platform.id === "bing") || platforms.find((platform) => platform.name === "必应") || platforms[0];
+      const otherPlatforms = platforms.filter((platform) => platform !== bing);
+
+      const bingCard = bing ? `
+        <button class="platform-card platform-card-main" type="button" data-action="platform-bing" data-platform-id="${escapeAttribute(bing.id)}">
+          <h3>${escapeHtml(bing.name)}</h3>
+        </button>
+      ` : "";
+
+      const platformCards = otherPlatforms.map((platform) => `
+        <article
+          class="platform-card ${isSortingPlatforms ? "sorting" : ""} ${selectedSortPlatformId === platform.id ? "selected" : ""}"
+          ${isSortingPlatforms ? `data-action="platform-sort-select" data-platform-id="${escapeAttribute(platform.id)}"` : ""}
+        >
+          <div class="platform-card-head">
+            <h3>${escapeHtml(platform.name)}</h3>
+            ${isSortingPlatforms ? `<span class="sort-hint">${selectedSortPlatformId === platform.id ? "已选" : "选择"}</span>` : ""}
+          </div>
+          ${isSortingPlatforms ? "" : `
+            <div class="platform-actions">
+              <button class="tiny-btn" type="button" data-action="platform-web" data-platform-id="${escapeAttribute(platform.id)}">网页搜索</button>
+              <button class="tiny-btn" type="button" data-action="platform-site" data-platform-id="${escapeAttribute(platform.id)}">Bing site</button>
+            </div>
+          `}
+        </article>
+      `).join("");
+
+      const addCard = `
+        <button class="platform-card add" type="button" data-action="open-add-platform">
+          <span>+ 添加自定义平台</span>
+        </button>
+      `;
+
+      const sortCard = `
+        <button class="platform-card platform-card-sort-control ${isSortingPlatforms ? "active" : ""}" type="button" data-action="toggle-platform-sort">
+          <h3>${isSortingPlatforms ? "完成排序" : "自定义排序"}</h3>
+        </button>
+      `;
+
+      elements.platformCards.innerHTML = bingCard + platformCards + addCard + sortCard;
+    }
+
+
+    function renderFilters() {
+      const platformNames = unique([
+        ...platforms.map((item) => item.name),
+        ...historyItems.map((item) => item.platform).filter(Boolean)
+      ]);
+      fillSelect(elements.historyPlatformFilter, ["全部平台", ...platformNames], "全部平台");
+      fillSelect(elements.historyStatusFilter, ["全部状态", ...SEARCH_STATUSES], "全部状态");
+
+      const sourceOptions = getAllLaterSources();
+      fillSelect(elements.laterSource, sourceOptions, sourceOptions.includes("其他") ? "其他" : sourceOptions[0]);
+      fillSelect(elements.laterSourceFilter, ["全部来源", ...sourceOptions], "全部来源");
+      fillSelect(elements.laterStatusFilter, ["全部状态", ...LATER_STATUSES], "全部状态");
+    }
+
+    function getAllLaterSources() {
+      return unique([
+        ...LATER_SOURCES_BASE,
+        ...platforms.map((item) => item.name),
+        ...laterItems.map((item) => item.source).filter(Boolean)
+      ]);
+    }
+
+    function fillSelect(select, options, selectedValue) {
+      const previousValue = select.value || selectedValue;
+      select.innerHTML = "";
+      options.forEach((option) => {
+        const node = document.createElement("option");
+        node.value = option;
+        node.textContent = option;
+        select.appendChild(node);
+      });
+      select.value = options.includes(previousValue) ? previousValue : selectedValue;
+    }
+
+    function togglePlatformSort() {
+      isSortingPlatforms = !isSortingPlatforms;
+      selectedSortPlatformId = "";
+      renderPlatformCards();
+      toast(isSortingPlatforms ? "已进入排序模式：依次点击两个非必应卡片即可互换位置。" : "已退出排序模式。");
+    }
+
+    function selectPlatformForSwap(platformId) {
+      if (!isSortingPlatforms || !platformId) return;
+
+      if (!selectedSortPlatformId) {
+        selectedSortPlatformId = platformId;
+        renderPlatformCards();
+        toast("已选中第一个卡片，再点击另一个卡片即可互换。");
+        return;
+      }
+
+      if (selectedSortPlatformId === platformId) {
+        selectedSortPlatformId = "";
+        renderPlatformCards();
+        return;
+      }
+
+      swapPlatforms(selectedSortPlatformId, platformId);
+      selectedSortPlatformId = "";
+      renderPlatformCards();
+      renderFilters();
+      toast("已互换两个平台的位置。");
+    }
+
+    function swapPlatforms(firstId, secondId) {
+      const firstIndex = platforms.findIndex((platform) => platform.id === firstId);
+      const secondIndex = platforms.findIndex((platform) => platform.id === secondId);
+
+      if (firstIndex <= 0 || secondIndex <= 0 || firstIndex === secondIndex) return;
+
+      const nextPlatforms = [...platforms];
+      const temp = nextPlatforms[firstIndex];
+      nextPlatforms[firstIndex] = nextPlatforms[secondIndex];
+      nextPlatforms[secondIndex] = temp;
+
+      platforms = nextPlatforms;
+      save(STORAGE_KEYS.platforms, platforms);
+    }
+
+    function getWebEntrance(platform) {
+      const urlTemplate = platform.urlTemplate || platform.mobileUrlTemplate || "https://www.bing.com/search?q={query}";
+      return {
+        label: "网页搜索",
+        entranceType: "网页搜索",
+        description: "使用该平台的网页搜索入口。",
+        urlTemplate,
+        domain: platform.domain || ""
+      };
+    }
+
+    function getBingSiteEntrance(platform) {
+      const domain = platform.domain || "";
+      if (domain) {
+        return {
+          label: "Bing site 搜索",
+          entranceType: "Bing site 搜索",
+          description: `用 Bing 限定搜索 site:${domain}。`,
+          urlTemplate: "https://www.bing.com/search?q=site%3A{domain}+{query}",
+          domain
+        };
+      }
+
+      return {
+        label: "Bing 搜索",
+        entranceType: "Bing 搜索",
+        description: "该平台未配置域名，使用 Bing 全网搜索兜底。",
+        urlTemplate: "https://www.bing.com/search?q={query}",
+        domain: ""
+      };
+    }
+
+    function runPlatformEntrance(platformId, entranceKind = "web") {
+      const platform = platforms.find((item) => item.id === platformId);
+      if (!platform) return;
+      const entrance = entranceKind === "site" ? getBingSiteEntrance(platform) : getWebEntrance(platform);
+      executeEntrance(platform, entrance);
+    }
+
+    function executeEntrance(platform, entrance) {
+      const keyword = elements.searchInput.value.trim();
+      if (!platform || !entrance) return;
+
+      if (!keyword) {
+        elements.searchInput.focus();
+        toast("先写下今天要找什么。");
+        setStatus("请输入关键词或问题后再点击入口。");
+        return;
+      }
+
+      const renderedUrl = entrance.urlTemplate
+        ? fillUrlTemplate(entrance.urlTemplate, keyword, entrance.domain || platform.domain)
+        : "";
+
+      const item = {
+        id: createId(),
+        keyword,
+        platform: platform.name,
+        platformId: platform.id,
+        entranceType: entrance.entranceType,
+        entranceLabel: entrance.label,
+        time: new Date().toISOString(),
+        status: "未处理",
+        solved: false,
+        note: "",
+        url: renderedUrl
+      };
+
+      historyItems.unshift(item);
+      save(STORAGE_KEYS.history, historyItems);
+
+      window.open(renderedUrl, "_blank", "noopener,noreferrer");
+      setStatus(`已记录：通过「${platform.name} / ${entrance.entranceType}」搜索「${keyword}」。已打开入口。`);
+      toast(`已保存记录，并打开 ${entrance.label}。`);
+
+      renderAll();
+    }
+
+function fillUrlTemplate(template, query, domain = "") {
+      return String(template)
+        .replaceAll("{domain}", domain)
+        .replaceAll("{query}", encodeURIComponent(query));
+    }
+    function renderHistory() {
+      const platformFilter = elements.historyPlatformFilter.value || "全部平台";
+      const statusFilter = elements.historyStatusFilter.value || "全部状态";
+      const textFilter = normalize(elements.historyTextFilter.value);
+      const sort = elements.historySort.value || "newest";
+
+      let filtered = historyItems.filter((item) => {
+        const matchesPlatform = platformFilter === "全部平台" || item.platform === platformFilter;
+        const matchesStatus = statusFilter === "全部状态" || item.status === statusFilter;
+        const haystack = normalize([
+          item.keyword,
+          item.platform,
+          item.entranceType,
+          item.entranceLabel,
+          item.note
+        ].join(" "));
+        const matchesText = !textFilter || haystack.includes(textFilter);
+        return matchesPlatform && matchesStatus && matchesText;
+      });
+
+      filtered = filtered.sort((a, b) => {
+        const result = new Date(b.time) - new Date(a.time);
+        return sort === "newest" ? result : -result;
+      });
+
+      elements.historyList.innerHTML = "";
+
+      if (!filtered.length) {
+        elements.historyList.innerHTML = `<div class="empty">还没有匹配的搜索记录。先从上方输入关键词，点击平台入口。</div>`;
+        return;
+      }
+
+      elements.historyList.innerHTML = filtered.map((item) => `
+        <article class="card item">
+          <div class="item-head">
+            <div>
+              <h3 class="item-title">${escapeHtml(item.keyword)}</h3>
+              <div class="meta">
+                <span class="tag">${escapeHtml(item.platform)}</span>
+                <span class="tag">${escapeHtml(item.entranceType || "网页搜索")}</span>
+                <span class="tag ${historyTagClass(item.status)}">${escapeHtml(item.status)}</span>
+                <span class="tag">${formatTime(item.time)}</span>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="tiny-btn" type="button" data-action="history-repeat" data-id="${escapeAttribute(item.id)}">再搜一次</button>
+              <button class="tiny-btn" type="button" data-action="history-to-later" data-id="${escapeAttribute(item.id)}">转入稍后看</button>
+              <button class="danger-btn" type="button" data-action="history-delete" data-id="${escapeAttribute(item.id)}">删除</button>
+            </div>
+          </div>
+          <div class="edit-grid">
+            <label class="label">状态
+              <select data-action="history-status" data-id="${escapeAttribute(item.id)}">
+                ${SEARCH_STATUSES.map((status) => `<option value="${escapeAttribute(status)}" ${status === item.status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
+              </select>
+            </label>
+            <label class="label wide">备注
+              <textarea data-action="history-note" data-id="${escapeAttribute(item.id)}" placeholder="记录搜到什么、没找到什么、下一步怎么处理。">${escapeHtml(item.note || "")}</textarea>
+            </label>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderLater() {
+      const sourceFilter = elements.laterSourceFilter.value || "全部来源";
+      const statusFilter = elements.laterStatusFilter.value || "全部状态";
+      const textFilter = normalize(elements.laterTextFilter.value);
+
+      const filtered = laterItems.filter((item) => {
+        const matchesSource = sourceFilter === "全部来源" || item.source === sourceFilter;
+        const matchesStatus = statusFilter === "全部状态" || item.status === statusFilter;
+        const haystack = normalize([
+          item.title,
+          item.url,
+          item.source,
+          item.reason,
+          item.estimate,
+          item.conclusion
+        ].join(" "));
+        const matchesText = !textFilter || haystack.includes(textFilter);
+        return matchesSource && matchesStatus && matchesText;
+      });
+
+      if (!filtered.length) {
+        elements.laterList.innerHTML = `<div class="empty">还没有匹配的稍后看内容。可以先添加一条，也可以从搜索历史或 bookmarklet 转入。</div>`;
+        return;
+      }
+
+      elements.laterList.innerHTML = filtered.map((item) => {
+        const titleHtml = item.url
+          ? `<a href="${escapeAttribute(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>`
+          : escapeHtml(item.title);
+
+        return `
+          <article class="card item">
+            <div class="item-head">
+              <div>
+                <h3 class="item-title">${titleHtml}</h3>
+                <div class="meta">
+                  <span class="tag">${escapeHtml(item.source)}</span>
+                  <span class="tag ${laterTagClass(item.status)}">${escapeHtml(item.status)}</span>
+                  <span class="tag">预计：${escapeHtml(item.estimate || "未填写")}</span>
+                  <span class="tag">${formatTime(item.createdAt)}</span>
+                </div>
+              </div>
+              <div class="actions">
+                ${item.url ? `<button class="tiny-btn" type="button" data-action="open-later" data-id="${escapeAttribute(item.id)}">打开链接</button>` : ""}
+                <button class="danger-btn" type="button" data-action="delete-later" data-id="${escapeAttribute(item.id)}">删除</button>
+              </div>
+            </div>
+            <div class="edit-grid">
+              <label class="label">状态
+                <select data-action="later-status" data-id="${escapeAttribute(item.id)}">
+                  ${LATER_STATUSES.map((status) => `<option value="${escapeAttribute(status)}" ${status === item.status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
+                </select>
+              </label>
+              <label class="label">来源平台
+                <select data-action="later-source" data-id="${escapeAttribute(item.id)}">
+                  ${getAllLaterSources().map((source) => `<option value="${escapeAttribute(source)}" ${source === item.source ? "selected" : ""}>${escapeHtml(source)}</option>`).join("")}
+                </select>
+              </label>
+              <label class="label">标题
+                <input class="field" data-action="later-title" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.title || "")}" />
+              </label>
+              <label class="label">链接
+                <input class="field" data-action="later-url" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.url || "")}" placeholder="https://..." />
+              </label>
+              <label class="label">预计耗时
+                <input class="field" data-action="later-estimate" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.estimate || "")}" placeholder="例如：15 分钟" />
+              </label>
+              <label class="label wide">为什么想看
+                <textarea data-action="later-reason" data-id="${escapeAttribute(item.id)}" placeholder="记录这个内容和当前问题的关系。">${escapeHtml(item.reason || "")}</textarea>
+              </label>
+              <label class="label wide">看完后的结论
+                <textarea data-action="later-conclusion" data-id="${escapeAttribute(item.id)}" placeholder="看完后写一句结论：有无帮助，下一步是什么。">${escapeHtml(item.conclusion || "")}</textarea>
+              </label>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function handleGlobalClick(event) {
+      const node = event.target.closest("[data-action]");
+      if (!node) return;
+
+      const action = node.dataset.action;
+      const id = node.dataset.id;
+
+      if (action === "platform-bing") {
+        runPlatformEntrance(node.dataset.platformId, "web");
+      }
+
+      if (action === "platform-web") {
+        runPlatformEntrance(node.dataset.platformId, "web");
+      }
+
+      if (action === "platform-site") {
+        runPlatformEntrance(node.dataset.platformId, "site");
+      }
+
+      if (action === "toggle-platform-sort") {
+        togglePlatformSort();
+      }
+
+      if (action === "platform-sort-select") {
+        selectPlatformForSwap(node.dataset.platformId);
+      }
+
+      if (action === "open-add-platform") {
+        openAddPlatformModal();
+      }
+
+      if (action === "history-delete") {
+        historyItems = historyItems.filter((item) => item.id !== id);
+        save(STORAGE_KEYS.history, historyItems);
+        renderHistory();
+        toast("已删除搜索记录。");
+      }
+
+      if (action === "history-repeat") {
+        const item = historyItems.find((entry) => entry.id === id);
+        if (!item) return;
+        elements.searchInput.value = item.keyword;
+        const platform = platforms.find((entry) => entry.id === item.platformId) || platforms.find((entry) => entry.name === item.platform);
+        const entranceKind = item.entranceType === "Bing site 搜索" ? "site" : "web";
+        if (platform) runPlatformEntrance(platform.id, entranceKind);
+      }
+
+      if (action === "history-to-later") {
+        const item = historyItems.find((entry) => entry.id === id);
+        if (!item) return;
+        const added = addLaterFromHistory(item);
+        if (added) {
+          updateHistoryItem(id, { status: "转入稍后看", solved: false }, true);
+          toast("已转入稍后看清单。");
+        }
+      }
+
+      if (action === "open-later") {
+        const item = laterItems.find((entry) => entry.id === id);
+        if (item && item.url) window.open(item.url, "_blank", "noopener,noreferrer");
+      }
+
+      if (action === "delete-later") {
+        laterItems = laterItems.filter((item) => item.id !== id);
+        save(STORAGE_KEYS.later, laterItems);
+        renderLater();
+        toast("已删除稍后看内容。");
+      }
+    }
+
+function handleGlobalInput(event) {
+      const node = event.target;
+      const action = node.dataset.action;
+      const id = node.dataset.id;
+
+      if (!action) return;
+
+      if (action === "history-status") {
+        updateHistoryItem(id, {
+          status: node.value,
+          solved: ["已解决", "有用"].includes(node.value)
+        }, true);
+      }
+
+      if (action === "history-note") {
+        updateHistoryItem(id, { note: node.value }, false);
+      }
+
+      const laterKeyMap = {
+        "later-status": "status",
+        "later-source": "source",
+        "later-title": "title",
+        "later-url": "url",
+        "later-estimate": "estimate",
+        "later-reason": "reason",
+        "later-conclusion": "conclusion"
+      };
+
+      if (laterKeyMap[action]) {
+        updateLaterItem(id, { [laterKeyMap[action]]: node.value }, action === "later-status" || action === "later-source");
+      }
+    }
+
+    function updateHistoryItem(id, patch, shouldRender = true) {
+      historyItems = historyItems.map((item) => item.id === id ? { ...item, ...patch } : item);
+      save(STORAGE_KEYS.history, historyItems);
+
+      if (shouldRender) {
+        renderHistory();
+      }
+    }
+
+    function addLaterItem() {
+      const title = elements.laterTitle.value.trim();
+      const url = elements.laterUrl.value.trim();
+
+      if (!title) {
+        toast("稍后看标题不能为空。");
+        return;
+      }
+
+      if (url && laterItems.some((item) => item.url === url)) {
+        toast("这条链接已经在稍后看清单里。");
+        return;
+      }
+
+      const item = {
+        id: createId(),
+        title,
+        url,
+        source: elements.laterSource.value,
+        reason: elements.laterReason.value.trim(),
+        estimate: elements.laterEstimate.value.trim(),
+        status: "未看",
+        conclusion: "",
+        createdAt: new Date().toISOString(),
+        relatedHistoryId: ""
+      };
+
+      laterItems.unshift(item);
+      save(STORAGE_KEYS.later, laterItems);
+      elements.laterForm.reset();
+      elements.laterSource.value = "其他";
+      renderLater();
+      toast("已添加到稍后看清单。");
+    }
+
+    function addLaterFromHistory(historyItem) {
+      const url = historyItem.url || "";
+      if (url && laterItems.some((item) => item.url === url)) {
+        toast("这条链接已经在稍后看清单里。");
+        return false;
+      }
+
+      const item = {
+        id: createId(),
+        title: `${historyItem.platform}：${historyItem.keyword}`,
+        url,
+        source: normalizeLaterSource(historyItem.platform),
+        reason: "来自搜索历史。",
+        estimate: "",
+        status: "未看",
+        conclusion: "",
+        createdAt: new Date().toISOString(),
+        relatedHistoryId: historyItem.id
+      };
+
+      laterItems.unshift(item);
+      save(STORAGE_KEYS.later, laterItems);
+      renderLater();
+      return true;
+    }
+
+    function updateLaterItem(id, patch, shouldRender = true) {
+      laterItems = laterItems.map((item) => item.id === id ? { ...item, ...patch } : item);
+      save(STORAGE_KEYS.later, laterItems);
+
+      if (shouldRender) {
+        renderLater();
+      }
+    }
+
+    function renderBookmarklet() {
+      elements.bookmarkletLink.href = buildBookmarklet();
+    }
+
+    function buildBookmarklet() {
+      const cleanUrl = getCleanDockUrl();
+      const sourceDetector = [
+        "const h=location.hostname;",
+        "let s='其他';",
+        "if(/(^|\\.)bing\\.com$/i.test(h))s='必应';",
+        "else if(/(^|\\.)zhihu\\.com$/i.test(h))s='知乎';",
+        "else if(/(^|\\.)weibo\\.com$/i.test(h))s='微博';",
+        "else if(/(^|\\.)xiaohongshu\\.com$/i.test(h))s='小红书';",
+        "else if(/(^|\\.)bilibili\\.com$/i.test(h))s='B站';",
+        "else if(/(^|\\.)douyin\\.com$/i.test(h))s='抖音';",
+        "else if(/(^|\\.)github\\.com$/i.test(h))s='GitHub';",
+        "else if(/(^|\\.)weixin\\.qq\\.com$/i.test(h)||/(^|\\.)qq\\.com$/i.test(h)&&location.href.includes('mp.weixin'))s='微信/公众号';",
+        "else if(/podcast|xiaoyuzhou|spotify|apple\\.com/i.test(location.href))s='播客';"
+      ].join("");
+
+      return `javascript:(async()=>{const d=${JSON.stringify(cleanUrl)},u=location.href,t=document.title||u;${sourceDetector}const p={title:t,url:u,source:s};const target=d+'#addLater='+encodeURIComponent(JSON.stringify(p))+'&ts='+Date.now();const w=window.open(target,'_blank');if(w){try{w.opener=null}catch(e){}return;}try{await navigator.clipboard.writeText(target);alert('Info Dock 没能自动打开，已复制导入链接。请打开该链接完成添加。');}catch(e){prompt('Info Dock 没能自动打开。请复制下面的导入链接：',target);}})();`;
+    }
+
+    function getCleanDockUrl() {
+      const url = new URL(window.location.href);
+      url.search = "";
+      url.hash = "";
+      return url.href;
+    }
+
+    function consumeIncomingLaterItem() {
+      const incoming = getIncomingLaterPayload();
+      if (!incoming) return;
+
+      const incomingUrl = incoming.url || "";
+      const incomingTitle = incoming.title || incomingUrl || "未命名内容";
+      const incomingSource = normalizeLaterSource(incoming.source || detectSourceFromUrl(incomingUrl));
+      const alreadyExists = incomingUrl && laterItems.some((item) => item.url === incomingUrl);
+
+      if (!alreadyExists) {
+        laterItems.unshift({
+          id: createId(),
+          title: incomingTitle,
+          url: incomingUrl,
+          source: incomingSource,
+          reason: "通过 Info Dock 收藏夹小工具添加。",
+          estimate: "",
+          status: "未看",
+          conclusion: "",
+          createdAt: new Date().toISOString(),
+          relatedHistoryId: ""
+        });
+        save(STORAGE_KEYS.later, laterItems);
+        setStatus(`已添加到稍后看清单：${incomingTitle}`);
+      } else {
+        setStatus("这条链接已经在稍后看清单里。");
+      }
+
+      clearIncomingParams();
+
+      setTimeout(() => {
+        activateTab("laterSection");
+        renderLater();
+        toast(alreadyExists ? "这条链接已存在。" : "已从外部页面加入稍后看清单。");
+      }, 0);
+    }
+
+    function getIncomingLaterPayload() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("addLater") === "1") {
+        return {
+          title: params.get("title") || "",
+          url: params.get("url") || "",
+          source: params.get("source") || ""
+        };
+      }
+
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const encodedPayload = hashParams.get("addLater");
+      if (!encodedPayload) return null;
+
+      try {
+        const payload = JSON.parse(encodedPayload);
+        return {
+          title: payload.title || "",
+          url: payload.url || "",
+          source: payload.source || ""
+        };
+      } catch (error) {
+        console.warn("解析收藏脚本传入数据失败：", error);
+        setStatus("收藏脚本传入的数据格式不正确。");
+        return null;
+      }
+    }
+
+    function clearIncomingParams() {
+      if (!window.history || !window.history.replaceState) return;
+      const cleanUrl = new URL(window.location.href);
+      cleanUrl.search = "";
+      cleanUrl.hash = "";
+      window.history.replaceState({}, document.title, cleanUrl.href);
+    }
+
+    function openAddPlatformModal() {
+      elements.addPlatformModal.classList.add("active");
+      elements.addPlatformModal.setAttribute("aria-hidden", "false");
+      elements.newPlatformName.value = "";
+      elements.newPlatformRecommendation.value = "";
+      elements.newPlatformUrl.value = "";
+      elements.newPlatformMobileUrl.value = "";
+      elements.newPlatformDomain.value = "";
+      elements.newPlatformAppUrl.value = "";
+      setTimeout(() => elements.newPlatformName.focus(), 0);
+    }
+
+    function closeAddPlatformModal() {
+      elements.addPlatformModal.classList.remove("active");
+      elements.addPlatformModal.setAttribute("aria-hidden", "true");
+    }
+
+    function addPlatform() {
+      const name = normalizePlatformName(elements.newPlatformName.value);
+      const recommendation = elements.newPlatformRecommendation.value.trim();
+      const urlTemplate = elements.newPlatformUrl.value.trim();
+      const mobileUrlTemplate = elements.newPlatformMobileUrl.value.trim();
+      const domain = cleanDomain(elements.newPlatformDomain.value.trim() || inferDomain(urlTemplate) || inferDomain(mobileUrlTemplate));
+      const appUrlTemplate = elements.newPlatformAppUrl.value.trim();
+
+      if (!name) {
+        toast("请填写平台名称。");
+        return;
+      }
+
+      const templates = [urlTemplate, mobileUrlTemplate, appUrlTemplate].filter(Boolean);
+      if (templates.some((template) => !template.includes("{query}"))) {
+        toast("搜索地址模板需要包含 {query}，或留空。");
+        return;
+      }
+
+      if (platforms.some((item) => item.name === name)) {
+        toast("这个平台已经存在。");
+        return;
+      }
+
+      platforms.push({
+        id: createId(),
+        name,
+        goodFor: "自定义信息源",
+        recommendation: recommendation || "先用精准关键词，再用复制兜底",
+        domain,
+        urlTemplate,
+        mobileUrlTemplate,
+        appUrlTemplate
+      });
+
+      save(STORAGE_KEYS.platforms, platforms);
+      renderAll();
+      closeAddPlatformModal();
+      toast("已添加搜索平台。");
+    }
+
+    function copyCurrentKeyword() {
+      const keyword = elements.searchInput.value.trim();
+      if (keyword) {
+        copyText(keyword);
+        toast("已复制搜索内容。");
+        return;
+      }
+
+      toast("搜索栏为空，无内容可复制。");
+    }
+function detectSourceFromUrl(url) {
+      const value = normalize(url);
+      if (!value) return "其他";
+      if (value.includes("bing.com")) return "必应";
+      if (value.includes("zhihu.com")) return "知乎";
+      if (value.includes("weibo.com")) return "微博";
+      if (value.includes("xiaohongshu.com")) return "小红书";
+      if (value.includes("bilibili.com")) return "B站";
+      if (value.includes("douyin.com")) return "抖音";
+      if (value.includes("github.com")) return "GitHub";
+      if (value.includes("mp.weixin.qq.com")) return "微信/公众号";
+      if (value.includes("podcast") || value.includes("xiaoyuzhou") || value.includes("spotify")) return "播客";
+      return "其他";
+    }
+
+    function normalizeLaterSource(source) {
+      const value = normalizePlatformName(source || "其他");
+      const allSources = getAllLaterSources();
+      return allSources.includes(value) ? value : "其他";
+    }
+
+    function findPlatformIdByName(name) {
+      const normalizedName = normalizePlatformName(name);
+      const platform = platforms.find((item) => item.name === normalizedName);
+      return platform ? platform.id : "";
+    }
+
+    function inferDomain(urlTemplate) {
+      const raw = String(urlTemplate || "");
+      if (!raw) return "";
+      try {
+        const url = new URL(raw.replace("{query}", "test"));
+        return cleanDomain(url.hostname);
+      } catch (error) {
+        return "";
+      }
+    }
+
+    function cleanDomain(domain) {
+      return String(domain || "")
+        .trim()
+        .replace(/^https?:\/\//i, "")
+        .replace(/^www\./i, "")
+        .replace(/\/.*$/, "");
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        const temp = document.createElement("textarea");
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        temp.remove();
+      }
+    }
+
+    function setStatus(message) {
+      elements.statusMsg.textContent = message;
+    }
+
+    function toast(message) {
+      elements.toast.textContent = message;
+      elements.toast.classList.add("show");
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => {
+        elements.toast.classList.remove("show");
+      }, 2200);
+    }
+
+    function createId() {
+      return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function normalize(value) {
+      return String(value || "").trim().toLowerCase();
+    }
+
+    function unique(values) {
+      return Array.from(new Set(values.filter((value) => value !== undefined && value !== null && String(value).trim() !== "")));
+    }
+
+    function formatTime(isoString) {
+      if (!isoString) return "未知时间";
+      const date = new Date(isoString);
+      if (Number.isNaN(date.getTime())) return "未知时间";
+      return new Intl.DateTimeFormat("zh-CN", {
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(date);
+    }
+
+    function historyTagClass(status) {
+      if (status === "已解决" || status === "有用") return "ok";
+      if (status === "没找到" || status === "放弃") return "danger";
+      if (status === "转入稍后看") return "warn";
+      return "";
+    }
+
+    function laterTagClass(status) {
+      if (status === "有用" || status === "已看") return "ok";
+      if (status === "没用" || status === "删除") return "danger";
+      if (status === "转成项目任务") return "warn";
+      return "";
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value).replaceAll("`", "&#096;");
+    }
+  </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
