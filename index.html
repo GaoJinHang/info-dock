@@ -1175,8 +1175,6 @@
     let isSortingPlatforms = false;
     let selectedSortPlatformId = "";
 
-    boot().catch(handleBootError);
-
     async function boot() {
       await initializeStorage();
 
@@ -1399,6 +1397,8 @@
     })();
 
     let storageMode = "indexedDB";
+
+    boot().catch(handleBootError);
 
     async function initializeStorage() {
       try {
