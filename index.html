@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#2563eb" />
   <link rel="manifest" href="manifest.json">
+  <script src="https://cdn.jsdelivr.net/npm/minisearch@6.3.0/dist/umd/index.js"></script>
   <title>Info Dock</title>
   <style>
     :root {
@@ -228,6 +229,58 @@
       min-height: 22px;
       color: var(--muted);
       font-size: 14px;
+    }
+
+    .global-search-box {
+      display: grid;
+      gap: 8px;
+      position: relative;
+    }
+
+    .global-search-input {
+      min-height: 46px;
+      border-radius: 16px;
+    }
+
+    .global-search-results {
+      display: grid;
+      gap: 8px;
+      max-height: 360px;
+      overflow: auto;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+
+    .global-search-item {
+      display: grid;
+      gap: 7px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: white;
+    }
+
+    .global-search-item h3 {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .global-search-snippet,
+    .auto-summary {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.55;
+    }
+
+    .global-search-empty {
+      padding: 10px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
     }
 
     .status-msg:empty {
@@ -933,6 +986,10 @@
             <button class="ghost-btn copy-search-btn" id="copySearchBtn" type="button">复制</button>
           </div>
         </div>
+        <div class="global-search-box" aria-label="全文搜索">
+          <input id="globalSearchInput" class="field global-search-input" type="search" placeholder="🔍 搜索所有内容：标题、标签、备注、正文" autocomplete="off" />
+          <div id="globalSearchResults" class="global-search-results hidden"></div>
+        </div>
         <div class="status-msg" id="statusMsg"></div>
       </section>
 
@@ -1137,6 +1194,8 @@
       searchInput: $("#searchInput"),
       copySearchBtn: $("#copySearchBtn"),
       statusMsg: $("#statusMsg"),
+      globalSearchInput: $("#globalSearchInput"),
+      globalSearchResults: $("#globalSearchResults"),
       platformDock: $("#platformDock"),
       platformCards: $("#platformCards"),
       historyPlatformFilter: $("#historyPlatformFilter"),
@@ -1169,9 +1228,159 @@
       storageBadge: $("#storageBadge")
     };
 
+    const searchEngine = (() => {
+      const fields = ["title", "source", "reason", "conclusion", "note", "keyword", "platform", "bodyText"];
+      const storeFields = ["id", "itemType", "title", "source", "reason", "conclusion", "note", "keyword", "platform", "bodyText", "url", "createdAt", "time", "autoSummary"];
+      const docs = new Map();
+      let miniSearch = null;
+
+      function tokenizeForSearch(text) {
+        const rawTokens = String(text || "").toLowerCase().match(/[\p{L}\p{N}_]+/gu) || [];
+        const result = new Set();
+
+        rawTokens.forEach((token) => {
+          if (token.length <= 80) result.add(token);
+          if (/[㐀-鿿]/.test(token)) {
+            [2, 3, 4].forEach((size) => {
+              for (let index = 0; index <= token.length - size; index += 1) {
+                result.add(token.slice(index, index + size));
+              }
+            });
+          }
+        });
+
+        return Array.from(result);
+      }
+
+      function createMiniSearch() {
+        if (!window.MiniSearch) return null;
+        return new MiniSearch({
+          fields,
+          storeFields,
+          tokenize: tokenizeForSearch,
+          searchOptions: {
+            prefix: true,
+            fuzzy: 0.2
+          }
+        });
+      }
+
+      function ensureMiniSearch() {
+        if (!miniSearch) miniSearch = createMiniSearch();
+        return miniSearch;
+      }
+
+      function normalizeSearchDoc(doc) {
+        const normalized = {
+          id: String(doc.id || ""),
+          itemType: doc.itemType || "",
+          title: doc.title || "",
+          source: doc.source || "",
+          reason: doc.reason || "",
+          conclusion: doc.conclusion || "",
+          note: doc.note || "",
+          keyword: doc.keyword || "",
+          platform: doc.platform || "",
+          bodyText: doc.bodyText || "",
+          url: doc.url || "",
+          createdAt: doc.createdAt || "",
+          time: doc.time || "",
+          autoSummary: doc.autoSummary || ""
+        };
+        return normalized.id ? normalized : null;
+      }
+
+      function rebuildMiniSearch() {
+        miniSearch = createMiniSearch();
+        if (!miniSearch) return;
+        try {
+          miniSearch.addAll(Array.from(docs.values()));
+        } catch (error) {
+          console.warn("重建 MiniSearch 索引失败：", error);
+          miniSearch = null;
+        }
+      }
+
+      function addToIndex(doc) {
+        const normalized = normalizeSearchDoc(doc);
+        if (!normalized) return;
+        removeFromIndex(normalized.id, { keepDoc: false });
+        docs.set(normalized.id, normalized);
+
+        const mini = ensureMiniSearch();
+        if (!mini) return;
+        try {
+          mini.add(normalized);
+        } catch (error) {
+          console.warn("添加全文索引失败，尝试重建索引：", error);
+          rebuildMiniSearch();
+        }
+      }
+
+      function removeFromIndex(id, options = {}) {
+        const cleanId = String(id || "");
+        if (!cleanId) return;
+        if (!options.keepDoc) docs.delete(cleanId);
+        if (!miniSearch) return;
+
+        try {
+          if (typeof miniSearch.discard === "function") {
+            miniSearch.discard(cleanId);
+          } else {
+            rebuildMiniSearch();
+          }
+        } catch (error) {
+          rebuildMiniSearch();
+        }
+      }
+
+      function clear() {
+        docs.clear();
+        miniSearch = createMiniSearch();
+      }
+
+      function fallbackSearch(query) {
+        const terms = normalize(query).split(/\s+/).filter(Boolean);
+        if (!terms.length) return [];
+
+        return Array.from(docs.values())
+          .map((doc) => {
+            const haystack = normalize(fields.map((field) => doc[field] || "").join(" "));
+            const score = terms.reduce((total, term) => total + (haystack.includes(term) ? 1 : 0), 0);
+            return score ? { ...doc, score } : null;
+          })
+          .filter(Boolean)
+          .sort((a, b) => b.score - a.score);
+      }
+
+      function search(query) {
+        const cleanQuery = String(query || "").trim();
+        if (!cleanQuery) return [];
+
+        const mini = ensureMiniSearch();
+        if (mini) {
+          try {
+            return mini.search(cleanQuery, { prefix: true, fuzzy: 0.2 })
+              .map((result) => {
+                const doc = docs.get(String(result.id));
+                return doc ? { ...doc, score: result.score, terms: result.terms, match: result.match } : null;
+              })
+              .filter(Boolean);
+          } catch (error) {
+            console.warn("MiniSearch 搜索失败，使用降级搜索：", error);
+          }
+        }
+
+        return fallbackSearch(cleanQuery);
+      }
+
+      return { addToIndex, removeFromIndex, search, clear };
+    })();
+
     let platforms = [];
     let historyItems = [];
     let laterItems = [];
+    const contentFetchQueue = new Set();
     let isSortingPlatforms = false;
     let selectedSortPlatformId = "";
 
@@ -1182,6 +1391,7 @@
       historyItems = normalizeHistoryItems(await load(STORE_NAMES.history, []));
       laterItems = normalizeLaterItems(await load(STORE_NAMES.later, []));
       await persistCoreData();
+      await rebuildSearchIndex();
       renderAll();
       bindEvents();
       await consumeIncomingLaterItem();
@@ -1200,6 +1410,8 @@
 
     function bindEvents() {
       elements.copySearchBtn.addEventListener("click", () => copyCurrentKeyword());
+      elements.globalSearchInput.addEventListener("input", renderGlobalSearchResults);
+      elements.globalSearchInput.addEventListener("focus", renderGlobalSearchResults);
 
       elements.searchInput.addEventListener("keydown", async (event) => {
         if (event.key === "Enter") {
@@ -1280,6 +1492,7 @@
       renderBookmarklet();
       renderHistory();
       renderLater();
+      renderGlobalSearchResults();
     }
 
     function activateTab(tabId) {
@@ -1466,6 +1679,9 @@
         type: content.type,
         rawHtml: content.rawHtml || "",
         text: content.text || "",
+        metaDescription: content.metaDescription || "",
+        title: content.title || "",
+        url: content.url || "",
         timestamp: content.timestamp || new Date().toISOString()
       };
 
@@ -1492,6 +1708,22 @@
         .filter((key) => key.startsWith(`infoDock.contents.v1.${id}.`))
         .map((key) => loadFromLocalStorage(key, null))
         .filter(Boolean);
+    }
+
+    async function loadAllContentSnapshots() {
+      if (storageMode === "indexedDB") {
+        return InfoDockDB.getAll(STORE_NAMES.contents);
+      }
+
+      try {
+        return Object.keys(localStorage)
+          .filter((key) => key.startsWith("infoDock.contents.v1."))
+          .map((key) => loadFromLocalStorage(key, null))
+          .filter(Boolean);
+      } catch (error) {
+        console.warn("读取全部内容快照失败：", error);
+        return [];
+      }
     }
 
     function localStorageKeyForStore(storeName) {
@@ -1652,6 +1884,7 @@
         url: item.url || "",
         source: normalizeLaterSource(item.source || detectSourceFromUrl(item.url || "")),
         reason: item.reason || "",
+        autoSummary: item.autoSummary || "",
         estimate: item.estimate || "",
         status: LATER_STATUSES.includes(item.status) ? item.status : "未看",
         conclusion: item.conclusion || "",
@@ -1669,6 +1902,262 @@
       const value = String(name || "").trim();
       if (["B 站", "哔哩哔哩", "bilibili", "Bilibili"].includes(value)) return "B站";
       return value || "其他";
+    }
+
+    async function rebuildSearchIndex() {
+      const contents = await loadAllContentSnapshots();
+      const contentById = new Map();
+
+      contents.forEach((content) => {
+        if (!content || !content.id) return;
+        const current = contentById.get(content.id) || { bodyText: "", metaDescription: "" };
+        if (content.type === "page-body") {
+          current.bodyText = content.text || current.bodyText || "";
+          current.metaDescription = content.metaDescription || current.metaDescription || "";
+        }
+        contentById.set(content.id, current);
+      });
+
+      searchEngine.clear();
+      laterItems.forEach((item) => {
+        const content = contentById.get(item.id) || {};
+        searchEngine.addToIndex(buildLaterSearchDoc(item, content));
+      });
+      historyItems.forEach((item) => {
+        const content = contentById.get(item.id) || {};
+        searchEngine.addToIndex(buildHistorySearchDoc(item, content));
+      });
+
+      renderGlobalSearchResults();
+    }
+
+    function buildLaterSearchDoc(item, content = {}) {
+      return {
+        id: item.id,
+        itemType: "later",
+        title: item.title,
+        source: item.source,
+        reason: [item.reason, item.autoSummary || content.metaDescription || ""].filter(Boolean).join(" "),
+        conclusion: item.conclusion,
+        keyword: "",
+        platform: item.source,
+        note: "",
+        bodyText: content.bodyText || "",
+        url: item.url,
+        createdAt: item.createdAt,
+        autoSummary: item.autoSummary || content.metaDescription || ""
+      };
+    }
+
+    function buildHistorySearchDoc(item, content = {}) {
+      return {
+        id: item.id,
+        itemType: "history",
+        title: `${item.platform}：${item.keyword}`,
+        source: item.platform,
+        reason: "",
+        conclusion: "",
+        keyword: item.keyword,
+        platform: item.platform,
+        note: item.note,
+        bodyText: content.bodyText || "",
+        url: item.url,
+        time: item.time
+      };
+    }
+
+    function renderGlobalSearchResults() {
+      if (!elements.globalSearchInput || !elements.globalSearchResults) return;
+      const query = elements.globalSearchInput.value.trim();
+      const panel = elements.globalSearchResults;
+
+      if (!query) {
+        panel.innerHTML = "";
+        panel.classList.add("hidden");
+        return;
+      }
+
+      const results = searchEngine.search(query).slice(0, 12);
+      panel.classList.remove("hidden");
+
+      if (!results.length) {
+        panel.innerHTML = `<div class="global-search-empty">未找到匹配内容。正文抓取可能仍在进行，或该网页限制了跨域访问。</div>`;
+        return;
+      }
+
+      panel.innerHTML = results.map((result) => {
+        const isLater = result.itemType === "later";
+        const typeLabel = isLater ? "稍后看" : "搜索历史";
+        const title = result.title || result.keyword || "未命名内容";
+        const source = result.source || result.platform || "其他";
+        const snippet = getSearchResultSnippet(result, query);
+        const openButton = result.url
+          ? `<button class="tiny-btn" type="button" data-action="${isLater ? "open-later" : "open-search-result-url"}" data-id="${escapeAttribute(result.id)}">打开链接</button>`
+          : "";
+        const repeatButton = !isLater
+          ? `<button class="tiny-btn" type="button" data-action="history-repeat" data-id="${escapeAttribute(result.id)}">再搜一次</button>`
+          : "";
+
+        return `
+          <article class="global-search-item">
+            <h3>${escapeHtml(title)}</h3>
+            <div class="meta">
+              <span class="tag">${escapeHtml(typeLabel)}</span>
+              <span class="tag">${escapeHtml(source)}</span>
+            </div>
+            ${snippet ? `<p class="global-search-snippet">${escapeHtml(snippet)}</p>` : ""}
+            ${openButton || repeatButton ? `<div class="actions">${openButton}${repeatButton}</div>` : ""}
+          </article>
+        `;
+      }).join("");
+    }
+
+    function getSearchResultSnippet(doc, query) {
+      const content = [doc.bodyText, doc.reason, doc.conclusion, doc.note, doc.keyword, doc.platform]
+        .filter(Boolean)
+        .join(" ")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (!content) return "";
+
+      const lowerContent = content.toLowerCase();
+      const lowerQuery = query.toLowerCase();
+      const index = lowerContent.indexOf(lowerQuery);
+      const start = index > 44 ? index - 44 : 0;
+      const snippet = content.slice(start, start + 180);
+      const prefix = start > 0 ? "…" : "";
+      const suffix = start + 180 < content.length ? "…" : "";
+      return `${prefix}${snippet}${suffix}`;
+    }
+
+    function hasUserProvidedLaterReason(reason) {
+      const value = String(reason || "").trim();
+      if (!value) return false;
+      return !["通过系统分享添加。", "通过 Info Dock 收藏夹小工具添加。", "来自搜索历史。"].includes(value);
+    }
+
+    function queueContentFetchForLaterItem(item) {
+      if (!item || !item.id || !item.url || contentFetchQueue.has(item.id)) return;
+      contentFetchQueue.add(item.id);
+      window.setTimeout(async () => {
+        try {
+          await refreshLaterContent(item.id, { silent: true });
+        } finally {
+          contentFetchQueue.delete(item.id);
+        }
+      }, 0);
+    }
+
+    async function refreshLaterContent(id, options = {}) {
+      const item = laterItems.find((entry) => entry.id === id);
+      if (!item || !item.url) {
+        if (!options.silent) toast("这条内容没有可抓取的链接。");
+        return null;
+      }
+
+      if (!options.silent) toast("正在刷新摘要和正文索引…");
+      const page = await fetchPageText(item.url);
+
+      await saveContentSnapshot({
+        id: item.id,
+        type: "page-body",
+        rawHtml: page.rawHtml || "",
+        text: page.text || "",
+        metaDescription: page.metaDescription || "",
+        title: item.title,
+        url: item.url,
+        timestamp: new Date().toISOString()
+      });
+
+      if (page.metaDescription) {
+        laterItems = laterItems.map((entry) => entry.id === item.id ? { ...entry, autoSummary: page.metaDescription } : entry);
+        await save(STORE_NAMES.later, laterItems);
+      }
+
+      await rebuildSearchIndex();
+      renderLater();
+
+      if (!options.silent) {
+        toast(page.text || page.metaDescription ? "已刷新摘要和正文索引。" : "未能抓取正文，可能被 CORS 或站点策略限制。");
+      }
+
+      if (page.error) {
+        console.warn("抓取网页正文失败：", page.error);
+      }
+
+      return page;
+    }
+
+    async function fetchPageText(url) {
+      const cleanUrl = String(url || "").trim();
+      if (!/^https?:\/\//i.test(cleanUrl)) {
+        return { rawHtml: "", text: "", metaDescription: "", error: "仅支持抓取 http/https 链接。" };
+      }
+
+      try {
+        const rawHtml = await fetchHtmlWithFallback(cleanUrl);
+        const doc = new DOMParser().parseFromString(rawHtml, "text/html");
+        const metaDescription = extractMetaDescription(doc);
+
+        doc.querySelectorAll("script, style, noscript, template, svg").forEach((node) => node.remove());
+        const root = doc.querySelector("article") || doc.querySelector("main") || doc.body;
+        const text = normalizePageText(root ? root.textContent : "").slice(0, 5000);
+
+        return {
+          rawHtml: rawHtml.slice(0, 50000),
+          text,
+          metaDescription,
+          error: ""
+        };
+      } catch (error) {
+        return {
+          rawHtml: "",
+          text: "",
+          metaDescription: "",
+          error: error?.message || String(error)
+        };
+      }
+    }
+
+    async function fetchHtmlWithFallback(url) {
+      const targets = isSameOriginUrl(url)
+        ? [url]
+        : [url, `https://corsproxy.io/?${encodeURIComponent(url)}`];
+      let lastError = null;
+
+      for (const target of targets) {
+        try {
+          const response = await fetch(target, {
+            method: "GET",
+            headers: {
+              Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+            }
+          });
+          if (!response.ok) throw new Error(`请求失败：${response.status}`);
+          return await response.text();
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      throw lastError || new Error("无法抓取网页。 ");
+    }
+
+    function isSameOriginUrl(url) {
+      try {
+        return new URL(url, window.location.href).origin === window.location.origin;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function extractMetaDescription(doc) {
+      const node = doc.querySelector('meta[name="description" i], meta[property="og:description" i]');
+      return node ? normalizePageText(node.getAttribute("content") || "").slice(0, 600) : "";
+    }
+
+    function normalizePageText(text) {
+      return String(text || "").replace(/\s+/g, " ").trim();
     }
 
     function renderPlatformCards() {
@@ -1864,6 +2353,7 @@
 
       historyItems.unshift(item);
       await save(STORE_NAMES.history, historyItems);
+      await rebuildSearchIndex();
 
       window.open(renderedUrl, "_blank", "noopener,noreferrer");
       setStatus(`已记录：通过「${platform.name} / ${entrance.entranceType}」搜索「${keyword}」。已打开入口。`);
@@ -1954,6 +2444,7 @@ function fillUrlTemplate(template, query, domain = "") {
           item.url,
           item.source,
           item.reason,
+          item.autoSummary,
           item.estimate,
           item.conclusion
         ].join(" "));
@@ -1984,10 +2475,12 @@ function fillUrlTemplate(template, query, domain = "") {
                 </div>
               </div>
               <div class="actions">
+                ${item.url ? `<button class="tiny-btn" type="button" data-action="refresh-later-summary" data-id="${escapeAttribute(item.id)}">刷新摘要</button>` : ""}
                 ${item.url ? `<button class="tiny-btn" type="button" data-action="open-later" data-id="${escapeAttribute(item.id)}">打开链接</button>` : ""}
                 <button class="danger-btn" type="button" data-action="delete-later" data-id="${escapeAttribute(item.id)}">删除</button>
               </div>
             </div>
+            ${item.autoSummary && !hasUserProvidedLaterReason(item.reason) ? `<p class="auto-summary"><strong>自动摘要（自动）：</strong>${escapeHtml(item.autoSummary)}</p>` : ""}
             <div class="edit-grid">
               <label class="label">状态
                 <select data-action="later-status" data-id="${escapeAttribute(item.id)}">
@@ -2054,6 +2547,8 @@ function fillUrlTemplate(template, query, domain = "") {
       if (action === "history-delete") {
         historyItems = historyItems.filter((item) => item.id !== id);
         await save(STORE_NAMES.history, historyItems);
+        searchEngine.removeFromIndex(id);
+        renderGlobalSearchResults();
         renderHistory();
         toast("已删除搜索记录。");
       }
@@ -2082,9 +2577,20 @@ function fillUrlTemplate(template, query, domain = "") {
         if (item && item.url) window.open(item.url, "_blank", "noopener,noreferrer");
       }
 
+      if (action === "open-search-result-url") {
+        const item = historyItems.find((entry) => entry.id === id) || laterItems.find((entry) => entry.id === id);
+        if (item && item.url) window.open(item.url, "_blank", "noopener,noreferrer");
+      }
+
+      if (action === "refresh-later-summary") {
+        await refreshLaterContent(id, { silent: false });
+      }
+
       if (action === "delete-later") {
         laterItems = laterItems.filter((item) => item.id !== id);
         await save(STORE_NAMES.later, laterItems);
+        searchEngine.removeFromIndex(id);
+        renderGlobalSearchResults();
         renderLater();
         toast("已删除稍后看内容。");
       }
@@ -2126,6 +2632,7 @@ function fillUrlTemplate(template, query, domain = "") {
     async function updateHistoryItem(id, patch, shouldRender = true) {
       historyItems = historyItems.map((item) => item.id === id ? { ...item, ...patch } : item);
       await save(STORE_NAMES.history, historyItems);
+      await rebuildSearchIndex();
 
       if (shouldRender) {
         renderHistory();
@@ -2152,6 +2659,7 @@ function fillUrlTemplate(template, query, domain = "") {
         url,
         source: elements.laterSource.value,
         reason: elements.laterReason.value.trim(),
+        autoSummary: "",
         estimate: elements.laterEstimate.value.trim(),
         status: "未看",
         conclusion: "",
@@ -2161,10 +2669,12 @@ function fillUrlTemplate(template, query, domain = "") {
 
       laterItems.unshift(item);
       await save(STORE_NAMES.later, laterItems);
+      await rebuildSearchIndex();
+      queueContentFetchForLaterItem(item);
       elements.laterForm.reset();
       elements.laterSource.value = "其他";
       renderLater();
-      toast("已添加到稍后看清单。");
+      toast("已添加到稍后看清单，正在后台抓取摘要和正文。 ");
     }
 
     async function addLaterFromExternal(title, url, source, reason = "通过系统分享添加。") {
@@ -2187,6 +2697,7 @@ function fillUrlTemplate(template, query, domain = "") {
         url: cleanUrl,
         source: finalSource,
         reason,
+        autoSummary: "",
         estimate: "",
         status: "未看",
         conclusion: "",
@@ -2196,6 +2707,8 @@ function fillUrlTemplate(template, query, domain = "") {
 
       laterItems.unshift(item);
       await save(STORE_NAMES.later, laterItems);
+      await rebuildSearchIndex();
+      queueContentFetchForLaterItem(item);
       return { added: true, reason: "created", item };
     }
 
@@ -2212,6 +2725,7 @@ function fillUrlTemplate(template, query, domain = "") {
         url,
         source: normalizeLaterSource(historyItem.platform),
         reason: "来自搜索历史。",
+        autoSummary: "",
         estimate: "",
         status: "未看",
         conclusion: "",
@@ -2221,13 +2735,23 @@ function fillUrlTemplate(template, query, domain = "") {
 
       laterItems.unshift(item);
       await save(STORE_NAMES.later, laterItems);
+      await rebuildSearchIndex();
+      queueContentFetchForLaterItem(item);
       renderLater();
       return true;
     }
 
     async function updateLaterItem(id, patch, shouldRender = true) {
+      const previousItem = laterItems.find((item) => item.id === id);
+      const previousUrl = previousItem?.url || "";
       laterItems = laterItems.map((item) => item.id === id ? { ...item, ...patch } : item);
       await save(STORE_NAMES.later, laterItems);
+      await rebuildSearchIndex();
+
+      const nextItem = laterItems.find((item) => item.id === id);
+      if (nextItem && Object.prototype.hasOwnProperty.call(patch, "url") && patch.url !== previousUrl) {
+        queueContentFetchForLaterItem(nextItem);
+      }
 
       if (shouldRender) {
         renderLater();
