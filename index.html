@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2563eb" />
+  <link rel="manifest" href="manifest.json">
   <title>Info Dock</title>
   <style>
     :root {
@@ -963,11 +965,12 @@
           <h2>从外部页面一键加入</h2>
           <button class="ghost-btn" id="copyBookmarkletBtn" type="button">复制收藏脚本</button>
         </div>
-        <p class="hint">把下面这个按钮拖到浏览器书签栏。在任意搜索结果页或内容页点击该书签，即可把当前页标题和链接带回 Info Dock，并自动加入稍后看清单。</p>
+        <p class="hint"><strong>手机快速保存：</strong>将本页面添加到主屏幕（iOS：分享按钮 → 添加到主屏幕；Android：菜单 → 添加到主屏幕）。之后在任何网页中点击分享按钮，选择 Info Dock，即可快速保存到稍后看清单。</p>
+        <p class="hint">电脑浏览器、file:// 本地打开，或暂不支持分享目标的浏览器，仍可使用下面的书签工具作为备选。</p>
         <div class="actions">
           <a class="primary-btn" id="bookmarkletLink" href="#">拖到书签栏：加入 Info Dock</a>
         </div>
-        <p class="hint">说明：这个小工具只保存当前页面的标题和链接，不抓取平台搜索结果。若浏览器拦截弹窗，或禁止外部网页打开 file:// 本地文件，会复制一条导入链接作为兜底。</p>
+        <p class="hint">说明：分享目标和书签工具默认只保存页面标题、链接和来源，不抓取网页正文；正文和搜索快照的 IndexedDB 存储接口已预留。</p>
       </div>
 
       <form class="card later-form" id="laterForm">
@@ -1117,6 +1120,16 @@
       later: "infoDock.later.v1"
     };
 
+    const STORE_NAMES = {
+      platforms: "platforms",
+      history: "history",
+      later: "later",
+      contents: "contents"
+    };
+
+    const DB_NAME = "InfoDockDB";
+    const DB_VERSION = 1;
+
     const $ = (selector) => document.querySelector(selector);
     const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 
@@ -1162,28 +1175,39 @@
     let isSortingPlatforms = false;
     let selectedSortPlatformId = "";
 
-    boot();
+    boot().catch(handleBootError);
 
-    function boot() {
-      ensureLocalStorageAvailable();
+    async function boot() {
+      await initializeStorage();
 
-      platforms = normalizePlatforms(load(STORAGE_KEYS.platforms, DEFAULT_PLATFORMS));
-      historyItems = normalizeHistoryItems(load(STORAGE_KEYS.history, []));
-      laterItems = normalizeLaterItems(load(STORAGE_KEYS.later, []));
-      persistCoreData();
-      consumeIncomingLaterItem();
+      platforms = normalizePlatforms(await load(STORE_NAMES.platforms, DEFAULT_PLATFORMS));
+      historyItems = normalizeHistoryItems(await load(STORE_NAMES.history, []));
+      laterItems = normalizeLaterItems(await load(STORE_NAMES.later, []));
+      await persistCoreData();
       renderAll();
       bindEvents();
+      await consumeIncomingLaterItem();
+      await handleSharedData();
+    }
+
+    function handleBootError(error) {
+      console.error("Info Dock 启动失败：", error);
+      if (elements.storageBadge) {
+        elements.storageBadge.textContent = "本地保存：启动失败";
+        elements.storageBadge.classList.add("status-warn");
+        elements.storageBadge.classList.remove("status-ok");
+      }
+      toast("启动失败，请打开控制台查看错误。若浏览器禁用了 IndexedDB，请尝试使用 http://localhost。 ");
     }
 
     function bindEvents() {
       elements.copySearchBtn.addEventListener("click", () => copyCurrentKeyword());
 
-      elements.searchInput.addEventListener("keydown", (event) => {
+      elements.searchInput.addEventListener("keydown", async (event) => {
         if (event.key === "Enter") {
           event.preventDefault();
           const firstPlatform = platforms[0];
-          if (firstPlatform) runPlatformEntrance(firstPlatform.id, "web");
+          if (firstPlatform) await runPlatformEntrance(firstPlatform.id, "web");
         }
       });
 
@@ -1222,20 +1246,28 @@
         }
       });
 
-      elements.laterForm.addEventListener("submit", (event) => {
+      elements.laterForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        addLaterItem();
+        await addLaterItem();
       });
 
       elements.cancelPlatformBtn.addEventListener("click", closeAddPlatformModal);
-      elements.savePlatformBtn.addEventListener("click", addPlatform);
+      elements.savePlatformBtn.addEventListener("click", () => {
+        void addPlatform();
+      });
       elements.addPlatformModal.addEventListener("click", (event) => {
         if (event.target === elements.addPlatformModal) closeAddPlatformModal();
       });
 
-      document.addEventListener("click", handleGlobalClick);
-      document.addEventListener("input", handleGlobalInput);
-      document.addEventListener("change", handleGlobalInput);
+      document.addEventListener("click", (event) => {
+        void handleGlobalClick(event);
+      });
+      document.addEventListener("input", (event) => {
+        void handleGlobalInput(event);
+      });
+      document.addEventListener("change", (event) => {
+        void handleGlobalInput(event);
+      });
 
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
@@ -1261,18 +1293,236 @@
       });
     }
 
-    function load(key, fallback) {
+    const InfoDockDB = (() => {
+      let dbPromise = null;
+
+      function open() {
+        if (!window.indexedDB) {
+          return Promise.reject(new Error("当前浏览器不支持 IndexedDB"));
+        }
+
+        if (dbPromise) return dbPromise;
+
+        dbPromise = new Promise((resolve, reject) => {
+          const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+          request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+
+            if (!db.objectStoreNames.contains(STORE_NAMES.platforms)) {
+              db.createObjectStore(STORE_NAMES.platforms, { keyPath: "id" });
+            }
+            if (!db.objectStoreNames.contains(STORE_NAMES.history)) {
+              const historyStore = db.createObjectStore(STORE_NAMES.history, { keyPath: "id" });
+              historyStore.createIndex("time", "time", { unique: false });
+              historyStore.createIndex("platformId", "platformId", { unique: false });
+            }
+            if (!db.objectStoreNames.contains(STORE_NAMES.later)) {
+              const laterStore = db.createObjectStore(STORE_NAMES.later, { keyPath: "id" });
+              laterStore.createIndex("createdAt", "createdAt", { unique: false });
+              laterStore.createIndex("status", "status", { unique: false });
+            }
+            if (!db.objectStoreNames.contains(STORE_NAMES.contents)) {
+              const contentStore = db.createObjectStore(STORE_NAMES.contents, { keyPath: ["id", "type"] });
+              contentStore.createIndex("id", "id", { unique: false });
+              contentStore.createIndex("type", "type", { unique: false });
+              contentStore.createIndex("timestamp", "timestamp", { unique: false });
+            }
+          };
+
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error || new Error("打开 IndexedDB 失败"));
+          request.onblocked = () => reject(new Error("IndexedDB 升级被其他页面阻止，请关闭其它 Info Dock 标签页后刷新。"));
+        });
+
+        return dbPromise;
+      }
+
+      async function transaction(storeName, mode, callback) {
+        const db = await open();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(storeName, mode);
+          const store = tx.objectStore(storeName);
+          let result;
+
+          tx.oncomplete = () => resolve(result);
+          tx.onerror = () => reject(tx.error || new Error(`IndexedDB ${storeName} 事务失败`));
+          tx.onabort = () => reject(tx.error || new Error(`IndexedDB ${storeName} 事务中止`));
+
+          result = callback(store);
+        });
+      }
+
+      async function getAll(storeName) {
+        return transaction(storeName, "readonly", (store) => new Promise((resolve, reject) => {
+          const request = store.getAll();
+          request.onsuccess = () => resolve(request.result || []);
+          request.onerror = () => reject(request.error || new Error(`读取 ${storeName} 失败`));
+        }));
+      }
+
+      async function count(storeName) {
+        return transaction(storeName, "readonly", (store) => new Promise((resolve, reject) => {
+          const request = store.count();
+          request.onsuccess = () => resolve(request.result || 0);
+          request.onerror = () => reject(request.error || new Error(`统计 ${storeName} 失败`));
+        }));
+      }
+
+      async function replaceAll(storeName, items) {
+        return transaction(storeName, "readwrite", (store) => {
+          store.clear();
+          (Array.isArray(items) ? items : []).forEach((item) => {
+            if (item && item.id) store.put(clone(item));
+          });
+          return true;
+        });
+      }
+
+      async function put(storeName, item) {
+        return transaction(storeName, "readwrite", (store) => {
+          store.put(clone(item));
+          return item;
+        });
+      }
+
+      async function getContentsById(id) {
+        return transaction(STORE_NAMES.contents, "readonly", (store) => new Promise((resolve, reject) => {
+          const index = store.index("id");
+          const request = index.getAll(id);
+          request.onsuccess = () => resolve(request.result || []);
+          request.onerror = () => reject(request.error || new Error("读取内容快照失败"));
+        }));
+      }
+
+      return { open, getAll, count, replaceAll, put, getContentsById };
+    })();
+
+    let storageMode = "indexedDB";
+
+    async function initializeStorage() {
       try {
-        const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : clone(fallback);
+        storageMode = "indexedDB";
+        await InfoDockDB.open();
+        await migrateLocalStorageToIndexedDBIfNeeded();
+        elements.storageBadge.textContent = "本地保存：已启用 IndexedDB";
+        elements.storageBadge.classList.add("status-ok");
+        elements.storageBadge.classList.remove("status-warn");
       } catch (error) {
-        console.warn("读取本地数据失败：", error);
+        console.warn("IndexedDB 不可用，降级到 localStorage：", error);
+        storageMode = "localStorage";
+        ensureLocalStorageFallbackAvailable();
+      }
+    }
+
+    async function migrateLocalStorageToIndexedDBIfNeeded() {
+      const counts = await Promise.all([
+        InfoDockDB.count(STORE_NAMES.platforms),
+        InfoDockDB.count(STORE_NAMES.history),
+        InfoDockDB.count(STORE_NAMES.later)
+      ]);
+
+      if (counts.some((count) => count > 0)) return;
+
+      const hasLocalData = [STORAGE_KEYS.platforms, STORAGE_KEYS.history, STORAGE_KEYS.later]
+        .some((key) => hasLocalStorageValue(key));
+
+      if (!hasLocalData) return;
+
+      const migratedPlatforms = loadFromLocalStorage(STORAGE_KEYS.platforms, []);
+      const migratedHistory = loadFromLocalStorage(STORAGE_KEYS.history, []);
+      const migratedLater = loadFromLocalStorage(STORAGE_KEYS.later, []);
+
+      await InfoDockDB.replaceAll(STORE_NAMES.platforms, Array.isArray(migratedPlatforms) ? migratedPlatforms : []);
+      await InfoDockDB.replaceAll(STORE_NAMES.history, Array.isArray(migratedHistory) ? migratedHistory : []);
+      await InfoDockDB.replaceAll(STORE_NAMES.later, Array.isArray(migratedLater) ? migratedLater : []);
+      console.info("已将 localStorage 数据迁移到 IndexedDB。 ");
+    }
+
+    async function load(storeName, fallback) {
+      try {
+        if (storageMode === "indexedDB") {
+          const value = await InfoDockDB.getAll(storeName);
+          return value.length ? value : clone(fallback);
+        }
+        return loadFromLocalStorage(localStorageKeyForStore(storeName), fallback);
+      } catch (error) {
+        console.warn(`读取 ${storeName} 失败：`, error);
         return clone(fallback);
       }
     }
 
-    function save(key, value) {
+    async function save(storeName, value) {
+      if (storageMode === "indexedDB") {
+        await InfoDockDB.replaceAll(storeName, value);
+        return;
+      }
+      saveToLocalStorage(localStorageKeyForStore(storeName), value);
+    }
+
+    async function saveContentSnapshot(content) {
+      const item = {
+        id: content.id,
+        type: content.type,
+        rawHtml: content.rawHtml || "",
+        text: content.text || "",
+        timestamp: content.timestamp || new Date().toISOString()
+      };
+
+      if (!item.id || !item.type) {
+        throw new Error("内容快照需要 id 和 type。 ");
+      }
+
+      if (storageMode === "indexedDB") {
+        await InfoDockDB.put(STORE_NAMES.contents, item);
+        return item;
+      }
+
+      const key = `infoDock.contents.v1.${item.id}.${item.type}`;
+      saveToLocalStorage(key, item);
+      return item;
+    }
+
+    async function loadContentSnapshots(id) {
+      if (!id) return [];
+      if (storageMode === "indexedDB") {
+        return InfoDockDB.getContentsById(id);
+      }
+      return Object.keys(localStorage)
+        .filter((key) => key.startsWith(`infoDock.contents.v1.${id}.`))
+        .map((key) => loadFromLocalStorage(key, null))
+        .filter(Boolean);
+    }
+
+    function localStorageKeyForStore(storeName) {
+      const map = {
+        [STORE_NAMES.platforms]: STORAGE_KEYS.platforms,
+        [STORE_NAMES.history]: STORAGE_KEYS.history,
+        [STORE_NAMES.later]: STORAGE_KEYS.later
+      };
+      return map[storeName] || storeName;
+    }
+
+    function loadFromLocalStorage(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : clone(fallback);
+      } catch (error) {
+        console.warn("读取 localStorage 失败：", error);
+        return clone(fallback);
+      }
+    }
+
+    function saveToLocalStorage(key, value) {
       localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function hasLocalStorageValue(key) {
+      try {
+        return localStorage.getItem(key) !== null;
+      } catch (error) {
+        return false;
+      }
     }
 
     function clone(value) {
@@ -1280,24 +1530,25 @@
       return JSON.parse(JSON.stringify(value));
     }
 
-    function persistCoreData() {
-      save(STORAGE_KEYS.platforms, platforms);
-      save(STORAGE_KEYS.history, historyItems);
-      save(STORAGE_KEYS.later, laterItems);
+    async function persistCoreData() {
+      await save(STORE_NAMES.platforms, platforms);
+      await save(STORE_NAMES.history, historyItems);
+      await save(STORE_NAMES.later, laterItems);
     }
 
-    function ensureLocalStorageAvailable() {
+    function ensureLocalStorageFallbackAvailable() {
       try {
         localStorage.setItem("infoDock.storageTest", "1");
         localStorage.removeItem("infoDock.storageTest");
-        elements.storageBadge.textContent = "本地保存：已启用";
-        elements.storageBadge.classList.add("status-ok");
-        elements.storageBadge.classList.remove("status-warn");
+        elements.storageBadge.textContent = "本地保存：已降级 localStorage";
+        elements.storageBadge.classList.add("status-warn");
+        elements.storageBadge.classList.remove("status-ok");
+        toast("IndexedDB 不可用，已临时降级到 localStorage。 ");
       } catch (error) {
         elements.storageBadge.textContent = "本地保存：不可用";
         elements.storageBadge.classList.add("status-warn");
         elements.storageBadge.classList.remove("status-ok");
-        toast("当前浏览器可能禁用了 localStorage，刷新后数据可能丢失。");
+        toast("当前浏览器禁用了本地存储，刷新后数据可能丢失。 ");
       }
     }
 
@@ -1505,7 +1756,7 @@
       toast(isSortingPlatforms ? "已进入排序模式：依次点击两个非必应卡片即可互换位置。" : "已退出排序模式。");
     }
 
-    function selectPlatformForSwap(platformId) {
+    async function selectPlatformForSwap(platformId) {
       if (!isSortingPlatforms || !platformId) return;
 
       if (!selectedSortPlatformId) {
@@ -1521,14 +1772,14 @@
         return;
       }
 
-      swapPlatforms(selectedSortPlatformId, platformId);
+      await swapPlatforms(selectedSortPlatformId, platformId);
       selectedSortPlatformId = "";
       renderPlatformCards();
       renderFilters();
       toast("已互换两个平台的位置。");
     }
 
-    function swapPlatforms(firstId, secondId) {
+    async function swapPlatforms(firstId, secondId) {
       const firstIndex = platforms.findIndex((platform) => platform.id === firstId);
       const secondIndex = platforms.findIndex((platform) => platform.id === secondId);
 
@@ -1540,7 +1791,7 @@
       nextPlatforms[secondIndex] = temp;
 
       platforms = nextPlatforms;
-      save(STORAGE_KEYS.platforms, platforms);
+      await save(STORE_NAMES.platforms, platforms);
     }
 
     function getWebEntrance(platform) {
@@ -1575,14 +1826,14 @@
       };
     }
 
-    function runPlatformEntrance(platformId, entranceKind = "web") {
+    async function runPlatformEntrance(platformId, entranceKind = "web") {
       const platform = platforms.find((item) => item.id === platformId);
       if (!platform) return;
       const entrance = entranceKind === "site" ? getBingSiteEntrance(platform) : getWebEntrance(platform);
-      executeEntrance(platform, entrance);
+      await executeEntrance(platform, entrance);
     }
 
-    function executeEntrance(platform, entrance) {
+    async function executeEntrance(platform, entrance) {
       const keyword = elements.searchInput.value.trim();
       if (!platform || !entrance) return;
 
@@ -1612,7 +1863,7 @@
       };
 
       historyItems.unshift(item);
-      save(STORAGE_KEYS.history, historyItems);
+      await save(STORE_NAMES.history, historyItems);
 
       window.open(renderedUrl, "_blank", "noopener,noreferrer");
       setStatus(`已记录：通过「${platform.name} / ${entrance.entranceType}」搜索「${keyword}」。已打开入口。`);
@@ -1769,7 +2020,7 @@ function fillUrlTemplate(template, query, domain = "") {
       }).join("");
     }
 
-    function handleGlobalClick(event) {
+    async function handleGlobalClick(event) {
       const node = event.target.closest("[data-action]");
       if (!node) return;
 
@@ -1777,15 +2028,15 @@ function fillUrlTemplate(template, query, domain = "") {
       const id = node.dataset.id;
 
       if (action === "platform-bing") {
-        runPlatformEntrance(node.dataset.platformId, "web");
+        await runPlatformEntrance(node.dataset.platformId, "web");
       }
 
       if (action === "platform-web") {
-        runPlatformEntrance(node.dataset.platformId, "web");
+        await runPlatformEntrance(node.dataset.platformId, "web");
       }
 
       if (action === "platform-site") {
-        runPlatformEntrance(node.dataset.platformId, "site");
+        await runPlatformEntrance(node.dataset.platformId, "site");
       }
 
       if (action === "toggle-platform-sort") {
@@ -1793,7 +2044,7 @@ function fillUrlTemplate(template, query, domain = "") {
       }
 
       if (action === "platform-sort-select") {
-        selectPlatformForSwap(node.dataset.platformId);
+        await selectPlatformForSwap(node.dataset.platformId);
       }
 
       if (action === "open-add-platform") {
@@ -1802,7 +2053,7 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (action === "history-delete") {
         historyItems = historyItems.filter((item) => item.id !== id);
-        save(STORAGE_KEYS.history, historyItems);
+        await save(STORE_NAMES.history, historyItems);
         renderHistory();
         toast("已删除搜索记录。");
       }
@@ -1813,15 +2064,15 @@ function fillUrlTemplate(template, query, domain = "") {
         elements.searchInput.value = item.keyword;
         const platform = platforms.find((entry) => entry.id === item.platformId) || platforms.find((entry) => entry.name === item.platform);
         const entranceKind = item.entranceType === "Bing site 搜索" ? "site" : "web";
-        if (platform) runPlatformEntrance(platform.id, entranceKind);
+        if (platform) await runPlatformEntrance(platform.id, entranceKind);
       }
 
       if (action === "history-to-later") {
         const item = historyItems.find((entry) => entry.id === id);
         if (!item) return;
-        const added = addLaterFromHistory(item);
+        const added = await addLaterFromHistory(item);
         if (added) {
-          updateHistoryItem(id, { status: "转入稍后看", solved: false }, true);
+          await updateHistoryItem(id, { status: "转入稍后看", solved: false }, true);
           toast("已转入稍后看清单。");
         }
       }
@@ -1833,13 +2084,13 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (action === "delete-later") {
         laterItems = laterItems.filter((item) => item.id !== id);
-        save(STORAGE_KEYS.later, laterItems);
+        await save(STORE_NAMES.later, laterItems);
         renderLater();
         toast("已删除稍后看内容。");
       }
     }
 
-function handleGlobalInput(event) {
+    async function handleGlobalInput(event) {
       const node = event.target;
       const action = node.dataset.action;
       const id = node.dataset.id;
@@ -1847,14 +2098,14 @@ function handleGlobalInput(event) {
       if (!action) return;
 
       if (action === "history-status") {
-        updateHistoryItem(id, {
+        await updateHistoryItem(id, {
           status: node.value,
           solved: ["已解决", "有用"].includes(node.value)
         }, true);
       }
 
       if (action === "history-note") {
-        updateHistoryItem(id, { note: node.value }, false);
+        await updateHistoryItem(id, { note: node.value }, false);
       }
 
       const laterKeyMap = {
@@ -1868,20 +2119,20 @@ function handleGlobalInput(event) {
       };
 
       if (laterKeyMap[action]) {
-        updateLaterItem(id, { [laterKeyMap[action]]: node.value }, action === "later-status" || action === "later-source");
+        await updateLaterItem(id, { [laterKeyMap[action]]: node.value }, action === "later-status" || action === "later-source");
       }
     }
 
-    function updateHistoryItem(id, patch, shouldRender = true) {
+    async function updateHistoryItem(id, patch, shouldRender = true) {
       historyItems = historyItems.map((item) => item.id === id ? { ...item, ...patch } : item);
-      save(STORAGE_KEYS.history, historyItems);
+      await save(STORE_NAMES.history, historyItems);
 
       if (shouldRender) {
         renderHistory();
       }
     }
 
-    function addLaterItem() {
+    async function addLaterItem() {
       const title = elements.laterTitle.value.trim();
       const url = elements.laterUrl.value.trim();
 
@@ -1909,14 +2160,46 @@ function handleGlobalInput(event) {
       };
 
       laterItems.unshift(item);
-      save(STORAGE_KEYS.later, laterItems);
+      await save(STORE_NAMES.later, laterItems);
       elements.laterForm.reset();
       elements.laterSource.value = "其他";
       renderLater();
       toast("已添加到稍后看清单。");
     }
 
-    function addLaterFromHistory(historyItem) {
+    async function addLaterFromExternal(title, url, source, reason = "通过系统分享添加。") {
+      const cleanTitle = String(title || "").trim();
+      const cleanUrl = String(url || extractFirstUrl(cleanTitle) || "").trim();
+      const finalTitle = cleanTitle || cleanUrl || "未命名内容";
+      const finalSource = normalizeLaterSource(source || detectSourceFromUrl(cleanUrl));
+
+      if (cleanUrl && laterItems.some((item) => item.url === cleanUrl)) {
+        return {
+          added: false,
+          reason: "duplicate",
+          item: laterItems.find((item) => item.url === cleanUrl) || null
+        };
+      }
+
+      const item = {
+        id: createId(),
+        title: finalTitle,
+        url: cleanUrl,
+        source: finalSource,
+        reason,
+        estimate: "",
+        status: "未看",
+        conclusion: "",
+        createdAt: new Date().toISOString(),
+        relatedHistoryId: ""
+      };
+
+      laterItems.unshift(item);
+      await save(STORE_NAMES.later, laterItems);
+      return { added: true, reason: "created", item };
+    }
+
+    async function addLaterFromHistory(historyItem) {
       const url = historyItem.url || "";
       if (url && laterItems.some((item) => item.url === url)) {
         toast("这条链接已经在稍后看清单里。");
@@ -1937,14 +2220,14 @@ function handleGlobalInput(event) {
       };
 
       laterItems.unshift(item);
-      save(STORAGE_KEYS.later, laterItems);
+      await save(STORE_NAMES.later, laterItems);
       renderLater();
       return true;
     }
 
-    function updateLaterItem(id, patch, shouldRender = true) {
+    async function updateLaterItem(id, patch, shouldRender = true) {
       laterItems = laterItems.map((item) => item.id === id ? { ...item, ...patch } : item);
-      save(STORAGE_KEYS.later, laterItems);
+      await save(STORE_NAMES.later, laterItems);
 
       if (shouldRender) {
         renderLater();
@@ -1981,41 +2264,58 @@ function handleGlobalInput(event) {
       return url.href;
     }
 
-    function consumeIncomingLaterItem() {
+    async function handleSharedData() {
+      const params = new URLSearchParams(window.location.search);
+      const hasShareParams = ["title", "text", "url"].some((key) => params.has(key));
+
+      if (!hasShareParams || params.get("addLater") === "1") return false;
+
+      const sharedTitle = params.get("title") || "";
+      const sharedText = params.get("text") || "";
+      const sharedUrl = params.get("url") || extractFirstUrl(sharedText) || "";
+      const source = inferSourceFromSharedData(params, sharedUrl, sharedText);
+      const result = await addLaterFromExternal(sharedTitle || sharedText || sharedUrl, sharedUrl, source);
+
+      clearIncomingParams();
+      activateTab("laterSection");
+      renderAll();
+
+      if (result.added) {
+        setStatus(`已通过手机分享加入稍后看清单：${result.item.title}`);
+        toast("已通过分享加入稍后看清单。 ");
+      } else if (result.reason === "duplicate") {
+        setStatus("这条链接已经在稍后看清单里。 ");
+        toast("这条链接已存在。 ");
+      }
+
+      return result.added;
+    }
+
+    async function consumeIncomingLaterItem() {
       const incoming = getIncomingLaterPayload();
-      if (!incoming) return;
+      if (!incoming) return false;
 
-      const incomingUrl = incoming.url || "";
-      const incomingTitle = incoming.title || incomingUrl || "未命名内容";
-      const incomingSource = normalizeLaterSource(incoming.source || detectSourceFromUrl(incomingUrl));
-      const alreadyExists = incomingUrl && laterItems.some((item) => item.url === incomingUrl);
+      const result = await addLaterFromExternal(
+        incoming.title || incoming.url || "未命名内容",
+        incoming.url || "",
+        incoming.source || detectSourceFromUrl(incoming.url),
+        "通过 Info Dock 收藏夹小工具添加。"
+      );
 
-      if (!alreadyExists) {
-        laterItems.unshift({
-          id: createId(),
-          title: incomingTitle,
-          url: incomingUrl,
-          source: incomingSource,
-          reason: "通过 Info Dock 收藏夹小工具添加。",
-          estimate: "",
-          status: "未看",
-          conclusion: "",
-          createdAt: new Date().toISOString(),
-          relatedHistoryId: ""
-        });
-        save(STORAGE_KEYS.later, laterItems);
-        setStatus(`已添加到稍后看清单：${incomingTitle}`);
-      } else {
-        setStatus("这条链接已经在稍后看清单里。");
+      if (result.added) {
+        setStatus(`已添加到稍后看清单：${result.item.title}`);
+      } else if (result.reason === "duplicate") {
+        setStatus("这条链接已经在稍后看清单里。 ");
       }
 
       clearIncomingParams();
-
       setTimeout(() => {
         activateTab("laterSection");
-        renderLater();
-        toast(alreadyExists ? "这条链接已存在。" : "已从外部页面加入稍后看清单。");
+        renderAll();
+        toast(result.added ? "已从外部页面加入稍后看清单。" : "这条链接已存在。 ");
       }, 0);
+
+      return result.added;
     }
 
     function getIncomingLaterPayload() {
@@ -2071,7 +2371,7 @@ function handleGlobalInput(event) {
       elements.addPlatformModal.setAttribute("aria-hidden", "true");
     }
 
-    function addPlatform() {
+    async function addPlatform() {
       const name = normalizePlatformName(elements.newPlatformName.value);
       const recommendation = elements.newPlatformRecommendation.value.trim();
       const urlTemplate = elements.newPlatformUrl.value.trim();
@@ -2106,7 +2406,7 @@ function handleGlobalInput(event) {
         appUrlTemplate
       });
 
-      save(STORAGE_KEYS.platforms, platforms);
+      await save(STORE_NAMES.platforms, platforms);
       renderAll();
       closeAddPlatformModal();
       toast("已添加搜索平台。");
@@ -2122,7 +2422,32 @@ function handleGlobalInput(event) {
 
       toast("搜索栏为空，无内容可复制。");
     }
-function detectSourceFromUrl(url) {
+    function extractFirstUrl(text) {
+      const match = String(text || "").match(/https?:\/\/[^\s<>'"]+/i);
+      return match ? match[0] : "";
+    }
+
+    function inferSourceFromSharedData(params, url, text) {
+      const explicitSource = params.get("source") || "";
+      if (explicitSource) {
+        const normalizedExplicit = normalizeLaterSource(explicitSource);
+        if (normalizedExplicit !== "其他" || normalizePlatformName(explicitSource) === "其他") {
+          return normalizedExplicit;
+        }
+      }
+
+      return firstKnownSource(explicitSource, url, text, document.referrer);
+    }
+
+    function firstKnownSource(...values) {
+      for (const value of values) {
+        const source = detectSourceFromUrl(value);
+        if (source && source !== "其他") return source;
+      }
+      return "其他";
+    }
+
+    function detectSourceFromUrl(url) {
       const value = normalize(url);
       if (!value) return "其他";
       if (value.includes("bing.com")) return "必应";
@@ -2245,7 +2570,5 @@ function detectSourceFromUrl(url) {
       return escapeHtml(value).replaceAll("`", "&#096;");
     }
   </script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
