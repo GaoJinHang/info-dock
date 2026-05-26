@@ -237,7 +237,19 @@
       position: relative;
     }
 
+    .global-search-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(180px, 260px);
+      gap: 8px;
+      align-items: center;
+    }
+
     .global-search-input {
+      min-height: 46px;
+      border-radius: 16px;
+    }
+
+    .global-project-filter {
       min-height: 46px;
       border-radius: 16px;
     }
@@ -274,6 +286,173 @@
       color: var(--muted);
       font-size: 12.5px;
       line-height: 1.55;
+    }
+
+    .tag-row,
+    .suggested-tags,
+    .project-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      margin-top: 6px;
+    }
+
+    .project-add-control {
+      min-width: 150px;
+      min-height: 32px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: white;
+    }
+
+    .project-items {
+      display: grid;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .project-item-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(248, 250, 252, 0.82);
+    }
+
+    .project-item-row h4 {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .project-item-row p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .project-description {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 13px;
+    }
+
+    .suggested-tags {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .tag-chip,
+    .suggested-tag-btn {
+      border: 0;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 750;
+    }
+
+    .tag-chip {
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .suggested-tag-btn {
+      color: var(--warning);
+      background: var(--warning-soft);
+    }
+
+    .tag-edit-field {
+      min-height: 38px;
+    }
+
+    .snapshot-prompt {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 0 0;
+    }
+
+    .snapshot-preview {
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: min(56vh, 520px);
+      overflow: auto;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--text);
+      background: #f8fafc;
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+
+    .wiki-preview,
+    .backlinks-box {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 6px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(248, 250, 252, 0.82);
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+
+    .wiki-preview {
+      margin-top: -2px;
+    }
+
+    .wiki-link,
+    .backlink-link {
+      border: 0;
+      padding: 0;
+      color: var(--primary);
+      background: transparent;
+      font-weight: 800;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .wiki-link-missing {
+      color: var(--warning);
+      font-weight: 800;
+    }
+
+    .backlinks-title {
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .backlinks-list {
+      display: grid;
+      gap: 4px;
+    }
+
+    .backlink-item {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: baseline;
+    }
+
+    .backlink-field {
+      color: var(--muted);
+      font-size: 11.5px;
+    }
+
+    .backlinks-empty {
+      color: var(--muted);
     }
 
     .global-search-empty {
@@ -469,8 +648,12 @@
     }
 
     .history-toolbar {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 8px;
+    }
+
+    .later-toolbar {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
     .history-search-field {
@@ -847,8 +1030,13 @@
         grid-template-columns: 1fr;
       }
 
+      .global-search-controls,
+      .project-item-row {
+        grid-template-columns: 1fr;
+      }
+
       .history-toolbar {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .history-search-field {
@@ -987,7 +1175,10 @@
           </div>
         </div>
         <div class="global-search-box" aria-label="全文搜索">
-          <input id="globalSearchInput" class="field global-search-input" type="search" placeholder="🔍 搜索所有内容：标题、标签、备注、正文" autocomplete="off" />
+          <div class="global-search-controls">
+            <input id="globalSearchInput" class="field global-search-input" type="search" placeholder="🔍 搜索所有内容：标题、标签、备注、正文" autocomplete="off" />
+            <select id="globalProjectFilter" class="field global-project-filter" title="按项目过滤"></select>
+          </div>
           <div id="globalSearchResults" class="global-search-results hidden"></div>
         </div>
         <div class="status-msg" id="statusMsg"></div>
@@ -1001,12 +1192,14 @@
     <nav class="tabs" aria-label="内容切换">
       <button class="tab-btn active" type="button" data-tab="historySection">搜索历史</button>
       <button class="tab-btn" type="button" data-tab="laterSection">稍后看清单</button>
+      <button class="tab-btn" type="button" data-tab="projectSection">项目管理</button>
     </nav>
 
     <section id="historySection" class="section active" aria-label="搜索历史">
       <div class="card toolbar history-toolbar">
         <select id="historyPlatformFilter"></select>
         <select id="historyStatusFilter"></select>
+        <select id="historyProjectFilter"></select>
         <select id="historySort">
           <option value="newest">排序</option>
           <option value="oldest">最早优先</option>
@@ -1054,18 +1247,43 @@
         </div>
       </form>
 
-      <div class="card toolbar two">
+      <div class="card toolbar two later-toolbar">
         <label class="label">来源平台
           <select id="laterSourceFilter"></select>
         </label>
         <label class="label">状态
           <select id="laterStatusFilter"></select>
         </label>
+        <label class="label">项目
+          <select id="laterProjectFilter"></select>
+        </label>
         <label class="label">关键词
           <input id="laterTextFilter" class="field" type="search" placeholder="搜索标题、原因、结论" />
         </label>
       </div>
       <div class="list" id="laterList"></div>
+    </section>
+
+    <section id="projectSection" class="section" aria-label="项目管理">
+      <form class="card later-form" id="projectForm">
+        <div class="form-title">
+          <div>
+            <h2>项目管理</h2>
+            <p class="hint">创建类似 Notion Database 的主题集合，把搜索历史和稍后看条目关联到同一个项目。</p>
+          </div>
+          <button class="primary-btn" type="submit">创建项目</button>
+        </div>
+        <div class="edit-grid">
+          <label class="label">项目名称
+            <input id="projectName" class="field" type="text" placeholder="例如：竞品分析" required />
+          </label>
+          <label class="label wide">项目描述
+            <textarea id="projectDescription" placeholder="这个项目要聚合哪些问题、资料或结论？"></textarea>
+          </label>
+        </div>
+      </form>
+
+      <div class="list" id="projectList"></div>
     </section>
   </main>
 
@@ -1099,6 +1317,19 @@
       <div class="actions">
         <button class="primary-btn" id="savePlatformBtn" type="button">保存平台</button>
       </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="snapshotModal" aria-hidden="true">
+    <section class="card modal" role="dialog" aria-modal="true" aria-labelledby="snapshotModalTitle">
+      <div class="modal-title-row">
+        <div>
+          <h2 id="snapshotModalTitle">搜索结果页快照</h2>
+          <p class="hint">这里显示已保存的 SERP 纯文本。若为空，通常是搜索页跨域、反爬或登录策略阻止了抓取。</p>
+        </div>
+        <button class="ghost-btn" type="button" id="closeSnapshotModalBtn">关闭</button>
+      </div>
+      <pre class="snapshot-preview" id="snapshotText"></pre>
     </section>
   </div>
 <div class="toast" id="toast"></div>
@@ -1174,18 +1405,20 @@
     const STORAGE_KEYS = {
       platforms: "infoDock.platforms.v1",
       history: "infoDock.history.v1",
-      later: "infoDock.later.v1"
+      later: "infoDock.later.v1",
+      projects: "infoDock.projects.v1"
     };
 
     const STORE_NAMES = {
       platforms: "platforms",
       history: "history",
       later: "later",
-      contents: "contents"
+      contents: "contents",
+      projects: "projects"
     };
 
     const DB_NAME = "InfoDockDB";
-    const DB_VERSION = 1;
+    const DB_VERSION = 2;
 
     const $ = (selector) => document.querySelector(selector);
     const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -1195,11 +1428,13 @@
       copySearchBtn: $("#copySearchBtn"),
       statusMsg: $("#statusMsg"),
       globalSearchInput: $("#globalSearchInput"),
+      globalProjectFilter: $("#globalProjectFilter"),
       globalSearchResults: $("#globalSearchResults"),
       platformDock: $("#platformDock"),
       platformCards: $("#platformCards"),
       historyPlatformFilter: $("#historyPlatformFilter"),
       historyStatusFilter: $("#historyStatusFilter"),
+      historyProjectFilter: $("#historyProjectFilter"),
       historyTextFilter: $("#historyTextFilter"),
       historySort: $("#historySort"),
       historyList: $("#historyList"),
@@ -1213,8 +1448,13 @@
       laterReason: $("#laterReason"),
       laterSourceFilter: $("#laterSourceFilter"),
       laterStatusFilter: $("#laterStatusFilter"),
+      laterProjectFilter: $("#laterProjectFilter"),
       laterTextFilter: $("#laterTextFilter"),
       laterList: $("#laterList"),
+      projectForm: $("#projectForm"),
+      projectName: $("#projectName"),
+      projectDescription: $("#projectDescription"),
+      projectList: $("#projectList"),
       addPlatformModal: $("#addPlatformModal"),
       newPlatformName: $("#newPlatformName"),
       newPlatformRecommendation: $("#newPlatformRecommendation"),
@@ -1224,13 +1464,16 @@
       newPlatformAppUrl: $("#newPlatformAppUrl"),
       cancelPlatformBtn: $("#cancelPlatformBtn"),
       savePlatformBtn: $("#savePlatformBtn"),
+      snapshotModal: $("#snapshotModal"),
+      snapshotText: $("#snapshotText"),
+      closeSnapshotModalBtn: $("#closeSnapshotModalBtn"),
       toast: $("#toast"),
       storageBadge: $("#storageBadge")
     };
 
     const searchEngine = (() => {
-      const fields = ["title", "source", "reason", "conclusion", "note", "keyword", "platform", "bodyText"];
-      const storeFields = ["id", "itemType", "title", "source", "reason", "conclusion", "note", "keyword", "platform", "bodyText", "url", "createdAt", "time", "autoSummary"];
+      const fields = ["title", "source", "reason", "conclusion", "note", "keyword", "platform", "tags", "projectNames", "bodyText"];
+      const storeFields = ["id", "itemType", "title", "source", "reason", "conclusion", "note", "keyword", "platform", "tags", "projectIds", "projectNames", "bodyText", "url", "createdAt", "time", "autoSummary"];
       const docs = new Map();
       let miniSearch = null;
 
@@ -1281,6 +1524,9 @@
           note: doc.note || "",
           keyword: doc.keyword || "",
           platform: doc.platform || "",
+          tags: Array.isArray(doc.tags) ? doc.tags.join(" ") : (doc.tags || ""),
+          projectIds: normalizeProjectIds(doc.projectIds || []),
+          projectNames: Array.isArray(doc.projectNames) ? doc.projectNames.join(" ") : (doc.projectNames || ""),
           bodyText: doc.bodyText || "",
           url: doc.url || "",
           createdAt: doc.createdAt || "",
@@ -1380,6 +1626,8 @@
     let platforms = [];
     let historyItems = [];
     let laterItems = [];
+    let projects = [];
+    let backlinkIndex = new Map();
     const contentFetchQueue = new Set();
     let isSortingPlatforms = false;
     let selectedSortPlatformId = "";
@@ -1390,8 +1638,10 @@
       platforms = normalizePlatforms(await load(STORE_NAMES.platforms, DEFAULT_PLATFORMS));
       historyItems = normalizeHistoryItems(await load(STORE_NAMES.history, []));
       laterItems = normalizeLaterItems(await load(STORE_NAMES.later, []));
+      projects = normalizeProjects(await load(STORE_NAMES.projects, []));
       await persistCoreData();
       await rebuildSearchIndex();
+      rebuildBacklinkIndex();
       renderAll();
       bindEvents();
       await consumeIncomingLaterItem();
@@ -1412,6 +1662,7 @@
       elements.copySearchBtn.addEventListener("click", () => copyCurrentKeyword());
       elements.globalSearchInput.addEventListener("input", renderGlobalSearchResults);
       elements.globalSearchInput.addEventListener("focus", renderGlobalSearchResults);
+      elements.globalProjectFilter.addEventListener("input", renderGlobalSearchResults);
 
       elements.searchInput.addEventListener("keydown", async (event) => {
         if (event.key === "Enter") {
@@ -1425,10 +1676,10 @@
         button.addEventListener("click", () => activateTab(button.dataset.tab));
       });
 
-      [elements.historyPlatformFilter, elements.historyStatusFilter, elements.historyTextFilter, elements.historySort]
+      [elements.historyPlatformFilter, elements.historyStatusFilter, elements.historyProjectFilter, elements.historyTextFilter, elements.historySort]
         .forEach((control) => control.addEventListener("input", renderHistory));
 
-      [elements.laterSourceFilter, elements.laterStatusFilter, elements.laterTextFilter]
+      [elements.laterSourceFilter, elements.laterStatusFilter, elements.laterProjectFilter, elements.laterTextFilter]
         .forEach((control) => control.addEventListener("input", renderLater));
 
       elements.copyBookmarkletBtn.addEventListener("click", () => {
@@ -1461,12 +1712,21 @@
         await addLaterItem();
       });
 
+      elements.projectForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        await createProject();
+      });
+
       elements.cancelPlatformBtn.addEventListener("click", closeAddPlatformModal);
       elements.savePlatformBtn.addEventListener("click", () => {
         void addPlatform();
       });
       elements.addPlatformModal.addEventListener("click", (event) => {
         if (event.target === elements.addPlatformModal) closeAddPlatformModal();
+      });
+      elements.closeSnapshotModalBtn.addEventListener("click", closeSnapshotModal);
+      elements.snapshotModal.addEventListener("click", (event) => {
+        if (event.target === elements.snapshotModal) closeSnapshotModal();
       });
 
       document.addEventListener("click", (event) => {
@@ -1482,6 +1742,7 @@
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
           closeAddPlatformModal();
+          closeSnapshotModal();
         }
       });
     }
@@ -1492,6 +1753,7 @@
       renderBookmarklet();
       renderHistory();
       renderLater();
+      renderProjects();
       renderGlobalSearchResults();
     }
 
@@ -1538,6 +1800,11 @@
               contentStore.createIndex("id", "id", { unique: false });
               contentStore.createIndex("type", "type", { unique: false });
               contentStore.createIndex("timestamp", "timestamp", { unique: false });
+            }
+            if (!db.objectStoreNames.contains(STORE_NAMES.projects)) {
+              const projectStore = db.createObjectStore(STORE_NAMES.projects, { keyPath: "id" });
+              projectStore.createIndex("createdAt", "createdAt", { unique: false });
+              projectStore.createIndex("name", "name", { unique: false });
             }
           };
 
@@ -1632,12 +1899,13 @@
       const counts = await Promise.all([
         InfoDockDB.count(STORE_NAMES.platforms),
         InfoDockDB.count(STORE_NAMES.history),
-        InfoDockDB.count(STORE_NAMES.later)
+        InfoDockDB.count(STORE_NAMES.later),
+        InfoDockDB.count(STORE_NAMES.projects)
       ]);
 
       if (counts.some((count) => count > 0)) return;
 
-      const hasLocalData = [STORAGE_KEYS.platforms, STORAGE_KEYS.history, STORAGE_KEYS.later]
+      const hasLocalData = [STORAGE_KEYS.platforms, STORAGE_KEYS.history, STORAGE_KEYS.later, STORAGE_KEYS.projects]
         .some((key) => hasLocalStorageValue(key));
 
       if (!hasLocalData) return;
@@ -1645,10 +1913,12 @@
       const migratedPlatforms = loadFromLocalStorage(STORAGE_KEYS.platforms, []);
       const migratedHistory = loadFromLocalStorage(STORAGE_KEYS.history, []);
       const migratedLater = loadFromLocalStorage(STORAGE_KEYS.later, []);
+      const migratedProjects = loadFromLocalStorage(STORAGE_KEYS.projects, []);
 
       await InfoDockDB.replaceAll(STORE_NAMES.platforms, Array.isArray(migratedPlatforms) ? migratedPlatforms : []);
       await InfoDockDB.replaceAll(STORE_NAMES.history, Array.isArray(migratedHistory) ? migratedHistory : []);
       await InfoDockDB.replaceAll(STORE_NAMES.later, Array.isArray(migratedLater) ? migratedLater : []);
+      await InfoDockDB.replaceAll(STORE_NAMES.projects, Array.isArray(migratedProjects) ? migratedProjects : []);
       console.info("已将 localStorage 数据迁移到 IndexedDB。 ");
     }
 
@@ -1730,7 +2000,8 @@
       const map = {
         [STORE_NAMES.platforms]: STORAGE_KEYS.platforms,
         [STORE_NAMES.history]: STORAGE_KEYS.history,
-        [STORE_NAMES.later]: STORAGE_KEYS.later
+        [STORE_NAMES.later]: STORAGE_KEYS.later,
+        [STORE_NAMES.projects]: STORAGE_KEYS.projects
       };
       return map[storeName] || storeName;
     }
@@ -1766,6 +2037,7 @@
       await save(STORE_NAMES.platforms, platforms);
       await save(STORE_NAMES.history, historyItems);
       await save(STORE_NAMES.later, laterItems);
+      await save(STORE_NAMES.projects, projects);
     }
 
     function ensureLocalStorageFallbackAvailable() {
@@ -1871,7 +2143,10 @@
           status: normalizeSearchStatus(item.status || (item.solved ? "已解决" : "未处理")),
           solved: Boolean(item.solved),
           note: item.note || "",
-          url: item.url || ""
+          url: item.url || "",
+          tags: normalizeTags(item.tags || []),
+          projectIds: normalizeProjectIds(item.projectIds || item.projects || []),
+          hasSnapshot: Boolean(item.hasSnapshot)
         };
       });
     }
@@ -1885,12 +2160,46 @@
         source: normalizeLaterSource(item.source || detectSourceFromUrl(item.url || "")),
         reason: item.reason || "",
         autoSummary: item.autoSummary || "",
+        tags: normalizeTags(item.tags || []),
+        projectIds: normalizeProjectIds(item.projectIds || item.projects || []),
         estimate: item.estimate || "",
         status: LATER_STATUSES.includes(item.status) ? item.status : "未看",
         conclusion: item.conclusion || "",
         createdAt: item.createdAt || new Date().toISOString(),
         relatedHistoryId: item.relatedHistoryId || ""
       }));
+    }
+
+    function normalizeProjects(rawProjects) {
+      const raw = Array.isArray(rawProjects) ? rawProjects : [];
+      const seen = new Set();
+      return raw
+        .map((project) => ({
+          id: project?.id || createId(),
+          name: String(project?.name || "").trim(),
+          description: String(project?.description || "").trim(),
+          createdAt: project?.createdAt || new Date().toISOString()
+        }))
+        .filter((project) => project.name)
+        .filter((project) => {
+          const key = normalize(project.name);
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+    }
+
+    function normalizeProjectIds(value) {
+      const raw = Array.isArray(value) ? value : String(value || "").split(/[\s,，、]+/);
+      const seen = new Set();
+      return raw
+        .map((id) => String(id || "").trim())
+        .filter(Boolean)
+        .filter((id) => {
+          if (seen.has(id)) return false;
+          seen.add(id);
+          return true;
+        });
     }
 
     function normalizeSearchStatus(status) {
@@ -1910,10 +2219,14 @@
 
       contents.forEach((content) => {
         if (!content || !content.id) return;
-        const current = contentById.get(content.id) || { bodyText: "", metaDescription: "" };
+        const current = contentById.get(content.id) || { bodyText: "", snapshotText: "", metaDescription: "", hasSnapshot: false };
         if (content.type === "page-body") {
           current.bodyText = content.text || current.bodyText || "";
           current.metaDescription = content.metaDescription || current.metaDescription || "";
+        }
+        if (content.type === "search-snapshot") {
+          current.snapshotText = content.text || current.snapshotText || "";
+          current.hasSnapshot = true;
         }
         contentById.set(content.id, current);
       });
@@ -1942,7 +2255,10 @@
         keyword: "",
         platform: item.source,
         note: "",
-        bodyText: content.bodyText || "",
+        tags: normalizeTags(item.tags || []).join(" "),
+        projectIds: normalizeProjectIds(item.projectIds || []),
+        projectNames: getProjectNamesForItem(item).join(" "),
+        bodyText: [content.bodyText, content.snapshotText].filter(Boolean).join(" "),
         url: item.url,
         createdAt: item.createdAt,
         autoSummary: item.autoSummary || content.metaDescription || ""
@@ -1960,7 +2276,10 @@
         keyword: item.keyword,
         platform: item.platform,
         note: item.note,
-        bodyText: content.bodyText || "",
+        tags: normalizeTags(item.tags || []).join(" "),
+        projectIds: normalizeProjectIds(item.projectIds || []),
+        projectNames: getProjectNamesForItem(item).join(" "),
+        bodyText: [content.bodyText, content.snapshotText].filter(Boolean).join(" "),
         url: item.url,
         time: item.time
       };
@@ -1969,6 +2288,7 @@
     function renderGlobalSearchResults() {
       if (!elements.globalSearchInput || !elements.globalSearchResults) return;
       const query = elements.globalSearchInput.value.trim();
+      const projectFilter = elements.globalProjectFilter?.value || "全部项目";
       const panel = elements.globalSearchResults;
 
       if (!query) {
@@ -1977,7 +2297,9 @@
         return;
       }
 
-      const results = searchEngine.search(query).slice(0, 12);
+      const results = searchEngine.search(query)
+        .filter((result) => matchesProjectFilter(result, projectFilter))
+        .slice(0, 12);
       panel.classList.remove("hidden");
 
       if (!results.length) {
@@ -2004,6 +2326,8 @@
             <div class="meta">
               <span class="tag">${escapeHtml(typeLabel)}</span>
               <span class="tag">${escapeHtml(source)}</span>
+              ${normalizeTags(result.tags).map((tag) => `<span class="tag tag-chip">${escapeHtml(tag)}</span>`).join("")}
+              ${renderProjectBadgesByIds(result.projectIds)}
             </div>
             ${snippet ? `<p class="global-search-snippet">${escapeHtml(snippet)}</p>` : ""}
             ${openButton || repeatButton ? `<div class="actions">${openButton}${repeatButton}</div>` : ""}
@@ -2013,7 +2337,7 @@
     }
 
     function getSearchResultSnippet(doc, query) {
-      const content = [doc.bodyText, doc.reason, doc.conclusion, doc.note, doc.keyword, doc.platform]
+      const content = [doc.bodyText, doc.reason, doc.conclusion, doc.note, doc.tags, doc.keyword, doc.platform]
         .filter(Boolean)
         .join(" ")
         .replace(/\s+/g, " ")
@@ -2034,6 +2358,389 @@
       const value = String(reason || "").trim();
       if (!value) return false;
       return !["通过系统分享添加。", "通过 Info Dock 收藏夹小工具添加。", "来自搜索历史。"].includes(value);
+    }
+
+    function normalizeTags(tags) {
+      const raw = Array.isArray(tags) ? tags : String(tags || "").split(/[\s,，、]+/);
+      const seen = new Set();
+      return raw
+        .map((tag) => String(tag || "").trim())
+        .filter(Boolean)
+        .map((tag) => tag.startsWith("#") ? tag : `#${tag}`)
+        .map((tag) => tag.replace(/^#+/, "#"))
+        .filter((tag) => tag.length > 1)
+        .filter((tag) => {
+          const key = tag.toLowerCase();
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        })
+        .slice(0, 12);
+    }
+
+    function formatTagsForEdit(tags) {
+      return normalizeTags(tags).join(" ");
+    }
+
+    function suggestTags(title, url, source) {
+      const text = `${title || ""} ${url || ""} ${source || ""}`.toLowerCase();
+      const sourceName = normalizePlatformName(source || "");
+      const tags = [];
+
+      const rules = [
+        { tag: "#教程", test: () => /教程|指南|入门|教学|实操|攻略|how\s*to|tutorial|guide/.test(text) },
+        { tag: "#AI", test: () => /\bai\b|人工智能|chatgpt|gpt|llm|大模型|机器学习|深度学习/.test(text) },
+        { tag: "#开源", test: () => /github\.com|gitlab\.com|源码|开源|open\s*source/.test(text) },
+        { tag: "#观点", test: () => sourceName === "知乎" && /为什么|如何看待|是否|是不是|该不该|观点/.test(title || "") },
+        { tag: "#视频", test: () => /bilibili\.com|youtube\.com|youtu\.be|视频|课程/.test(text) || sourceName === "B站" },
+        { tag: "#论文", test: () => /arxiv\.org|论文|paper|research|study|journal/.test(text) },
+        { tag: "#工具", test: () => /工具|插件|扩展|app|software|tool|workflow/.test(text) },
+        { tag: "#避坑", test: () => /避坑|踩坑|坑|风险|注意事项|mistake|pitfall/.test(text) },
+        { tag: "#新闻", test: () => /新闻|快讯|breaking|news|报道/.test(text) },
+        { tag: "#案例", test: () => /案例|复盘|case\s*study|example/.test(text) }
+      ];
+
+      rules.forEach((rule) => {
+        if (rule.test()) tags.push(rule.tag);
+      });
+
+      return normalizeTags(tags);
+    }
+
+    function getSuggestedTagsForHistory(item) {
+      return suggestTags(item.keyword, item.url, item.platform)
+        .filter((tag) => !normalizeTags(item.tags).includes(tag));
+    }
+
+    function getSuggestedTagsForLater(item) {
+      return suggestTags(item.title, item.url, item.source)
+        .filter((tag) => !normalizeTags(item.tags).includes(tag));
+    }
+
+    function renderExistingTagButtons(item, itemType) {
+      const tags = normalizeTags(item.tags || []);
+      if (!tags.length) return "";
+      return tags.map((tag) => `<button class="tag tag-chip" type="button" data-action="remove-${itemType}-tag" data-id="${escapeAttribute(item.id)}" data-tag="${escapeAttribute(tag)}" title="点击移除 ${escapeAttribute(tag)}">${escapeHtml(tag)} ×</button>`).join("");
+    }
+
+    function renderSuggestedTagButtons(item, itemType) {
+      const suggestions = itemType === "history" ? getSuggestedTagsForHistory(item) : getSuggestedTagsForLater(item);
+      if (!suggestions.length) return "";
+      return `<div class="suggested-tags"><span>建议标签：</span>${suggestions.map((tag) => `<button class="suggested-tag-btn" type="button" data-action="add-${itemType}-tag" data-id="${escapeAttribute(item.id)}" data-tag="${escapeAttribute(tag)}">${escapeHtml(tag)}</button>`).join("")}</div>`;
+    }
+
+    function getItemTitle(item, itemType) {
+      if (!item) return "";
+      return itemType === "history" ? (item.keyword || "") : (item.title || "");
+    }
+
+    function getAllLinkableItems() {
+      return [
+        ...historyItems.map((item) => ({
+          id: item.id,
+          itemType: "history",
+          title: getItemTitle(item, "history"),
+          sourceLabel: "搜索历史",
+          subtitle: item.platform || ""
+        })),
+        ...laterItems.map((item) => ({
+          id: item.id,
+          itemType: "later",
+          title: getItemTitle(item, "later"),
+          sourceLabel: "稍后看",
+          subtitle: item.source || ""
+        }))
+      ].filter((item) => item.id && item.title);
+    }
+
+    function normalizeWikiTitle(title) {
+      return String(title || "")
+        .normalize("NFKC")
+        .replace(/\s+/g, "")
+        .toLowerCase();
+    }
+
+    function extractWikiTitles(text) {
+      const titles = [];
+      const pattern = /\[\[([^\]]+?)\]\]/g;
+      let match;
+      while ((match = pattern.exec(String(text || "")))) {
+        const title = match[1].trim();
+        if (title) titles.push(title);
+      }
+      return titles;
+    }
+
+    function findItemByWikiTitle(title) {
+      const needle = normalizeWikiTitle(title);
+      if (!needle) return null;
+
+      const candidates = getAllLinkableItems().map((item) => ({
+        ...item,
+        normalizedTitle: normalizeWikiTitle(item.title)
+      }));
+
+      return candidates.find((item) => item.normalizedTitle === needle)
+        || candidates.find((item) => item.normalizedTitle.includes(needle) || needle.includes(item.normalizedTitle))
+        || null;
+    }
+
+    function getItemById(itemType, id) {
+      return itemType === "history"
+        ? historyItems.find((item) => item.id === id)
+        : laterItems.find((item) => item.id === id);
+    }
+
+    function rebuildBacklinkIndex() {
+      const nextIndex = new Map();
+      const sourceItems = [
+        ...historyItems.map((item) => ({
+          id: item.id,
+          itemType: "history",
+          title: getItemTitle(item, "history"),
+          sourceLabel: "搜索历史",
+          fields: [{ key: "note", label: "备注", value: item.note || "" }]
+        })),
+        ...laterItems.map((item) => ({
+          id: item.id,
+          itemType: "later",
+          title: getItemTitle(item, "later"),
+          sourceLabel: "稍后看",
+          fields: [
+            { key: "reason", label: "为什么想看", value: item.reason || "" },
+            { key: "conclusion", label: "看完后的结论", value: item.conclusion || "" }
+          ]
+        }))
+      ];
+
+      sourceItems.forEach((source) => {
+        source.fields.forEach((field) => {
+          extractWikiTitles(field.value).forEach((linkedTitle) => {
+            const target = findItemByWikiTitle(linkedTitle);
+            if (!target || (target.id === source.id && target.itemType === source.itemType)) return;
+
+            const key = `${target.itemType}:${target.id}`;
+            const existing = nextIndex.get(key) || [];
+            const duplicate = existing.some((entry) =>
+              entry.sourceId === source.id &&
+              entry.sourceType === source.itemType &&
+              entry.fieldKey === field.key &&
+              entry.linkedTitle === linkedTitle
+            );
+            if (duplicate) return;
+
+            existing.push({
+              sourceId: source.id,
+              sourceType: source.itemType,
+              sourceTitle: source.title,
+              sourceLabel: source.sourceLabel,
+              fieldKey: field.key,
+              fieldLabel: field.label,
+              linkedTitle
+            });
+            nextIndex.set(key, existing);
+          });
+        });
+      });
+
+      backlinkIndex = nextIndex;
+    }
+
+    function getBacklinks(itemType, id) {
+      return backlinkIndex.get(`${itemType}:${id}`) || [];
+    }
+
+    function getHistoryBacklinks(id) {
+      return getBacklinks("history", id);
+    }
+
+    function getLaterBacklinks(id) {
+      return getBacklinks("later", id);
+    }
+
+    function renderWikiText(text) {
+      const value = String(text || "");
+      if (!value) return "";
+
+      const pattern = /\[\[([^\]]+?)\]\]/g;
+      let htmlParts = "";
+      let lastIndex = 0;
+      let match;
+
+      while ((match = pattern.exec(value))) {
+        htmlParts += escapeHtml(value.slice(lastIndex, match.index));
+        const label = match[1].trim();
+        const target = findItemByWikiTitle(label);
+        if (target) {
+          htmlParts += `<button class="wiki-link" type="button" data-action="wiki-link" data-target-id="${escapeAttribute(target.id)}" data-target-type="${escapeAttribute(target.itemType)}">[[${escapeHtml(label)}]]</button>`;
+        } else {
+          htmlParts += `<span class="wiki-link-missing" title="未找到匹配条目">[[${escapeHtml(label)}]]</span>`;
+        }
+        lastIndex = pattern.lastIndex;
+      }
+
+      htmlParts += escapeHtml(value.slice(lastIndex));
+      return htmlParts;
+    }
+
+    function renderWikiPreview(text) {
+      if (!/\[\[[^\]]+?\]\]/.test(String(text || ""))) return "";
+      return `<div class="wiki-preview">${renderWikiText(text)}</div>`;
+    }
+
+    function renderBacklinks(itemType, id) {
+      const backlinks = itemType === "history" ? getHistoryBacklinks(id) : getLaterBacklinks(id);
+      const list = backlinks.length
+        ? backlinks.map((entry) => `
+          <div class="backlink-item">
+            <button class="backlink-link" type="button" data-action="backlink-jump" data-target-id="${escapeAttribute(entry.sourceId)}" data-target-type="${escapeAttribute(entry.sourceType)}">${escapeHtml(entry.sourceTitle || "未命名条目")}</button>
+            <span class="backlink-field">${escapeHtml(entry.sourceLabel)} · ${escapeHtml(entry.fieldLabel)}</span>
+          </div>
+        `).join("")
+        : `<span class="backlinks-empty">暂无反向链接。</span>`;
+
+      return `
+        <div class="backlinks-box">
+          <div class="backlinks-title">反向链接</div>
+          <div class="backlinks-list">${list}</div>
+        </div>
+      `;
+    }
+
+    function jumpToItem(id, itemType) {
+      if (!id || !itemType) return;
+
+      if (itemType === "history") {
+        activateTab("historySection");
+        elements.historyPlatformFilter.value = "全部平台";
+        elements.historyStatusFilter.value = "全部状态";
+        if (elements.historyProjectFilter) elements.historyProjectFilter.value = "全部项目";
+        elements.historyTextFilter.value = "";
+        renderHistory();
+      } else {
+        activateTab("laterSection");
+        elements.laterSourceFilter.value = "全部来源";
+        elements.laterStatusFilter.value = "全部状态";
+        if (elements.laterProjectFilter) elements.laterProjectFilter.value = "全部项目";
+        elements.laterTextFilter.value = "";
+        renderLater();
+      }
+
+      setTimeout(() => {
+        const target = document.querySelector(`[data-item-type="${escapeCssSelectorValue(itemType)}"][data-item-id="${escapeCssSelectorValue(id)}"]`);
+        if (!target) {
+          toast("未找到对应条目，可能已被删除。");
+          return;
+        }
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+        target.classList.remove("focus-flash");
+        void target.offsetWidth;
+        target.classList.add("focus-flash");
+      }, 0);
+    }
+
+    async function addTagToItem(itemType, id, tag) {
+      const normalized = normalizeTags([tag])[0];
+      if (!normalized) return;
+
+      if (itemType === "history") {
+        const item = historyItems.find((entry) => entry.id === id);
+        if (!item) return;
+        await updateHistoryItem(id, { tags: normalizeTags([...(item.tags || []), normalized]) }, true);
+        toast(`已添加标签 ${normalized}。`);
+        return;
+      }
+
+      const item = laterItems.find((entry) => entry.id === id);
+      if (!item) return;
+      await updateLaterItem(id, { tags: normalizeTags([...(item.tags || []), normalized]) }, true);
+      toast(`已添加标签 ${normalized}。`);
+    }
+
+    async function removeTagFromItem(itemType, id, tag) {
+      const normalized = normalizeTags([tag])[0];
+      if (!normalized) return;
+
+      if (itemType === "history") {
+        const item = historyItems.find((entry) => entry.id === id);
+        if (!item) return;
+        await updateHistoryItem(id, { tags: normalizeTags(item.tags).filter((entry) => entry !== normalized) }, true);
+        toast(`已移除标签 ${normalized}。`);
+        return;
+      }
+
+      const item = laterItems.find((entry) => entry.id === id);
+      if (!item) return;
+      await updateLaterItem(id, { tags: normalizeTags(item.tags).filter((entry) => entry !== normalized) }, true);
+      toast(`已移除标签 ${normalized}。`);
+    }
+
+    function showSnapshotPrompt(item) {
+      if (!item || !item.id || !item.url) return;
+      elements.statusMsg.innerHTML = `
+        <div class="snapshot-prompt">
+          <span>是否保存本次搜索结果页快照？</span>
+          <button class="tiny-btn" type="button" data-action="save-search-snapshot" data-id="${escapeAttribute(item.id)}">保存快照</button>
+          <button class="tiny-btn" type="button" data-action="dismiss-search-snapshot" data-id="${escapeAttribute(item.id)}">不保存</button>
+        </div>
+      `;
+    }
+
+    async function saveSearchSnapshot(id) {
+      const item = historyItems.find((entry) => entry.id === id);
+      if (!item || !item.url) {
+        toast("这条搜索历史没有可保存的结果页链接。");
+        return;
+      }
+
+      setStatus("正在保存搜索结果页快照…");
+      const page = await fetchPageText(item.url);
+      const fallbackText = page.error && !page.text
+        ? `未能抓取搜索结果页文本，可能被 CORS、登录墙或搜索引擎反爬策略限制。错误信息：${page.error}`
+        : "";
+
+      await saveContentSnapshot({
+        id: item.id,
+        type: "search-snapshot",
+        rawHtml: page.rawHtml || "",
+        text: page.text || fallbackText,
+        metaDescription: page.metaDescription || "",
+        title: `${item.platform}：${item.keyword}`,
+        url: item.url,
+        timestamp: new Date().toISOString()
+      });
+
+      historyItems = historyItems.map((entry) => entry.id === item.id ? { ...entry, hasSnapshot: true } : entry);
+      await save(STORE_NAMES.history, historyItems);
+      await rebuildSearchIndex();
+      renderHistory();
+
+      if (page.text) {
+        setStatus("已保存搜索结果页快照，并加入全文索引。");
+        toast("已保存搜索结果页快照。");
+      } else {
+        setStatus("已记录快照抓取结果，但未获取到正文。");
+        toast("搜索页正文未抓取成功，已保存错误说明。");
+      }
+    }
+
+    async function openSearchSnapshotModal(id) {
+      const item = historyItems.find((entry) => entry.id === id);
+      const snapshots = await loadContentSnapshots(id);
+      const snapshot = snapshots
+        .filter((entry) => entry.type === "search-snapshot")
+        .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0))[0];
+
+      elements.snapshotText.textContent = snapshot?.text || "还没有保存这个搜索结果页的快照。可在下次搜索后点击“保存快照”。";
+      elements.snapshotModal.querySelector("#snapshotModalTitle").textContent = item ? `搜索结果页快照：${item.keyword}` : "搜索结果页快照";
+      elements.snapshotModal.classList.add("active");
+      elements.snapshotModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeSnapshotModal() {
+      elements.snapshotModal.classList.remove("active");
+      elements.snapshotModal.setAttribute("aria-hidden", "true");
+      elements.snapshotText.textContent = "";
     }
 
     function queueContentFetchForLaterItem(item) {
@@ -2211,11 +2918,14 @@
       ]);
       fillSelect(elements.historyPlatformFilter, ["全部平台", ...platformNames], "全部平台");
       fillSelect(elements.historyStatusFilter, ["全部状态", ...SEARCH_STATUSES], "全部状态");
+      fillProjectFilterSelect(elements.historyProjectFilter, "全部项目");
+      fillProjectFilterSelect(elements.globalProjectFilter, "全部项目");
 
       const sourceOptions = getAllLaterSources();
       fillSelect(elements.laterSource, sourceOptions, sourceOptions.includes("其他") ? "其他" : sourceOptions[0]);
       fillSelect(elements.laterSourceFilter, ["全部来源", ...sourceOptions], "全部来源");
       fillSelect(elements.laterStatusFilter, ["全部状态", ...LATER_STATUSES], "全部状态");
+      fillProjectFilterSelect(elements.laterProjectFilter, "全部项目");
     }
 
     function getAllLaterSources() {
@@ -2236,6 +2946,27 @@
         select.appendChild(node);
       });
       select.value = options.includes(previousValue) ? previousValue : selectedValue;
+    }
+
+    function fillProjectFilterSelect(select, allLabel = "全部项目") {
+      if (!select) return;
+      const previousValue = select.value || allLabel;
+      select.innerHTML = "";
+
+      const allOption = document.createElement("option");
+      allOption.value = allLabel;
+      allOption.textContent = allLabel;
+      select.appendChild(allOption);
+
+      projects.forEach((project) => {
+        const option = document.createElement("option");
+        option.value = project.id;
+        option.textContent = project.name;
+        select.appendChild(option);
+      });
+
+      const availableValues = new Set([allLabel, ...projects.map((project) => project.id)]);
+      select.value = availableValues.has(previousValue) ? previousValue : allLabel;
     }
 
     function togglePlatformSort() {
@@ -2348,16 +3079,21 @@
         status: "未处理",
         solved: false,
         note: "",
-        url: renderedUrl
+        url: renderedUrl,
+        tags: [],
+        projectIds: [],
+        hasSnapshot: false
       };
 
       historyItems.unshift(item);
       await save(STORE_NAMES.history, historyItems);
       await rebuildSearchIndex();
+      rebuildBacklinkIndex();
 
       window.open(renderedUrl, "_blank", "noopener,noreferrer");
       setStatus(`已记录：通过「${platform.name} / ${entrance.entranceType}」搜索「${keyword}」。已打开入口。`);
       toast(`已保存记录，并打开 ${entrance.label}。`);
+      showSnapshotPrompt(item);
 
       renderAll();
     }
@@ -2370,21 +3106,24 @@ function fillUrlTemplate(template, query, domain = "") {
     function renderHistory() {
       const platformFilter = elements.historyPlatformFilter.value || "全部平台";
       const statusFilter = elements.historyStatusFilter.value || "全部状态";
+      const projectFilter = elements.historyProjectFilter?.value || "全部项目";
       const textFilter = normalize(elements.historyTextFilter.value);
       const sort = elements.historySort.value || "newest";
 
       let filtered = historyItems.filter((item) => {
         const matchesPlatform = platformFilter === "全部平台" || item.platform === platformFilter;
         const matchesStatus = statusFilter === "全部状态" || item.status === statusFilter;
+        const matchesProject = matchesProjectFilter(item, projectFilter);
         const haystack = normalize([
           item.keyword,
           item.platform,
           item.entranceType,
           item.entranceLabel,
-          item.note
+          item.note,
+          normalizeTags(item.tags).join(" ")
         ].join(" "));
         const matchesText = !textFilter || haystack.includes(textFilter);
-        return matchesPlatform && matchesStatus && matchesText;
+        return matchesPlatform && matchesStatus && matchesProject && matchesText;
       });
 
       filtered = filtered.sort((a, b) => {
@@ -2400,7 +3139,7 @@ function fillUrlTemplate(template, query, domain = "") {
       }
 
       elements.historyList.innerHTML = filtered.map((item) => `
-        <article class="card item">
+        <article class="card item" data-item-type="history" data-item-id="${escapeAttribute(item.id)}">
           <div class="item-head">
             <div>
               <h3 class="item-title">${escapeHtml(item.keyword)}</h3>
@@ -2409,11 +3148,16 @@ function fillUrlTemplate(template, query, domain = "") {
                 <span class="tag">${escapeHtml(item.entranceType || "网页搜索")}</span>
                 <span class="tag ${historyTagClass(item.status)}">${escapeHtml(item.status)}</span>
                 <span class="tag">${formatTime(item.time)}</span>
+                ${renderExistingTagButtons(item, "history")}
+                ${renderProjectBadges(item)}
               </div>
+              ${renderSuggestedTagButtons(item, "history")}
             </div>
             <div class="actions">
               <button class="tiny-btn" type="button" data-action="history-repeat" data-id="${escapeAttribute(item.id)}">再搜一次</button>
               <button class="tiny-btn" type="button" data-action="history-to-later" data-id="${escapeAttribute(item.id)}">转入稍后看</button>
+              <button class="tiny-btn" type="button" data-action="view-search-snapshot" data-id="${escapeAttribute(item.id)}">查看快照</button>
+              ${renderProjectAddControl(item, "history")}
               <button class="danger-btn" type="button" data-action="history-delete" data-id="${escapeAttribute(item.id)}">删除</button>
             </div>
           </div>
@@ -2426,7 +3170,12 @@ function fillUrlTemplate(template, query, domain = "") {
             <label class="label wide">备注
               <textarea data-action="history-note" data-id="${escapeAttribute(item.id)}" placeholder="记录搜到什么、没找到什么、下一步怎么处理。">${escapeHtml(item.note || "")}</textarea>
             </label>
+            ${renderWikiPreview(item.note)}
+            <label class="label wide">标签
+              <input class="field tag-edit-field" data-action="history-tags" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(formatTagsForEdit(item.tags))}" placeholder="#AI #教程 #观点" />
+            </label>
           </div>
+          ${renderBacklinks("history", item.id)}
         </article>
       `).join("");
     }
@@ -2434,22 +3183,25 @@ function fillUrlTemplate(template, query, domain = "") {
     function renderLater() {
       const sourceFilter = elements.laterSourceFilter.value || "全部来源";
       const statusFilter = elements.laterStatusFilter.value || "全部状态";
+      const projectFilter = elements.laterProjectFilter?.value || "全部项目";
       const textFilter = normalize(elements.laterTextFilter.value);
 
       const filtered = laterItems.filter((item) => {
         const matchesSource = sourceFilter === "全部来源" || item.source === sourceFilter;
         const matchesStatus = statusFilter === "全部状态" || item.status === statusFilter;
+        const matchesProject = matchesProjectFilter(item, projectFilter);
         const haystack = normalize([
           item.title,
           item.url,
           item.source,
           item.reason,
           item.autoSummary,
+          normalizeTags(item.tags).join(" "),
           item.estimate,
           item.conclusion
         ].join(" "));
         const matchesText = !textFilter || haystack.includes(textFilter);
-        return matchesSource && matchesStatus && matchesText;
+        return matchesSource && matchesStatus && matchesProject && matchesText;
       });
 
       if (!filtered.length) {
@@ -2463,7 +3215,7 @@ function fillUrlTemplate(template, query, domain = "") {
           : escapeHtml(item.title);
 
         return `
-          <article class="card item">
+          <article class="card item" data-item-type="later" data-item-id="${escapeAttribute(item.id)}">
             <div class="item-head">
               <div>
                 <h3 class="item-title">${titleHtml}</h3>
@@ -2472,11 +3224,15 @@ function fillUrlTemplate(template, query, domain = "") {
                   <span class="tag ${laterTagClass(item.status)}">${escapeHtml(item.status)}</span>
                   <span class="tag">预计：${escapeHtml(item.estimate || "未填写")}</span>
                   <span class="tag">${formatTime(item.createdAt)}</span>
+                  ${renderExistingTagButtons(item, "later")}
+                  ${renderProjectBadges(item)}
                 </div>
+                ${renderSuggestedTagButtons(item, "later")}
               </div>
               <div class="actions">
                 ${item.url ? `<button class="tiny-btn" type="button" data-action="refresh-later-summary" data-id="${escapeAttribute(item.id)}">刷新摘要</button>` : ""}
                 ${item.url ? `<button class="tiny-btn" type="button" data-action="open-later" data-id="${escapeAttribute(item.id)}">打开链接</button>` : ""}
+                ${renderProjectAddControl(item, "later")}
                 <button class="danger-btn" type="button" data-action="delete-later" data-id="${escapeAttribute(item.id)}">删除</button>
               </div>
             </div>
@@ -2501,16 +3257,300 @@ function fillUrlTemplate(template, query, domain = "") {
               <label class="label">预计耗时
                 <input class="field" data-action="later-estimate" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.estimate || "")}" placeholder="例如：15 分钟" />
               </label>
+              <label class="label">标签
+                <input class="field tag-edit-field" data-action="later-tags" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(formatTagsForEdit(item.tags))}" placeholder="#AI #教程 #开源" />
+              </label>
               <label class="label wide">为什么想看
                 <textarea data-action="later-reason" data-id="${escapeAttribute(item.id)}" placeholder="记录这个内容和当前问题的关系。">${escapeHtml(item.reason || "")}</textarea>
               </label>
+              ${renderWikiPreview(item.reason)}
               <label class="label wide">看完后的结论
                 <textarea data-action="later-conclusion" data-id="${escapeAttribute(item.id)}" placeholder="看完后写一句结论：有无帮助，下一步是什么。">${escapeHtml(item.conclusion || "")}</textarea>
               </label>
+              ${renderWikiPreview(item.conclusion)}
             </div>
+            ${renderBacklinks("later", item.id)}
           </article>
         `;
       }).join("");
+    }
+
+
+    function getProjectById(projectId) {
+      return projects.find((project) => project.id === projectId) || null;
+    }
+
+    function getProjectNamesForItem(item) {
+      return normalizeProjectIds(item?.projectIds || [])
+        .map((projectId) => getProjectById(projectId)?.name)
+        .filter(Boolean);
+    }
+
+    function matchesProjectFilter(item, projectFilter) {
+      if (!projectFilter || projectFilter === "全部项目") return true;
+      return normalizeProjectIds(item?.projectIds || []).includes(projectFilter);
+    }
+
+    function renderProjectBadges(item) {
+      return renderProjectBadgesByIds(item?.projectIds || []);
+    }
+
+    function renderProjectBadgesByIds(projectIds) {
+      const ids = normalizeProjectIds(projectIds);
+      if (!ids.length) return "";
+      return ids
+        .map((projectId) => getProjectById(projectId))
+        .filter(Boolean)
+        .map((project) => `<span class="tag ok">项目：${escapeHtml(project.name)}</span>`)
+        .join("");
+    }
+
+    function renderProjectAddControl(item, itemType) {
+      if (!projects.length) {
+        return `<button class="tiny-btn" type="button" data-action="project-tab">创建项目</button>`;
+      }
+
+      const currentIds = new Set(normalizeProjectIds(item.projectIds || []));
+      const availableProjects = projects.filter((project) => !currentIds.has(project.id));
+
+      if (!availableProjects.length) {
+        return `<span class="tag ok">已加入全部项目</span>`;
+      }
+
+      const options = availableProjects
+        .map((project) => `<option value="${escapeAttribute(project.id)}">${escapeHtml(project.name)}</option>`)
+        .join("");
+
+      return `
+        <select class="project-add-control" data-action="${itemType}-add-project" data-id="${escapeAttribute(item.id)}" aria-label="添加到项目">
+          <option value="">添加到项目</option>
+          ${options}
+        </select>
+      `;
+    }
+
+    function getProjectEntries(projectId) {
+      const historyEntries = historyItems
+        .filter((item) => normalizeProjectIds(item.projectIds || []).includes(projectId))
+        .map((item) => ({
+          ...item,
+          itemType: "history",
+          title: `${item.platform}：${item.keyword}`,
+          subtitle: `${item.entranceType || "网页搜索"} · ${formatTime(item.time)}`
+        }));
+
+      const laterEntries = laterItems
+        .filter((item) => normalizeProjectIds(item.projectIds || []).includes(projectId))
+        .map((item) => ({
+          ...item,
+          itemType: "later",
+          title: item.title || item.url || "未命名内容",
+          subtitle: `${item.source || "其他"} · ${formatTime(item.createdAt)}`
+        }));
+
+      return [...historyEntries, ...laterEntries].sort((a, b) => {
+        const aTime = new Date(a.time || a.createdAt || 0).getTime();
+        const bTime = new Date(b.time || b.createdAt || 0).getTime();
+        return bTime - aTime;
+      });
+    }
+
+    function renderProjects() {
+      if (!elements.projectList) return;
+
+      if (!projects.length) {
+        elements.projectList.innerHTML = `<div class="empty">还没有项目。先创建一个项目，例如「竞品分析」，再从搜索历史或稍后看卡片把条目加入项目。</div>`;
+        return;
+      }
+
+      elements.projectList.innerHTML = projects.map((project) => {
+        const entries = getProjectEntries(project.id);
+        const entryList = entries.length
+          ? entries.map((entry) => {
+              const isLater = entry.itemType === "later";
+              const openButton = entry.url
+                ? `<button class="tiny-btn" type="button" data-action="${isLater ? "open-later" : "open-search-result-url"}" data-id="${escapeAttribute(entry.id)}">打开链接</button>`
+                : "";
+              return `
+                <div class="project-item-row">
+                  <div>
+                    <h4>${escapeHtml(entry.title)}</h4>
+                    <p>
+                      <span class="tag">${escapeHtml(isLater ? "稍后看" : "搜索历史")}</span>
+                      <span class="tag">${escapeHtml(entry.subtitle)}</span>
+                    </p>
+                  </div>
+                  <div class="actions">
+                    <button class="tiny-btn" type="button" data-action="project-item-jump" data-id="${escapeAttribute(entry.id)}" data-item-type="${escapeAttribute(entry.itemType)}">定位</button>
+                    ${openButton}
+                    <button class="danger-btn" type="button" data-action="project-item-remove" data-id="${escapeAttribute(entry.id)}" data-item-type="${escapeAttribute(entry.itemType)}" data-project-id="${escapeAttribute(project.id)}">移除</button>
+                  </div>
+                </div>
+              `;
+            }).join("")
+          : `<div class="empty">这个项目还没有关联条目。回到搜索历史或稍后看卡片，使用“添加到项目”下拉菜单关联内容。</div>`;
+
+        return `
+          <article class="card item" data-project-id="${escapeAttribute(project.id)}">
+            <div class="item-head">
+              <div>
+                <h3 class="item-title">${escapeHtml(project.name)}</h3>
+                <div class="meta">
+                  <span class="tag ok">${entries.length} 条目</span>
+                  <span class="tag">${formatTime(project.createdAt)}</span>
+                </div>
+              </div>
+              <div class="actions">
+                <button class="tiny-btn" type="button" data-action="project-export" data-project-id="${escapeAttribute(project.id)}">批量导出</button>
+                <button class="danger-btn" type="button" data-action="project-delete" data-project-id="${escapeAttribute(project.id)}">删除项目</button>
+              </div>
+            </div>
+            ${project.description ? `<p class="project-description">${escapeHtml(project.description)}</p>` : ""}
+            <div class="project-items">${entryList}</div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    async function createProject() {
+      const name = elements.projectName.value.trim();
+      const description = elements.projectDescription.value.trim();
+
+      if (!name) {
+        toast("请填写项目名称。");
+        return;
+      }
+
+      if (projects.some((project) => normalize(project.name) === normalize(name))) {
+        toast("这个项目已经存在。");
+        return;
+      }
+
+      projects.unshift({
+        id: createId(),
+        name,
+        description,
+        createdAt: new Date().toISOString()
+      });
+
+      await save(STORE_NAMES.projects, projects);
+      elements.projectForm.reset();
+      await rebuildSearchIndex();
+      renderAll();
+      activateTab("projectSection");
+      toast(`已创建项目「${name}」。`);
+    }
+
+    async function addItemToProject(itemType, id, projectId) {
+      if (!projectId || !getProjectById(projectId)) return;
+
+      if (itemType === "history") {
+        const item = historyItems.find((entry) => entry.id === id);
+        if (!item) return;
+        const projectIds = normalizeProjectIds([...(item.projectIds || []), projectId]);
+        await updateHistoryItem(id, { projectIds }, true);
+      } else {
+        const item = laterItems.find((entry) => entry.id === id);
+        if (!item) return;
+        const projectIds = normalizeProjectIds([...(item.projectIds || []), projectId]);
+        await updateLaterItem(id, { projectIds }, true);
+      }
+
+      renderProjects();
+      renderFilters();
+      renderGlobalSearchResults();
+      toast("已加入项目。");
+    }
+
+    async function removeItemFromProject(itemType, id, projectId) {
+      if (!projectId) return;
+
+      if (itemType === "history") {
+        const item = historyItems.find((entry) => entry.id === id);
+        if (!item) return;
+        const projectIds = normalizeProjectIds(item.projectIds || []).filter((currentId) => currentId !== projectId);
+        await updateHistoryItem(id, { projectIds }, true);
+      } else {
+        const item = laterItems.find((entry) => entry.id === id);
+        if (!item) return;
+        const projectIds = normalizeProjectIds(item.projectIds || []).filter((currentId) => currentId !== projectId);
+        await updateLaterItem(id, { projectIds }, true);
+      }
+
+      renderProjects();
+      renderFilters();
+      renderGlobalSearchResults();
+      toast("已从项目中移除。");
+    }
+
+    async function deleteProject(projectId) {
+      const project = getProjectById(projectId);
+      if (!project) return;
+      const confirmed = window.confirm(`确定删除项目「${project.name}」吗？条目本身不会被删除，只会取消关联。`);
+      if (!confirmed) return;
+
+      projects = projects.filter((item) => item.id !== projectId);
+      historyItems = historyItems.map((item) => ({
+        ...item,
+        projectIds: normalizeProjectIds(item.projectIds || []).filter((id) => id !== projectId)
+      }));
+      laterItems = laterItems.map((item) => ({
+        ...item,
+        projectIds: normalizeProjectIds(item.projectIds || []).filter((id) => id !== projectId)
+      }));
+
+      await persistCoreData();
+      await rebuildSearchIndex();
+      renderAll();
+      toast("已删除项目，关联条目已保留。");
+    }
+
+    function exportProject(projectId) {
+      const project = getProjectById(projectId);
+      if (!project) return;
+
+      const entries = getProjectEntries(projectId);
+      const lines = [
+        `# ${project.name}`,
+        "",
+        project.description || "",
+        "",
+        `导出时间：${new Date().toLocaleString()}`,
+        `条目数量：${entries.length}`,
+        ""
+      ];
+
+      entries.forEach((entry, index) => {
+        const isLater = entry.itemType === "later";
+        lines.push(`## ${index + 1}. ${entry.title}`);
+        lines.push("");
+        lines.push(`- 类型：${isLater ? "稍后看" : "搜索历史"}`);
+        lines.push(`- 来源：${isLater ? (entry.source || "其他") : (entry.platform || "其他")}`);
+        if (entry.url) lines.push(`- 链接：${entry.url}`);
+        if (entry.keyword) lines.push(`- 关键词：${entry.keyword}`);
+        if (entry.note) lines.push(`- 备注：${entry.note}`);
+        if (entry.reason) lines.push(`- 为什么想看：${entry.reason}`);
+        if (entry.conclusion) lines.push(`- 结论：${entry.conclusion}`);
+        if (entry.autoSummary) lines.push(`- 自动摘要：${entry.autoSummary}`);
+        const tags = normalizeTags(entry.tags || []);
+        if (tags.length) lines.push(`- 标签：${tags.join(" ")}`);
+        lines.push("");
+      });
+
+      const blob = new Blob([lines.join("\n")], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${sanitizeFileName(project.name)}.md`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      toast("已导出项目 Markdown。");
+    }
+
+    function sanitizeFileName(value) {
+      return String(value || "project").replace(/[\\/:*?"<>|]+/g, "-").slice(0, 80) || "project";
     }
 
     async function handleGlobalClick(event) {
@@ -2548,8 +3588,10 @@ function fillUrlTemplate(template, query, domain = "") {
         historyItems = historyItems.filter((item) => item.id !== id);
         await save(STORE_NAMES.history, historyItems);
         searchEngine.removeFromIndex(id);
+        rebuildBacklinkIndex();
         renderGlobalSearchResults();
         renderHistory();
+        renderProjects();
         toast("已删除搜索记录。");
       }
 
@@ -2586,12 +3628,66 @@ function fillUrlTemplate(template, query, domain = "") {
         await refreshLaterContent(id, { silent: false });
       }
 
+      if (action === "save-search-snapshot") {
+        await saveSearchSnapshot(id);
+      }
+
+      if (action === "dismiss-search-snapshot") {
+        setStatus("已跳过保存搜索结果页快照。");
+      }
+
+      if (action === "view-search-snapshot") {
+        await openSearchSnapshotModal(id);
+      }
+
+      if (action === "add-history-tag") {
+        await addTagToItem("history", id, node.dataset.tag);
+      }
+
+      if (action === "add-later-tag") {
+        await addTagToItem("later", id, node.dataset.tag);
+      }
+
+      if (action === "remove-history-tag") {
+        await removeTagFromItem("history", id, node.dataset.tag);
+      }
+
+      if (action === "remove-later-tag") {
+        await removeTagFromItem("later", id, node.dataset.tag);
+      }
+
+      if (action === "wiki-link" || action === "backlink-jump") {
+        jumpToItem(node.dataset.targetId, node.dataset.targetType);
+      }
+
+      if (action === "project-tab") {
+        activateTab("projectSection");
+      }
+
+      if (action === "project-item-jump") {
+        jumpToItem(id, node.dataset.itemType);
+      }
+
+      if (action === "project-item-remove") {
+        await removeItemFromProject(node.dataset.itemType, id, node.dataset.projectId);
+      }
+
+      if (action === "project-export") {
+        exportProject(node.dataset.projectId);
+      }
+
+      if (action === "project-delete") {
+        await deleteProject(node.dataset.projectId);
+      }
+
       if (action === "delete-later") {
         laterItems = laterItems.filter((item) => item.id !== id);
         await save(STORE_NAMES.later, laterItems);
         searchEngine.removeFromIndex(id);
+        rebuildBacklinkIndex();
         renderGlobalSearchResults();
         renderLater();
+        renderProjects();
         toast("已删除稍后看内容。");
       }
     }
@@ -2603,6 +3699,13 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (!action) return;
 
+      if (action === "history-add-project" || action === "later-add-project") {
+        if (event.type !== "change") return;
+        await addItemToProject(action === "history-add-project" ? "history" : "later", id, node.value);
+        node.value = "";
+        return;
+      }
+
       if (action === "history-status") {
         await updateHistoryItem(id, {
           status: node.value,
@@ -2611,7 +3714,11 @@ function fillUrlTemplate(template, query, domain = "") {
       }
 
       if (action === "history-note") {
-        await updateHistoryItem(id, { note: node.value }, false);
+        await updateHistoryItem(id, { note: node.value }, event.type === "change");
+      }
+
+      if (action === "history-tags") {
+        await updateHistoryItem(id, { tags: normalizeTags(node.value) }, event.type === "change");
       }
 
       const laterKeyMap = {
@@ -2621,11 +3728,20 @@ function fillUrlTemplate(template, query, domain = "") {
         "later-url": "url",
         "later-estimate": "estimate",
         "later-reason": "reason",
-        "later-conclusion": "conclusion"
+        "later-conclusion": "conclusion",
+        "later-tags": "tags"
       };
 
+      if (action === "later-tags") {
+        await updateLaterItem(id, { tags: normalizeTags(node.value) }, event.type === "change");
+        return;
+      }
+
       if (laterKeyMap[action]) {
-        await updateLaterItem(id, { [laterKeyMap[action]]: node.value }, action === "later-status" || action === "later-source");
+        const shouldRender = action === "later-status" || action === "later-source" || (
+          event.type === "change" && (action === "later-reason" || action === "later-conclusion")
+        );
+        await updateLaterItem(id, { [laterKeyMap[action]]: node.value }, shouldRender);
       }
     }
 
@@ -2633,9 +3749,11 @@ function fillUrlTemplate(template, query, domain = "") {
       historyItems = historyItems.map((item) => item.id === id ? { ...item, ...patch } : item);
       await save(STORE_NAMES.history, historyItems);
       await rebuildSearchIndex();
+      rebuildBacklinkIndex();
 
       if (shouldRender) {
         renderHistory();
+        renderProjects();
       }
     }
 
@@ -2660,6 +3778,8 @@ function fillUrlTemplate(template, query, domain = "") {
         source: elements.laterSource.value,
         reason: elements.laterReason.value.trim(),
         autoSummary: "",
+        tags: [],
+        projectIds: [],
         estimate: elements.laterEstimate.value.trim(),
         status: "未看",
         conclusion: "",
@@ -2670,6 +3790,7 @@ function fillUrlTemplate(template, query, domain = "") {
       laterItems.unshift(item);
       await save(STORE_NAMES.later, laterItems);
       await rebuildSearchIndex();
+      rebuildBacklinkIndex();
       queueContentFetchForLaterItem(item);
       elements.laterForm.reset();
       elements.laterSource.value = "其他";
@@ -2698,6 +3819,8 @@ function fillUrlTemplate(template, query, domain = "") {
         source: finalSource,
         reason,
         autoSummary: "",
+        tags: [],
+        projectIds: [],
         estimate: "",
         status: "未看",
         conclusion: "",
@@ -2708,6 +3831,7 @@ function fillUrlTemplate(template, query, domain = "") {
       laterItems.unshift(item);
       await save(STORE_NAMES.later, laterItems);
       await rebuildSearchIndex();
+      rebuildBacklinkIndex();
       queueContentFetchForLaterItem(item);
       return { added: true, reason: "created", item };
     }
@@ -2726,6 +3850,8 @@ function fillUrlTemplate(template, query, domain = "") {
         source: normalizeLaterSource(historyItem.platform),
         reason: "来自搜索历史。",
         autoSummary: "",
+        tags: [],
+        projectIds: [],
         estimate: "",
         status: "未看",
         conclusion: "",
@@ -2736,6 +3862,7 @@ function fillUrlTemplate(template, query, domain = "") {
       laterItems.unshift(item);
       await save(STORE_NAMES.later, laterItems);
       await rebuildSearchIndex();
+      rebuildBacklinkIndex();
       queueContentFetchForLaterItem(item);
       renderLater();
       return true;
@@ -2747,6 +3874,7 @@ function fillUrlTemplate(template, query, domain = "") {
       laterItems = laterItems.map((item) => item.id === id ? { ...item, ...patch } : item);
       await save(STORE_NAMES.later, laterItems);
       await rebuildSearchIndex();
+      rebuildBacklinkIndex();
 
       const nextItem = laterItems.find((item) => item.id === id);
       if (nextItem && Object.prototype.hasOwnProperty.call(patch, "url") && patch.url !== previousUrl) {
@@ -2755,6 +3883,7 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (shouldRender) {
         renderLater();
+        renderProjects();
       }
     }
 
@@ -3079,6 +4208,11 @@ function fillUrlTemplate(template, query, domain = "") {
       if (status === "没用" || status === "删除") return "danger";
       if (status === "转成项目任务") return "warn";
       return "";
+    }
+
+    function escapeCssSelectorValue(value) {
+      if (window.CSS && typeof CSS.escape === "function") return CSS.escape(String(value || ""));
+      return String(value || "").replace(/["\\]/g, "\\$&");
     }
 
     function escapeHtml(value) {
