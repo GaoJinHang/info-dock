@@ -237,19 +237,7 @@
       position: relative;
     }
 
-    .global-search-controls {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(180px, 260px);
-      gap: 8px;
-      align-items: center;
-    }
-
     .global-search-input {
-      min-height: 46px;
-      border-radius: 16px;
-    }
-
-    .global-project-filter {
       min-height: 46px;
       border-radius: 16px;
     }
@@ -281,7 +269,8 @@
     }
 
     .global-search-snippet,
-    .auto-summary {
+    .auto-summary,
+    .metadata-preview {
       margin: 0;
       color: var(--muted);
       font-size: 12.5px;
@@ -289,59 +278,12 @@
     }
 
     .tag-row,
-    .suggested-tags,
-    .project-badges {
+    .suggested-tags {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
       align-items: center;
       margin-top: 6px;
-    }
-
-    .project-add-control {
-      min-width: 150px;
-      min-height: 32px;
-      padding: 0 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      background: white;
-    }
-
-    .project-items {
-      display: grid;
-      gap: 8px;
-      margin-top: 6px;
-    }
-
-    .project-item-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 8px;
-      align-items: center;
-      padding: 10px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: rgba(248, 250, 252, 0.82);
-    }
-
-    .project-item-row h4 {
-      margin: 0;
-      font-size: 14px;
-      line-height: 1.35;
-    }
-
-    .project-item-row p {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.5;
-    }
-
-    .project-description {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.65;
-      font-size: 13px;
     }
 
     .suggested-tags {
@@ -648,12 +590,8 @@
     }
 
     .history-toolbar {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 8px;
-    }
-
-    .later-toolbar {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
     .history-search-field {
@@ -1030,13 +968,8 @@
         grid-template-columns: 1fr;
       }
 
-      .global-search-controls,
-      .project-item-row {
-        grid-template-columns: 1fr;
-      }
-
       .history-toolbar {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
       .history-search-field {
@@ -1171,14 +1104,11 @@
         <div class="search-main">
           <div class="search-row">
             <input id="searchInput" class="search-input" type="search" placeholder="今天我要找什么？" autocomplete="off" />
-            <button class="ghost-btn copy-search-btn" id="copySearchBtn" type="button">复制</button>
+            <button class="ghost-btn copy-search-btn" id="quickNoteBtn" type="button">📝 笔记</button>
           </div>
         </div>
         <div class="global-search-box" aria-label="全文搜索">
-          <div class="global-search-controls">
-            <input id="globalSearchInput" class="field global-search-input" type="search" placeholder="🔍 搜索所有内容：标题、标签、备注、正文" autocomplete="off" />
-            <select id="globalProjectFilter" class="field global-project-filter" title="按项目过滤"></select>
-          </div>
+          <input id="globalSearchInput" class="field global-search-input" type="search" placeholder="🔍 搜索所有内容：标题、标签、备注、正文" autocomplete="off" />
           <div id="globalSearchResults" class="global-search-results hidden"></div>
         </div>
         <div class="status-msg" id="statusMsg"></div>
@@ -1192,14 +1122,12 @@
     <nav class="tabs" aria-label="内容切换">
       <button class="tab-btn active" type="button" data-tab="historySection">搜索历史</button>
       <button class="tab-btn" type="button" data-tab="laterSection">稍后看清单</button>
-      <button class="tab-btn" type="button" data-tab="projectSection">项目管理</button>
     </nav>
 
     <section id="historySection" class="section active" aria-label="搜索历史">
       <div class="card toolbar history-toolbar">
         <select id="historyPlatformFilter"></select>
         <select id="historyStatusFilter"></select>
-        <select id="historyProjectFilter"></select>
         <select id="historySort">
           <option value="newest">排序</option>
           <option value="oldest">最早优先</option>
@@ -1247,43 +1175,18 @@
         </div>
       </form>
 
-      <div class="card toolbar two later-toolbar">
+      <div class="card toolbar two">
         <label class="label">来源平台
           <select id="laterSourceFilter"></select>
         </label>
         <label class="label">状态
           <select id="laterStatusFilter"></select>
         </label>
-        <label class="label">项目
-          <select id="laterProjectFilter"></select>
-        </label>
         <label class="label">关键词
           <input id="laterTextFilter" class="field" type="search" placeholder="搜索标题、原因、结论" />
         </label>
       </div>
       <div class="list" id="laterList"></div>
-    </section>
-
-    <section id="projectSection" class="section" aria-label="项目管理">
-      <form class="card later-form" id="projectForm">
-        <div class="form-title">
-          <div>
-            <h2>项目管理</h2>
-            <p class="hint">创建类似 Notion Database 的主题集合，把搜索历史和稍后看条目关联到同一个项目。</p>
-          </div>
-          <button class="primary-btn" type="submit">创建项目</button>
-        </div>
-        <div class="edit-grid">
-          <label class="label">项目名称
-            <input id="projectName" class="field" type="text" placeholder="例如：竞品分析" required />
-          </label>
-          <label class="label wide">项目描述
-            <textarea id="projectDescription" placeholder="这个项目要聚合哪些问题、资料或结论？"></textarea>
-          </label>
-        </div>
-      </form>
-
-      <div class="list" id="projectList"></div>
     </section>
   </main>
 
@@ -1337,7 +1240,7 @@
   <script>
     const SEARCH_STATUSES = ["未处理", "有用", "已解决", "没找到", "转入稍后看", "放弃"];
     const LATER_STATUSES = ["未看", "已看", "有用", "没用", "转成项目任务", "删除"];
-    const LATER_SOURCES_BASE = ["必应", "知乎", "微博", "小红书", "B站", "抖音", "播客", "GitHub", "微信/公众号", "其他"];
+    const LATER_SOURCES_BASE = ["必应", "知乎", "微博", "小红书", "B站", "抖音", "播客", "GitHub", "微信/公众号", "快速笔记", "其他"];
 
     const DEFAULT_PLATFORMS = [
       {
@@ -1405,36 +1308,32 @@
     const STORAGE_KEYS = {
       platforms: "infoDock.platforms.v1",
       history: "infoDock.history.v1",
-      later: "infoDock.later.v1",
-      projects: "infoDock.projects.v1"
+      later: "infoDock.later.v1"
     };
 
     const STORE_NAMES = {
       platforms: "platforms",
       history: "history",
       later: "later",
-      contents: "contents",
-      projects: "projects"
+      contents: "contents"
     };
 
     const DB_NAME = "InfoDockDB";
-    const DB_VERSION = 2;
+    const DB_VERSION = 1;
 
     const $ = (selector) => document.querySelector(selector);
     const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 
     const elements = {
       searchInput: $("#searchInput"),
-      copySearchBtn: $("#copySearchBtn"),
+      quickNoteBtn: $("#quickNoteBtn"),
       statusMsg: $("#statusMsg"),
       globalSearchInput: $("#globalSearchInput"),
-      globalProjectFilter: $("#globalProjectFilter"),
       globalSearchResults: $("#globalSearchResults"),
       platformDock: $("#platformDock"),
       platformCards: $("#platformCards"),
       historyPlatformFilter: $("#historyPlatformFilter"),
       historyStatusFilter: $("#historyStatusFilter"),
-      historyProjectFilter: $("#historyProjectFilter"),
       historyTextFilter: $("#historyTextFilter"),
       historySort: $("#historySort"),
       historyList: $("#historyList"),
@@ -1448,13 +1347,8 @@
       laterReason: $("#laterReason"),
       laterSourceFilter: $("#laterSourceFilter"),
       laterStatusFilter: $("#laterStatusFilter"),
-      laterProjectFilter: $("#laterProjectFilter"),
       laterTextFilter: $("#laterTextFilter"),
       laterList: $("#laterList"),
-      projectForm: $("#projectForm"),
-      projectName: $("#projectName"),
-      projectDescription: $("#projectDescription"),
-      projectList: $("#projectList"),
       addPlatformModal: $("#addPlatformModal"),
       newPlatformName: $("#newPlatformName"),
       newPlatformRecommendation: $("#newPlatformRecommendation"),
@@ -1472,8 +1366,8 @@
     };
 
     const searchEngine = (() => {
-      const fields = ["title", "source", "reason", "conclusion", "note", "keyword", "platform", "tags", "projectNames", "bodyText"];
-      const storeFields = ["id", "itemType", "title", "source", "reason", "conclusion", "note", "keyword", "platform", "tags", "projectIds", "projectNames", "bodyText", "url", "createdAt", "time", "autoSummary"];
+      const fields = ["title", "source", "reason", "conclusion", "note", "keyword", "platform", "tags", "bodyText"];
+      const storeFields = ["id", "itemType", "title", "source", "reason", "conclusion", "note", "keyword", "platform", "tags", "bodyText", "url", "createdAt", "time", "autoSummary"];
       const docs = new Map();
       let miniSearch = null;
 
@@ -1525,8 +1419,6 @@
           keyword: doc.keyword || "",
           platform: doc.platform || "",
           tags: Array.isArray(doc.tags) ? doc.tags.join(" ") : (doc.tags || ""),
-          projectIds: normalizeProjectIds(doc.projectIds || []),
-          projectNames: Array.isArray(doc.projectNames) ? doc.projectNames.join(" ") : (doc.projectNames || ""),
           bodyText: doc.bodyText || "",
           url: doc.url || "",
           createdAt: doc.createdAt || "",
@@ -1626,9 +1518,12 @@
     let platforms = [];
     let historyItems = [];
     let laterItems = [];
-    let projects = [];
     let backlinkIndex = new Map();
     const contentFetchQueue = new Set();
+    const metadataFetchQueue = new Set();
+    const metadataCache = new Map();
+    const DEFAULT_CORS_PROXY = "https://api.allorigins.win/raw?url={url}";
+    const FALLBACK_CORS_PROXY = "https://corsproxy.io/?{url}";
     let isSortingPlatforms = false;
     let selectedSortPlatformId = "";
 
@@ -1638,7 +1533,6 @@
       platforms = normalizePlatforms(await load(STORE_NAMES.platforms, DEFAULT_PLATFORMS));
       historyItems = normalizeHistoryItems(await load(STORE_NAMES.history, []));
       laterItems = normalizeLaterItems(await load(STORE_NAMES.later, []));
-      projects = normalizeProjects(await load(STORE_NAMES.projects, []));
       await persistCoreData();
       await rebuildSearchIndex();
       rebuildBacklinkIndex();
@@ -1659,10 +1553,9 @@
     }
 
     function bindEvents() {
-      elements.copySearchBtn.addEventListener("click", () => copyCurrentKeyword());
+      elements.quickNoteBtn.addEventListener("click", handleQuickNoteButtonClick);
       elements.globalSearchInput.addEventListener("input", renderGlobalSearchResults);
       elements.globalSearchInput.addEventListener("focus", renderGlobalSearchResults);
-      elements.globalProjectFilter.addEventListener("input", renderGlobalSearchResults);
 
       elements.searchInput.addEventListener("keydown", async (event) => {
         if (event.key === "Enter") {
@@ -1676,10 +1569,10 @@
         button.addEventListener("click", () => activateTab(button.dataset.tab));
       });
 
-      [elements.historyPlatformFilter, elements.historyStatusFilter, elements.historyProjectFilter, elements.historyTextFilter, elements.historySort]
+      [elements.historyPlatformFilter, elements.historyStatusFilter, elements.historyTextFilter, elements.historySort]
         .forEach((control) => control.addEventListener("input", renderHistory));
 
-      [elements.laterSourceFilter, elements.laterStatusFilter, elements.laterProjectFilter, elements.laterTextFilter]
+      [elements.laterSourceFilter, elements.laterStatusFilter, elements.laterTextFilter]
         .forEach((control) => control.addEventListener("input", renderLater));
 
       elements.copyBookmarkletBtn.addEventListener("click", () => {
@@ -1710,11 +1603,6 @@
       elements.laterForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         await addLaterItem();
-      });
-
-      elements.projectForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        await createProject();
       });
 
       elements.cancelPlatformBtn.addEventListener("click", closeAddPlatformModal);
@@ -1753,7 +1641,6 @@
       renderBookmarklet();
       renderHistory();
       renderLater();
-      renderProjects();
       renderGlobalSearchResults();
     }
 
@@ -1800,11 +1687,6 @@
               contentStore.createIndex("id", "id", { unique: false });
               contentStore.createIndex("type", "type", { unique: false });
               contentStore.createIndex("timestamp", "timestamp", { unique: false });
-            }
-            if (!db.objectStoreNames.contains(STORE_NAMES.projects)) {
-              const projectStore = db.createObjectStore(STORE_NAMES.projects, { keyPath: "id" });
-              projectStore.createIndex("createdAt", "createdAt", { unique: false });
-              projectStore.createIndex("name", "name", { unique: false });
             }
           };
 
@@ -1899,13 +1781,12 @@
       const counts = await Promise.all([
         InfoDockDB.count(STORE_NAMES.platforms),
         InfoDockDB.count(STORE_NAMES.history),
-        InfoDockDB.count(STORE_NAMES.later),
-        InfoDockDB.count(STORE_NAMES.projects)
+        InfoDockDB.count(STORE_NAMES.later)
       ]);
 
       if (counts.some((count) => count > 0)) return;
 
-      const hasLocalData = [STORAGE_KEYS.platforms, STORAGE_KEYS.history, STORAGE_KEYS.later, STORAGE_KEYS.projects]
+      const hasLocalData = [STORAGE_KEYS.platforms, STORAGE_KEYS.history, STORAGE_KEYS.later]
         .some((key) => hasLocalStorageValue(key));
 
       if (!hasLocalData) return;
@@ -1913,12 +1794,10 @@
       const migratedPlatforms = loadFromLocalStorage(STORAGE_KEYS.platforms, []);
       const migratedHistory = loadFromLocalStorage(STORAGE_KEYS.history, []);
       const migratedLater = loadFromLocalStorage(STORAGE_KEYS.later, []);
-      const migratedProjects = loadFromLocalStorage(STORAGE_KEYS.projects, []);
 
       await InfoDockDB.replaceAll(STORE_NAMES.platforms, Array.isArray(migratedPlatforms) ? migratedPlatforms : []);
       await InfoDockDB.replaceAll(STORE_NAMES.history, Array.isArray(migratedHistory) ? migratedHistory : []);
       await InfoDockDB.replaceAll(STORE_NAMES.later, Array.isArray(migratedLater) ? migratedLater : []);
-      await InfoDockDB.replaceAll(STORE_NAMES.projects, Array.isArray(migratedProjects) ? migratedProjects : []);
       console.info("已将 localStorage 数据迁移到 IndexedDB。 ");
     }
 
@@ -2000,8 +1879,7 @@
       const map = {
         [STORE_NAMES.platforms]: STORAGE_KEYS.platforms,
         [STORE_NAMES.history]: STORAGE_KEYS.history,
-        [STORE_NAMES.later]: STORAGE_KEYS.later,
-        [STORE_NAMES.projects]: STORAGE_KEYS.projects
+        [STORE_NAMES.later]: STORAGE_KEYS.later
       };
       return map[storeName] || storeName;
     }
@@ -2037,7 +1915,6 @@
       await save(STORE_NAMES.platforms, platforms);
       await save(STORE_NAMES.history, historyItems);
       await save(STORE_NAMES.later, laterItems);
-      await save(STORE_NAMES.projects, projects);
     }
 
     function ensureLocalStorageFallbackAvailable() {
@@ -2145,7 +2022,6 @@
           note: item.note || "",
           url: item.url || "",
           tags: normalizeTags(item.tags || []),
-          projectIds: normalizeProjectIds(item.projectIds || item.projects || []),
           hasSnapshot: Boolean(item.hasSnapshot)
         };
       });
@@ -2160,46 +2036,15 @@
         source: normalizeLaterSource(item.source || detectSourceFromUrl(item.url || "")),
         reason: item.reason || "",
         autoSummary: item.autoSummary || "",
+        bodyText: item.bodyText || "",
+        metadataFetched: Boolean(item.metadataFetched),
         tags: normalizeTags(item.tags || []),
-        projectIds: normalizeProjectIds(item.projectIds || item.projects || []),
         estimate: item.estimate || "",
         status: LATER_STATUSES.includes(item.status) ? item.status : "未看",
         conclusion: item.conclusion || "",
         createdAt: item.createdAt || new Date().toISOString(),
         relatedHistoryId: item.relatedHistoryId || ""
       }));
-    }
-
-    function normalizeProjects(rawProjects) {
-      const raw = Array.isArray(rawProjects) ? rawProjects : [];
-      const seen = new Set();
-      return raw
-        .map((project) => ({
-          id: project?.id || createId(),
-          name: String(project?.name || "").trim(),
-          description: String(project?.description || "").trim(),
-          createdAt: project?.createdAt || new Date().toISOString()
-        }))
-        .filter((project) => project.name)
-        .filter((project) => {
-          const key = normalize(project.name);
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        });
-    }
-
-    function normalizeProjectIds(value) {
-      const raw = Array.isArray(value) ? value : String(value || "").split(/[\s,，、]+/);
-      const seen = new Set();
-      return raw
-        .map((id) => String(id || "").trim())
-        .filter(Boolean)
-        .filter((id) => {
-          if (seen.has(id)) return false;
-          seen.add(id);
-          return true;
-        });
     }
 
     function normalizeSearchStatus(status) {
@@ -2256,9 +2101,7 @@
         platform: item.source,
         note: "",
         tags: normalizeTags(item.tags || []).join(" "),
-        projectIds: normalizeProjectIds(item.projectIds || []),
-        projectNames: getProjectNamesForItem(item).join(" "),
-        bodyText: [content.bodyText, content.snapshotText].filter(Boolean).join(" "),
+        bodyText: [item.bodyText, content.bodyText, content.snapshotText].filter(Boolean).join(" "),
         url: item.url,
         createdAt: item.createdAt,
         autoSummary: item.autoSummary || content.metaDescription || ""
@@ -2277,8 +2120,6 @@
         platform: item.platform,
         note: item.note,
         tags: normalizeTags(item.tags || []).join(" "),
-        projectIds: normalizeProjectIds(item.projectIds || []),
-        projectNames: getProjectNamesForItem(item).join(" "),
         bodyText: [content.bodyText, content.snapshotText].filter(Boolean).join(" "),
         url: item.url,
         time: item.time
@@ -2288,7 +2129,6 @@
     function renderGlobalSearchResults() {
       if (!elements.globalSearchInput || !elements.globalSearchResults) return;
       const query = elements.globalSearchInput.value.trim();
-      const projectFilter = elements.globalProjectFilter?.value || "全部项目";
       const panel = elements.globalSearchResults;
 
       if (!query) {
@@ -2297,9 +2137,7 @@
         return;
       }
 
-      const results = searchEngine.search(query)
-        .filter((result) => matchesProjectFilter(result, projectFilter))
-        .slice(0, 12);
+      const results = searchEngine.search(query).slice(0, 12);
       panel.classList.remove("hidden");
 
       if (!results.length) {
@@ -2327,7 +2165,6 @@
               <span class="tag">${escapeHtml(typeLabel)}</span>
               <span class="tag">${escapeHtml(source)}</span>
               ${normalizeTags(result.tags).map((tag) => `<span class="tag tag-chip">${escapeHtml(tag)}</span>`).join("")}
-              ${renderProjectBadgesByIds(result.projectIds)}
             </div>
             ${snippet ? `<p class="global-search-snippet">${escapeHtml(snippet)}</p>` : ""}
             ${openButton || repeatButton ? `<div class="actions">${openButton}${repeatButton}</div>` : ""}
@@ -2614,14 +2451,12 @@
         activateTab("historySection");
         elements.historyPlatformFilter.value = "全部平台";
         elements.historyStatusFilter.value = "全部状态";
-        if (elements.historyProjectFilter) elements.historyProjectFilter.value = "全部项目";
         elements.historyTextFilter.value = "";
         renderHistory();
       } else {
         activateTab("laterSection");
         elements.laterSourceFilter.value = "全部来源";
         elements.laterStatusFilter.value = "全部状态";
-        if (elements.laterProjectFilter) elements.laterProjectFilter.value = "全部项目";
         elements.laterTextFilter.value = "";
         renderLater();
       }
@@ -2792,6 +2627,11 @@
         console.warn("抓取网页正文失败：", page.error);
       }
 
+      if (!options.silent) {
+        const latestItem = laterItems.find((entry) => entry.id === id);
+        if (latestItem) await enrichWithMetadata(latestItem, { force: true, silent: true });
+      }
+
       return page;
     }
 
@@ -2805,6 +2645,11 @@
         const rawHtml = await fetchHtmlWithFallback(cleanUrl);
         const doc = new DOMParser().parseFromString(rawHtml, "text/html");
         const metaDescription = extractMetaDescription(doc);
+        const pageTitle = (
+          doc.querySelector('meta[property="og:title"]')?.getAttribute("content") ||
+          doc.querySelector("title")?.textContent ||
+          ""
+        ).trim();
 
         doc.querySelectorAll("script, style, noscript, template, svg").forEach((node) => node.remove());
         const root = doc.querySelector("article") || doc.querySelector("main") || doc.body;
@@ -2814,6 +2659,7 @@
           rawHtml: rawHtml.slice(0, 50000),
           text,
           metaDescription,
+          title: pageTitle,
           error: ""
         };
       } catch (error) {
@@ -2821,33 +2667,14 @@
           rawHtml: "",
           text: "",
           metaDescription: "",
+          title: "",
           error: error?.message || String(error)
         };
       }
     }
 
     async function fetchHtmlWithFallback(url) {
-      const targets = isSameOriginUrl(url)
-        ? [url]
-        : [url, `https://corsproxy.io/?${encodeURIComponent(url)}`];
-      let lastError = null;
-
-      for (const target of targets) {
-        try {
-          const response = await fetch(target, {
-            method: "GET",
-            headers: {
-              Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-            }
-          });
-          if (!response.ok) throw new Error(`请求失败：${response.status}`);
-          return await response.text();
-        } catch (error) {
-          lastError = error;
-        }
-      }
-
-      throw lastError || new Error("无法抓取网页。 ");
+      return fetchViaProxy(url);
     }
 
     function isSameOriginUrl(url) {
@@ -2865,6 +2692,414 @@
 
     function normalizePageText(text) {
       return String(text || "").replace(/\s+/g, " ").trim();
+    }
+
+    function buildProxyUrl(url, proxyTemplate = DEFAULT_CORS_PROXY) {
+      const encodedUrl = encodeURIComponent(url);
+      const template = String(proxyTemplate || DEFAULT_CORS_PROXY);
+      if (template.includes("{url}")) return template.replace("{url}", encodedUrl);
+      if (/[?&=]$/.test(template)) return `${template}${encodedUrl}`;
+      return `${template}${encodedUrl}`;
+    }
+
+    async function fetchViaProxy(url, options = {}) {
+      const cleanUrl = String(url || "").trim();
+      if (!/^https?:\/\//i.test(cleanUrl)) {
+        throw new Error("仅支持 http/https 链接。");
+      }
+
+      const customProxy = window.INFO_DOCK_CORS_PROXY || "";
+      const proxyTemplates = [
+        customProxy,
+        DEFAULT_CORS_PROXY,
+        FALLBACK_CORS_PROXY
+      ].filter(Boolean);
+
+      let lastError = null;
+
+      for (const proxyTemplate of proxyTemplates) {
+        const target = buildProxyUrl(cleanUrl, proxyTemplate);
+        try {
+          const response = await fetchWithTimeout(target, options.timeoutMs || 9000, {
+            method: "GET",
+            headers: {
+              Accept: options.accept || "text/html,application/xhtml+xml,application/xml,application/json,text/plain;q=0.9,*/*;q=0.8"
+            }
+          });
+          if (!response.ok) throw new Error(`代理请求失败：${response.status}`);
+          return await response.text();
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      throw lastError || new Error("代理抓取失败。");
+    }
+
+    async function fetchWithTimeout(url, timeoutMs = 9000, fetchOptions = {}) {
+      if (!window.AbortController) return fetch(url, fetchOptions);
+
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+
+      try {
+        return await fetch(url, { ...fetchOptions, signal: controller.signal });
+      } finally {
+        window.clearTimeout(timer);
+      }
+    }
+
+    async function fetchJsonViaProxy(url, options = {}) {
+      const text = await fetchViaProxy(url, { ...options, accept: "application/json,text/plain,*/*" });
+      return JSON.parse(text);
+    }
+
+    function parseHTML(htmlString) {
+      return new DOMParser().parseFromString(String(htmlString || ""), "text/html");
+    }
+
+    function readMetaContent(doc, selectors) {
+      for (const selector of selectors) {
+        const node = doc.querySelector(selector);
+        const value = node?.getAttribute("content") || node?.textContent || "";
+        if (value.trim()) return normalizePageText(value);
+      }
+      return "";
+    }
+
+    function splitMetadataTags(values) {
+      const raw = Array.isArray(values) ? values : [values];
+      return normalizeTags(raw.flatMap((value) => String(value || "").split(/[,，;；、\s]+/)));
+    }
+
+    function extractHashtags(text) {
+      const matches = [];
+      const pattern = /#([^#\s,，。；;：:、]+)/g;
+      let match;
+      while ((match = pattern.exec(String(text || "")))) {
+        if (match[1]) matches.push(match[1]);
+      }
+      return normalizeTags(matches);
+    }
+
+    function mergeMetadataText(parts, maxLength = 12000) {
+      const seen = new Set();
+      const merged = [];
+
+      parts.forEach((part) => {
+        const value = normalizePageText(part);
+        if (!value) return;
+        const key = value.toLowerCase();
+        if (seen.has(key)) return;
+        seen.add(key);
+        merged.push(value);
+      });
+
+      return merged.join(" ").slice(0, maxLength);
+    }
+
+    function extractGenericMetadata(htmlString, url = "") {
+      const doc = parseHTML(htmlString);
+      const title = readMetaContent(doc, [
+        'meta[property="og:title" i]',
+        'meta[name="title" i]',
+        "title"
+      ]);
+      const description = readMetaContent(doc, [
+        'meta[property="og:description" i]',
+        'meta[name="description" i]'
+      ]);
+      const keywordTags = splitMetadataTags(readMetaContent(doc, ['meta[name="keywords" i]']));
+      const articleTags = normalizeTags(Array.from(doc.querySelectorAll('meta[property="article:tag" i]'))
+        .map((node) => node.getAttribute("content") || ""));
+      const tags = normalizeTags([...keywordTags, ...articleTags]);
+      const bodyText = mergeMetadataText([title, description, tags.join(" ")]);
+
+      return {
+        title,
+        description,
+        tags,
+        bodyText,
+        url
+      };
+    }
+
+    async function extractBilibiliMetadata(url, htmlString = "") {
+      const generic = extractGenericMetadata(htmlString, url);
+      const ids = extractBilibiliIds(url, htmlString);
+      const extraParts = [];
+
+      try {
+        const playerUrl = buildBilibiliPlayerUrl(ids);
+        if (playerUrl) {
+          const player = await fetchJsonViaProxy(playerUrl, { timeoutMs: 9000 });
+          const subtitles = player?.data?.subtitle?.subtitles || [];
+          const subtitleTexts = [];
+
+          for (const subtitle of subtitles.slice(0, 3)) {
+            const subtitleUrl = normalizeExternalUrl(subtitle.subtitle_url || subtitle.url || "");
+            if (!subtitleUrl) continue;
+            try {
+              const subtitleRaw = await fetchViaProxy(subtitleUrl, { timeoutMs: 9000, accept: "application/json,text/plain,*/*" });
+              subtitleTexts.push(parseSubtitleText(subtitleRaw));
+            } catch (error) {
+              console.warn("B站字幕抓取失败：", error);
+            }
+          }
+
+          if (subtitleTexts.length) extraParts.push(subtitleTexts.join(" "));
+        }
+      } catch (error) {
+        console.warn("B站字幕信息抓取失败：", error);
+      }
+
+      if (ids.aid) {
+        try {
+          const replyUrl = `https://api.bilibili.com/x/v2/reply?type=1&oid=${encodeURIComponent(ids.aid)}`;
+          const reply = await fetchJsonViaProxy(replyUrl, { timeoutMs: 9000 });
+          const comments = (reply?.data?.replies || [])
+            .slice(0, 5)
+            .map((entry) => entry?.content?.message || "")
+            .filter(Boolean);
+          if (comments.length) extraParts.push(comments.join(" "));
+        } catch (error) {
+          console.warn("B站热评抓取失败：", error);
+        }
+      }
+
+      return {
+        ...generic,
+        bodyText: mergeMetadataText([generic.bodyText, ...extraParts])
+      };
+    }
+
+    function extractBilibiliIds(url, htmlString = "") {
+      const source = `${url || ""}\n${htmlString || ""}`;
+      const aid = firstRegexMatch(source, [
+        /"aid"\s*:\s*(\d+)/i,
+        /"aid"\s*,\s*"value"\s*:\s*(\d+)/i,
+        /(?:^|[?&])aid=(\d+)/i
+      ]);
+      const cid = firstRegexMatch(source, [
+        /"cid"\s*:\s*(\d+)/i,
+        /(?:^|[?&])cid=(\d+)/i
+      ]);
+      const bvid = firstRegexMatch(source, [
+        /(BV[0-9A-Za-z]+)/,
+        /"bvid"\s*:\s*"(BV[0-9A-Za-z]+)"/i
+      ]);
+
+      return { aid, cid, bvid };
+    }
+
+    function buildBilibiliPlayerUrl(ids) {
+      if (ids.aid && ids.cid) {
+        return `https://api.bilibili.com/x/player/v2?aid=${encodeURIComponent(ids.aid)}&cid=${encodeURIComponent(ids.cid)}`;
+      }
+      if (ids.bvid && ids.cid) {
+        return `https://api.bilibili.com/x/player/v2?bvid=${encodeURIComponent(ids.bvid)}&cid=${encodeURIComponent(ids.cid)}`;
+      }
+      return "";
+    }
+
+    function parseSubtitleText(rawText) {
+      const raw = String(rawText || "").trim();
+      if (!raw) return "";
+
+      try {
+        const json = JSON.parse(raw);
+        if (Array.isArray(json.body)) {
+          return normalizePageText(json.body.map((entry) => entry.content || "").join(" "));
+        }
+        if (Array.isArray(json)) {
+          return normalizePageText(json.map((entry) => entry.content || entry.text || "").join(" "));
+        }
+      } catch (error) {
+        // Not JSON; continue as ASS/plain text.
+      }
+
+      if (/^Dialogue:/im.test(raw)) {
+        return normalizePageText(raw
+          .split(/\r?\n/)
+          .filter((line) => /^Dialogue:/i.test(line))
+          .map((line) => line.split(",").slice(9).join(","))
+          .join(" ")
+          .replace(/\{[^}]*\}/g, " "));
+      }
+
+      return normalizePageText(raw);
+    }
+
+    function extractXiaohongshuMetadata(url, htmlString = "") {
+      const generic = extractGenericMetadata(htmlString, url);
+      const doc = parseHTML(htmlString);
+      const extraText = firstLongSelectorText(doc, [
+        ".note-content",
+        ".note-text",
+        ".desc",
+        '[class*="note-content"]',
+        '[class*="noteText"]',
+        '[class*="desc"]'
+      ]);
+      const descriptionText = generic.description || "";
+      const tags = normalizeTags([
+        ...generic.tags,
+        ...extractHashtags(`${extraText} ${descriptionText} ${generic.bodyText}`)
+      ]);
+
+      return {
+        ...generic,
+        tags,
+        bodyText: mergeMetadataText([generic.bodyText, extraText, descriptionText, tags.join(" ")])
+      };
+    }
+
+    function extractDouyinMetadata(url, htmlString = "") {
+      const generic = extractGenericMetadata(htmlString, url);
+      const caption = generic.description || generic.title || "";
+      const tags = normalizeTags([
+        ...generic.tags,
+        ...extractHashtags(`${caption} ${generic.bodyText}`)
+      ]);
+
+      return {
+        ...generic,
+        tags,
+        bodyText: mergeMetadataText([caption, generic.bodyText, tags.join(" ")])
+      };
+    }
+
+    function firstLongSelectorText(doc, selectors) {
+      for (const selector of selectors) {
+        const nodes = Array.from(doc.querySelectorAll(selector));
+        const text = normalizePageText(nodes.map((node) => node.textContent || "").join(" "));
+        if (text.length >= 12) return text.slice(0, 5000);
+      }
+      return "";
+    }
+
+    function firstRegexMatch(text, patterns) {
+      for (const pattern of patterns) {
+        const match = String(text || "").match(pattern);
+        if (match && match[1]) return match[1];
+      }
+      return "";
+    }
+
+    function normalizeExternalUrl(url) {
+      const value = String(url || "").trim();
+      if (!value) return "";
+      if (value.startsWith("//")) return `https:${value}`;
+      if (/^https?:\/\//i.test(value)) return value;
+      return "";
+    }
+
+    function getHostnameFromUrl(url) {
+      try {
+        return new URL(url).hostname.replace(/^www\./i, "").toLowerCase();
+      } catch (error) {
+        return "";
+      }
+    }
+
+    async function extractMetadataForUrl(url, htmlString = "") {
+      const hostname = getHostnameFromUrl(url);
+      if (hostname.includes("bilibili.com")) return extractBilibiliMetadata(url, htmlString);
+      if (hostname.includes("xiaohongshu.com")) return extractXiaohongshuMetadata(url, htmlString);
+      if (hostname.includes("douyin.com")) return extractDouyinMetadata(url, htmlString);
+      return extractGenericMetadata(htmlString, url);
+    }
+
+    function queueMetadataEnrichmentForLaterItem(item, options = {}) {
+      if (!item || !item.id || !item.url) return;
+      if (!options.force && (item.metadataFetched || normalizePageText(item.bodyText))) return;
+      if (metadataFetchQueue.has(item.id)) return;
+
+      metadataFetchQueue.add(item.id);
+      renderLater();
+
+      window.setTimeout(async () => {
+        try {
+          await enrichWithMetadata(item, { silent: true, force: Boolean(options.force) });
+        } finally {
+          metadataFetchQueue.delete(item.id);
+          renderLater();
+        }
+      }, 0);
+    }
+
+    async function enrichWithMetadata(item, options = {}) {
+      const current = laterItems.find((entry) => entry.id === item?.id);
+      if (!current || !current.url || !/^https?:\/\//i.test(current.url)) return null;
+
+      if (!options.force && current.metadataFetched && normalizePageText(current.bodyText)) {
+        return current;
+      }
+
+      const cacheKey = current.url;
+      let metadata = metadataCache.get(cacheKey);
+
+      try {
+        if (!metadata || options.force) {
+          const htmlString = await fetchViaProxy(current.url, { timeoutMs: options.timeoutMs || 10000 });
+          metadata = await extractMetadataForUrl(current.url, htmlString);
+          metadataCache.set(cacheKey, metadata);
+        }
+
+        const mergedTags = normalizeTags([...(current.tags || []), ...(metadata.tags || [])]);
+        const nextBodyText = mergeMetadataText([
+          current.bodyText,
+          metadata.bodyText,
+          metadata.title,
+          metadata.description,
+          mergedTags.join(" ")
+        ]);
+
+        const patch = {
+          bodyText: nextBodyText,
+          metadataFetched: Boolean(nextBodyText)
+        };
+
+        if (metadata.description && !current.autoSummary) {
+          patch.autoSummary = metadata.description;
+        }
+
+        if (metadata.title && (!current.title || current.title === current.url)) {
+          patch.title = metadata.title;
+        }
+
+        if (mergedTags.length) {
+          patch.tags = mergedTags;
+        }
+
+        laterItems = laterItems.map((entry) => entry.id === current.id ? { ...entry, ...patch } : entry);
+        await save(STORE_NAMES.later, laterItems);
+        await rebuildSearchIndex();
+        renderLater();
+
+        if (!options.silent) {
+          toast(nextBodyText ? "已重新提取元数据。" : "未提取到可用元数据。");
+        }
+
+        return laterItems.find((entry) => entry.id === current.id) || null;
+      } catch (error) {
+        console.warn("元数据提取失败：", error);
+        if (!options.silent) toast("元数据提取失败，已保留原内容。");
+        return current;
+      }
+    }
+
+    function renderMetadataStatusTag(item) {
+      if (!item.url) return "";
+      if (metadataFetchQueue.has(item.id)) return `<span class="tag warn">⏳ 元数据提取中</span>`;
+      if (item.metadataFetched || normalizePageText(item.bodyText)) return `<span class="tag ok">📄 元数据</span>`;
+      return `<span class="tag">未提取元数据</span>`;
+    }
+
+    function truncateMetadataText(text, maxLength = 220) {
+      const value = normalizePageText(text);
+      if (value.length <= maxLength) return value;
+      return `${value.slice(0, maxLength)}…`;
     }
 
     function renderPlatformCards() {
@@ -2918,14 +3153,11 @@
       ]);
       fillSelect(elements.historyPlatformFilter, ["全部平台", ...platformNames], "全部平台");
       fillSelect(elements.historyStatusFilter, ["全部状态", ...SEARCH_STATUSES], "全部状态");
-      fillProjectFilterSelect(elements.historyProjectFilter, "全部项目");
-      fillProjectFilterSelect(elements.globalProjectFilter, "全部项目");
 
       const sourceOptions = getAllLaterSources();
       fillSelect(elements.laterSource, sourceOptions, sourceOptions.includes("其他") ? "其他" : sourceOptions[0]);
       fillSelect(elements.laterSourceFilter, ["全部来源", ...sourceOptions], "全部来源");
       fillSelect(elements.laterStatusFilter, ["全部状态", ...LATER_STATUSES], "全部状态");
-      fillProjectFilterSelect(elements.laterProjectFilter, "全部项目");
     }
 
     function getAllLaterSources() {
@@ -2946,27 +3178,6 @@
         select.appendChild(node);
       });
       select.value = options.includes(previousValue) ? previousValue : selectedValue;
-    }
-
-    function fillProjectFilterSelect(select, allLabel = "全部项目") {
-      if (!select) return;
-      const previousValue = select.value || allLabel;
-      select.innerHTML = "";
-
-      const allOption = document.createElement("option");
-      allOption.value = allLabel;
-      allOption.textContent = allLabel;
-      select.appendChild(allOption);
-
-      projects.forEach((project) => {
-        const option = document.createElement("option");
-        option.value = project.id;
-        option.textContent = project.name;
-        select.appendChild(option);
-      });
-
-      const availableValues = new Set([allLabel, ...projects.map((project) => project.id)]);
-      select.value = availableValues.has(previousValue) ? previousValue : allLabel;
     }
 
     function togglePlatformSort() {
@@ -3081,7 +3292,6 @@
         note: "",
         url: renderedUrl,
         tags: [],
-        projectIds: [],
         hasSnapshot: false
       };
 
@@ -3106,14 +3316,12 @@ function fillUrlTemplate(template, query, domain = "") {
     function renderHistory() {
       const platformFilter = elements.historyPlatformFilter.value || "全部平台";
       const statusFilter = elements.historyStatusFilter.value || "全部状态";
-      const projectFilter = elements.historyProjectFilter?.value || "全部项目";
       const textFilter = normalize(elements.historyTextFilter.value);
       const sort = elements.historySort.value || "newest";
 
       let filtered = historyItems.filter((item) => {
         const matchesPlatform = platformFilter === "全部平台" || item.platform === platformFilter;
         const matchesStatus = statusFilter === "全部状态" || item.status === statusFilter;
-        const matchesProject = matchesProjectFilter(item, projectFilter);
         const haystack = normalize([
           item.keyword,
           item.platform,
@@ -3123,7 +3331,7 @@ function fillUrlTemplate(template, query, domain = "") {
           normalizeTags(item.tags).join(" ")
         ].join(" "));
         const matchesText = !textFilter || haystack.includes(textFilter);
-        return matchesPlatform && matchesStatus && matchesProject && matchesText;
+        return matchesPlatform && matchesStatus && matchesText;
       });
 
       filtered = filtered.sort((a, b) => {
@@ -3149,7 +3357,6 @@ function fillUrlTemplate(template, query, domain = "") {
                 <span class="tag ${historyTagClass(item.status)}">${escapeHtml(item.status)}</span>
                 <span class="tag">${formatTime(item.time)}</span>
                 ${renderExistingTagButtons(item, "history")}
-                ${renderProjectBadges(item)}
               </div>
               ${renderSuggestedTagButtons(item, "history")}
             </div>
@@ -3157,7 +3364,6 @@ function fillUrlTemplate(template, query, domain = "") {
               <button class="tiny-btn" type="button" data-action="history-repeat" data-id="${escapeAttribute(item.id)}">再搜一次</button>
               <button class="tiny-btn" type="button" data-action="history-to-later" data-id="${escapeAttribute(item.id)}">转入稍后看</button>
               <button class="tiny-btn" type="button" data-action="view-search-snapshot" data-id="${escapeAttribute(item.id)}">查看快照</button>
-              ${renderProjectAddControl(item, "history")}
               <button class="danger-btn" type="button" data-action="history-delete" data-id="${escapeAttribute(item.id)}">删除</button>
             </div>
           </div>
@@ -3183,25 +3389,24 @@ function fillUrlTemplate(template, query, domain = "") {
     function renderLater() {
       const sourceFilter = elements.laterSourceFilter.value || "全部来源";
       const statusFilter = elements.laterStatusFilter.value || "全部状态";
-      const projectFilter = elements.laterProjectFilter?.value || "全部项目";
       const textFilter = normalize(elements.laterTextFilter.value);
 
       const filtered = laterItems.filter((item) => {
         const matchesSource = sourceFilter === "全部来源" || item.source === sourceFilter;
         const matchesStatus = statusFilter === "全部状态" || item.status === statusFilter;
-        const matchesProject = matchesProjectFilter(item, projectFilter);
         const haystack = normalize([
           item.title,
           item.url,
           item.source,
           item.reason,
           item.autoSummary,
+          item.bodyText,
           normalizeTags(item.tags).join(" "),
           item.estimate,
           item.conclusion
         ].join(" "));
         const matchesText = !textFilter || haystack.includes(textFilter);
-        return matchesSource && matchesStatus && matchesProject && matchesText;
+        return matchesSource && matchesStatus && matchesText;
       });
 
       if (!filtered.length) {
@@ -3224,19 +3429,20 @@ function fillUrlTemplate(template, query, domain = "") {
                   <span class="tag ${laterTagClass(item.status)}">${escapeHtml(item.status)}</span>
                   <span class="tag">预计：${escapeHtml(item.estimate || "未填写")}</span>
                   <span class="tag">${formatTime(item.createdAt)}</span>
+                  ${renderMetadataStatusTag(item)}
                   ${renderExistingTagButtons(item, "later")}
-                  ${renderProjectBadges(item)}
                 </div>
                 ${renderSuggestedTagButtons(item, "later")}
               </div>
               <div class="actions">
                 ${item.url ? `<button class="tiny-btn" type="button" data-action="refresh-later-summary" data-id="${escapeAttribute(item.id)}">刷新摘要</button>` : ""}
+                ${item.url ? `<button class="tiny-btn" type="button" data-action="refresh-later-metadata" data-id="${escapeAttribute(item.id)}">重新提取元数据</button>` : ""}
                 ${item.url ? `<button class="tiny-btn" type="button" data-action="open-later" data-id="${escapeAttribute(item.id)}">打开链接</button>` : ""}
-                ${renderProjectAddControl(item, "later")}
                 <button class="danger-btn" type="button" data-action="delete-later" data-id="${escapeAttribute(item.id)}">删除</button>
               </div>
             </div>
             ${item.autoSummary && !hasUserProvidedLaterReason(item.reason) ? `<p class="auto-summary"><strong>自动摘要（自动）：</strong>${escapeHtml(item.autoSummary)}</p>` : ""}
+            ${item.bodyText ? `<p class="metadata-preview"><strong>元数据：</strong>${escapeHtml(truncateMetadataText(item.bodyText, 220))}</p>` : ""}
             <div class="edit-grid">
               <label class="label">状态
                 <select data-action="later-status" data-id="${escapeAttribute(item.id)}">
@@ -3273,284 +3479,6 @@ function fillUrlTemplate(template, query, domain = "") {
           </article>
         `;
       }).join("");
-    }
-
-
-    function getProjectById(projectId) {
-      return projects.find((project) => project.id === projectId) || null;
-    }
-
-    function getProjectNamesForItem(item) {
-      return normalizeProjectIds(item?.projectIds || [])
-        .map((projectId) => getProjectById(projectId)?.name)
-        .filter(Boolean);
-    }
-
-    function matchesProjectFilter(item, projectFilter) {
-      if (!projectFilter || projectFilter === "全部项目") return true;
-      return normalizeProjectIds(item?.projectIds || []).includes(projectFilter);
-    }
-
-    function renderProjectBadges(item) {
-      return renderProjectBadgesByIds(item?.projectIds || []);
-    }
-
-    function renderProjectBadgesByIds(projectIds) {
-      const ids = normalizeProjectIds(projectIds);
-      if (!ids.length) return "";
-      return ids
-        .map((projectId) => getProjectById(projectId))
-        .filter(Boolean)
-        .map((project) => `<span class="tag ok">项目：${escapeHtml(project.name)}</span>`)
-        .join("");
-    }
-
-    function renderProjectAddControl(item, itemType) {
-      if (!projects.length) {
-        return `<button class="tiny-btn" type="button" data-action="project-tab">创建项目</button>`;
-      }
-
-      const currentIds = new Set(normalizeProjectIds(item.projectIds || []));
-      const availableProjects = projects.filter((project) => !currentIds.has(project.id));
-
-      if (!availableProjects.length) {
-        return `<span class="tag ok">已加入全部项目</span>`;
-      }
-
-      const options = availableProjects
-        .map((project) => `<option value="${escapeAttribute(project.id)}">${escapeHtml(project.name)}</option>`)
-        .join("");
-
-      return `
-        <select class="project-add-control" data-action="${itemType}-add-project" data-id="${escapeAttribute(item.id)}" aria-label="添加到项目">
-          <option value="">添加到项目</option>
-          ${options}
-        </select>
-      `;
-    }
-
-    function getProjectEntries(projectId) {
-      const historyEntries = historyItems
-        .filter((item) => normalizeProjectIds(item.projectIds || []).includes(projectId))
-        .map((item) => ({
-          ...item,
-          itemType: "history",
-          title: `${item.platform}：${item.keyword}`,
-          subtitle: `${item.entranceType || "网页搜索"} · ${formatTime(item.time)}`
-        }));
-
-      const laterEntries = laterItems
-        .filter((item) => normalizeProjectIds(item.projectIds || []).includes(projectId))
-        .map((item) => ({
-          ...item,
-          itemType: "later",
-          title: item.title || item.url || "未命名内容",
-          subtitle: `${item.source || "其他"} · ${formatTime(item.createdAt)}`
-        }));
-
-      return [...historyEntries, ...laterEntries].sort((a, b) => {
-        const aTime = new Date(a.time || a.createdAt || 0).getTime();
-        const bTime = new Date(b.time || b.createdAt || 0).getTime();
-        return bTime - aTime;
-      });
-    }
-
-    function renderProjects() {
-      if (!elements.projectList) return;
-
-      if (!projects.length) {
-        elements.projectList.innerHTML = `<div class="empty">还没有项目。先创建一个项目，例如「竞品分析」，再从搜索历史或稍后看卡片把条目加入项目。</div>`;
-        return;
-      }
-
-      elements.projectList.innerHTML = projects.map((project) => {
-        const entries = getProjectEntries(project.id);
-        const entryList = entries.length
-          ? entries.map((entry) => {
-              const isLater = entry.itemType === "later";
-              const openButton = entry.url
-                ? `<button class="tiny-btn" type="button" data-action="${isLater ? "open-later" : "open-search-result-url"}" data-id="${escapeAttribute(entry.id)}">打开链接</button>`
-                : "";
-              return `
-                <div class="project-item-row">
-                  <div>
-                    <h4>${escapeHtml(entry.title)}</h4>
-                    <p>
-                      <span class="tag">${escapeHtml(isLater ? "稍后看" : "搜索历史")}</span>
-                      <span class="tag">${escapeHtml(entry.subtitle)}</span>
-                    </p>
-                  </div>
-                  <div class="actions">
-                    <button class="tiny-btn" type="button" data-action="project-item-jump" data-id="${escapeAttribute(entry.id)}" data-item-type="${escapeAttribute(entry.itemType)}">定位</button>
-                    ${openButton}
-                    <button class="danger-btn" type="button" data-action="project-item-remove" data-id="${escapeAttribute(entry.id)}" data-item-type="${escapeAttribute(entry.itemType)}" data-project-id="${escapeAttribute(project.id)}">移除</button>
-                  </div>
-                </div>
-              `;
-            }).join("")
-          : `<div class="empty">这个项目还没有关联条目。回到搜索历史或稍后看卡片，使用“添加到项目”下拉菜单关联内容。</div>`;
-
-        return `
-          <article class="card item" data-project-id="${escapeAttribute(project.id)}">
-            <div class="item-head">
-              <div>
-                <h3 class="item-title">${escapeHtml(project.name)}</h3>
-                <div class="meta">
-                  <span class="tag ok">${entries.length} 条目</span>
-                  <span class="tag">${formatTime(project.createdAt)}</span>
-                </div>
-              </div>
-              <div class="actions">
-                <button class="tiny-btn" type="button" data-action="project-export" data-project-id="${escapeAttribute(project.id)}">批量导出</button>
-                <button class="danger-btn" type="button" data-action="project-delete" data-project-id="${escapeAttribute(project.id)}">删除项目</button>
-              </div>
-            </div>
-            ${project.description ? `<p class="project-description">${escapeHtml(project.description)}</p>` : ""}
-            <div class="project-items">${entryList}</div>
-          </article>
-        `;
-      }).join("");
-    }
-
-    async function createProject() {
-      const name = elements.projectName.value.trim();
-      const description = elements.projectDescription.value.trim();
-
-      if (!name) {
-        toast("请填写项目名称。");
-        return;
-      }
-
-      if (projects.some((project) => normalize(project.name) === normalize(name))) {
-        toast("这个项目已经存在。");
-        return;
-      }
-
-      projects.unshift({
-        id: createId(),
-        name,
-        description,
-        createdAt: new Date().toISOString()
-      });
-
-      await save(STORE_NAMES.projects, projects);
-      elements.projectForm.reset();
-      await rebuildSearchIndex();
-      renderAll();
-      activateTab("projectSection");
-      toast(`已创建项目「${name}」。`);
-    }
-
-    async function addItemToProject(itemType, id, projectId) {
-      if (!projectId || !getProjectById(projectId)) return;
-
-      if (itemType === "history") {
-        const item = historyItems.find((entry) => entry.id === id);
-        if (!item) return;
-        const projectIds = normalizeProjectIds([...(item.projectIds || []), projectId]);
-        await updateHistoryItem(id, { projectIds }, true);
-      } else {
-        const item = laterItems.find((entry) => entry.id === id);
-        if (!item) return;
-        const projectIds = normalizeProjectIds([...(item.projectIds || []), projectId]);
-        await updateLaterItem(id, { projectIds }, true);
-      }
-
-      renderProjects();
-      renderFilters();
-      renderGlobalSearchResults();
-      toast("已加入项目。");
-    }
-
-    async function removeItemFromProject(itemType, id, projectId) {
-      if (!projectId) return;
-
-      if (itemType === "history") {
-        const item = historyItems.find((entry) => entry.id === id);
-        if (!item) return;
-        const projectIds = normalizeProjectIds(item.projectIds || []).filter((currentId) => currentId !== projectId);
-        await updateHistoryItem(id, { projectIds }, true);
-      } else {
-        const item = laterItems.find((entry) => entry.id === id);
-        if (!item) return;
-        const projectIds = normalizeProjectIds(item.projectIds || []).filter((currentId) => currentId !== projectId);
-        await updateLaterItem(id, { projectIds }, true);
-      }
-
-      renderProjects();
-      renderFilters();
-      renderGlobalSearchResults();
-      toast("已从项目中移除。");
-    }
-
-    async function deleteProject(projectId) {
-      const project = getProjectById(projectId);
-      if (!project) return;
-      const confirmed = window.confirm(`确定删除项目「${project.name}」吗？条目本身不会被删除，只会取消关联。`);
-      if (!confirmed) return;
-
-      projects = projects.filter((item) => item.id !== projectId);
-      historyItems = historyItems.map((item) => ({
-        ...item,
-        projectIds: normalizeProjectIds(item.projectIds || []).filter((id) => id !== projectId)
-      }));
-      laterItems = laterItems.map((item) => ({
-        ...item,
-        projectIds: normalizeProjectIds(item.projectIds || []).filter((id) => id !== projectId)
-      }));
-
-      await persistCoreData();
-      await rebuildSearchIndex();
-      renderAll();
-      toast("已删除项目，关联条目已保留。");
-    }
-
-    function exportProject(projectId) {
-      const project = getProjectById(projectId);
-      if (!project) return;
-
-      const entries = getProjectEntries(projectId);
-      const lines = [
-        `# ${project.name}`,
-        "",
-        project.description || "",
-        "",
-        `导出时间：${new Date().toLocaleString()}`,
-        `条目数量：${entries.length}`,
-        ""
-      ];
-
-      entries.forEach((entry, index) => {
-        const isLater = entry.itemType === "later";
-        lines.push(`## ${index + 1}. ${entry.title}`);
-        lines.push("");
-        lines.push(`- 类型：${isLater ? "稍后看" : "搜索历史"}`);
-        lines.push(`- 来源：${isLater ? (entry.source || "其他") : (entry.platform || "其他")}`);
-        if (entry.url) lines.push(`- 链接：${entry.url}`);
-        if (entry.keyword) lines.push(`- 关键词：${entry.keyword}`);
-        if (entry.note) lines.push(`- 备注：${entry.note}`);
-        if (entry.reason) lines.push(`- 为什么想看：${entry.reason}`);
-        if (entry.conclusion) lines.push(`- 结论：${entry.conclusion}`);
-        if (entry.autoSummary) lines.push(`- 自动摘要：${entry.autoSummary}`);
-        const tags = normalizeTags(entry.tags || []);
-        if (tags.length) lines.push(`- 标签：${tags.join(" ")}`);
-        lines.push("");
-      });
-
-      const blob = new Blob([lines.join("\n")], { type: "text/markdown;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${sanitizeFileName(project.name)}.md`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-      toast("已导出项目 Markdown。");
-    }
-
-    function sanitizeFileName(value) {
-      return String(value || "project").replace(/[\\/:*?"<>|]+/g, "-").slice(0, 80) || "project";
     }
 
     async function handleGlobalClick(event) {
@@ -3591,7 +3519,6 @@ function fillUrlTemplate(template, query, domain = "") {
         rebuildBacklinkIndex();
         renderGlobalSearchResults();
         renderHistory();
-        renderProjects();
         toast("已删除搜索记录。");
       }
 
@@ -3628,6 +3555,12 @@ function fillUrlTemplate(template, query, domain = "") {
         await refreshLaterContent(id, { silent: false });
       }
 
+      if (action === "refresh-later-metadata") {
+        const item = laterItems.find((entry) => entry.id === id);
+        if (!item) return;
+        await enrichWithMetadata(item, { force: true, silent: false });
+      }
+
       if (action === "save-search-snapshot") {
         await saveSearchSnapshot(id);
       }
@@ -3660,26 +3593,6 @@ function fillUrlTemplate(template, query, domain = "") {
         jumpToItem(node.dataset.targetId, node.dataset.targetType);
       }
 
-      if (action === "project-tab") {
-        activateTab("projectSection");
-      }
-
-      if (action === "project-item-jump") {
-        jumpToItem(id, node.dataset.itemType);
-      }
-
-      if (action === "project-item-remove") {
-        await removeItemFromProject(node.dataset.itemType, id, node.dataset.projectId);
-      }
-
-      if (action === "project-export") {
-        exportProject(node.dataset.projectId);
-      }
-
-      if (action === "project-delete") {
-        await deleteProject(node.dataset.projectId);
-      }
-
       if (action === "delete-later") {
         laterItems = laterItems.filter((item) => item.id !== id);
         await save(STORE_NAMES.later, laterItems);
@@ -3687,7 +3600,6 @@ function fillUrlTemplate(template, query, domain = "") {
         rebuildBacklinkIndex();
         renderGlobalSearchResults();
         renderLater();
-        renderProjects();
         toast("已删除稍后看内容。");
       }
     }
@@ -3698,13 +3610,6 @@ function fillUrlTemplate(template, query, domain = "") {
       const id = node.dataset.id;
 
       if (!action) return;
-
-      if (action === "history-add-project" || action === "later-add-project") {
-        if (event.type !== "change") return;
-        await addItemToProject(action === "history-add-project" ? "history" : "later", id, node.value);
-        node.value = "";
-        return;
-      }
 
       if (action === "history-status") {
         await updateHistoryItem(id, {
@@ -3753,7 +3658,6 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (shouldRender) {
         renderHistory();
-        renderProjects();
       }
     }
 
@@ -3778,8 +3682,9 @@ function fillUrlTemplate(template, query, domain = "") {
         source: elements.laterSource.value,
         reason: elements.laterReason.value.trim(),
         autoSummary: "",
+        bodyText: "",
+        metadataFetched: false,
         tags: [],
-        projectIds: [],
         estimate: elements.laterEstimate.value.trim(),
         status: "未看",
         conclusion: "",
@@ -3792,6 +3697,7 @@ function fillUrlTemplate(template, query, domain = "") {
       await rebuildSearchIndex();
       rebuildBacklinkIndex();
       queueContentFetchForLaterItem(item);
+      queueMetadataEnrichmentForLaterItem(item);
       elements.laterForm.reset();
       elements.laterSource.value = "其他";
       renderLater();
@@ -3819,8 +3725,9 @@ function fillUrlTemplate(template, query, domain = "") {
         source: finalSource,
         reason,
         autoSummary: "",
+        bodyText: "",
+        metadataFetched: false,
         tags: [],
-        projectIds: [],
         estimate: "",
         status: "未看",
         conclusion: "",
@@ -3833,6 +3740,8 @@ function fillUrlTemplate(template, query, domain = "") {
       await rebuildSearchIndex();
       rebuildBacklinkIndex();
       queueContentFetchForLaterItem(item);
+      queueMetadataEnrichmentForLaterItem(item);
+      renderLater();
       return { added: true, reason: "created", item };
     }
 
@@ -3850,8 +3759,9 @@ function fillUrlTemplate(template, query, domain = "") {
         source: normalizeLaterSource(historyItem.platform),
         reason: "来自搜索历史。",
         autoSummary: "",
+        bodyText: "",
+        metadataFetched: false,
         tags: [],
-        projectIds: [],
         estimate: "",
         status: "未看",
         conclusion: "",
@@ -3864,6 +3774,7 @@ function fillUrlTemplate(template, query, domain = "") {
       await rebuildSearchIndex();
       rebuildBacklinkIndex();
       queueContentFetchForLaterItem(item);
+      queueMetadataEnrichmentForLaterItem(item);
       renderLater();
       return true;
     }
@@ -3883,7 +3794,6 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (shouldRender) {
         renderLater();
-        renderProjects();
       }
     }
 
@@ -4075,6 +3985,81 @@ function fillUrlTemplate(template, query, domain = "") {
 
       toast("搜索栏为空，无内容可复制。");
     }
+    async function handleQuickNoteButtonClick() {
+      const inputText = elements.searchInput.value.trim();
+
+      if (!inputText) {
+        toast("请输入内容或链接");
+        return;
+      }
+
+      if (/^https?:\/\//i.test(inputText)) {
+        if (laterItems.some((item) => item.url === inputText)) {
+          toast("这条链接已经在稍后看清单里");
+          return;
+        }
+
+        const source = typeof detectSourceFromUrl === "function" ? detectSourceFromUrl(inputText) : "其他";
+        const title = await fetchTitleForQuickNote(inputText);
+        const result = await addLaterFromExternal(title || inputText, inputText, source, "通过搜索框快速保存。");
+
+        if (!result.added && result.reason === "duplicate") {
+          toast("这条链接已经在稍后看清单里");
+          return;
+        }
+
+        elements.searchInput.value = "";
+        toast("已保存到稍后看");
+        return;
+      }
+
+      const item = {
+        id: createId(),
+        title: inputText,
+        url: "",
+        source: "快速笔记",
+        reason: "",
+        autoSummary: "",
+        bodyText: "",
+        metadataFetched: false,
+        tags: [],
+        estimate: "",
+        status: "未看",
+        conclusion: "",
+        createdAt: new Date().toISOString(),
+        relatedHistoryId: ""
+      };
+
+      laterItems.unshift(item);
+      await save(STORE_NAMES.later, laterItems);
+      await rebuildSearchIndex();
+      rebuildBacklinkIndex();
+      renderLater();
+      elements.searchInput.value = "";
+      toast("已保存到稍后看");
+    }
+
+    async function fetchTitleForQuickNote(url) {
+      if (typeof fetchPageText !== "function") return url;
+
+      try {
+        const page = await withTimeout(fetchPageText(url), 3500);
+        return page?.title || url;
+      } catch (error) {
+        console.warn("快速笔记获取网页标题失败，已使用 URL 作为标题：", error);
+        return url;
+      }
+    }
+
+    function withTimeout(promise, timeoutMs) {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new Error("timeout")), timeoutMs);
+        })
+      ]);
+    }
+
     function extractFirstUrl(text) {
       const match = String(text || "").match(/https?:\/\/[^\s<>'"]+/i);
       return match ? match[0] : "";
