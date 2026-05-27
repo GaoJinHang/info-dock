@@ -577,6 +577,29 @@
       gap: 14px;
     }
 
+    .settings-panel {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .settings-actions {
+      justify-content: flex-start;
+    }
+
+    .proxy-status {
+      margin: 0;
+      min-height: 22px;
+    }
+
+    .proxy-status.status-ok {
+      color: var(--ok);
+    }
+
+    .proxy-status.status-warn {
+      color: var(--warning);
+    }
+
     .toolbar {
       padding: 14px;
       display: grid;
@@ -1122,6 +1145,7 @@
     <nav class="tabs" aria-label="内容切换">
       <button class="tab-btn active" type="button" data-tab="historySection">搜索历史</button>
       <button class="tab-btn" type="button" data-tab="laterSection">稍后看清单</button>
+      <button class="tab-btn" type="button" data-tab="settingsSection">⚙️ 设置</button>
     </nav>
 
     <section id="historySection" class="section active" aria-label="搜索历史">
@@ -1187,6 +1211,26 @@
         </label>
       </div>
       <div class="list" id="laterList"></div>
+    </section>
+
+    <section id="settingsSection" class="section" aria-label="设置">
+      <div class="card settings-panel">
+        <div class="form-title">
+          <div>
+            <h2>⚙️ 设置</h2>
+            <p class="hint">配置用于网页正文、搜索快照、B站 API 等跨域请求的 CORS 代理。</p>
+          </div>
+        </div>
+        <label class="label">CORS 代理地址
+          <input id="proxyUrlInput" class="field" type="url" placeholder="https://你的worker.workers.dev" />
+        </label>
+        <div class="actions settings-actions">
+          <button class="ghost-btn" id="testProxyBtn" type="button">测试</button>
+          <button class="primary-btn" id="saveProxyBtn" type="button">保存</button>
+          <button class="ghost-btn" id="resetProxyBtn" type="button">重置为默认代理</button>
+        </div>
+        <p class="hint proxy-status" id="proxyStatus" aria-live="polite"></p>
+      </div>
     </section>
   </main>
 
@@ -1361,6 +1405,11 @@
       snapshotModal: $("#snapshotModal"),
       snapshotText: $("#snapshotText"),
       closeSnapshotModalBtn: $("#closeSnapshotModalBtn"),
+      proxyUrlInput: $("#proxyUrlInput"),
+      testProxyBtn: $("#testProxyBtn"),
+      saveProxyBtn: $("#saveProxyBtn"),
+      resetProxyBtn: $("#resetProxyBtn"),
+      proxyStatus: $("#proxyStatus"),
       toast: $("#toast"),
       storageBadge: $("#storageBadge")
     };
@@ -1522,13 +1571,17 @@
     const contentFetchQueue = new Set();
     const metadataFetchQueue = new Set();
     const metadataCache = new Map();
-    const DEFAULT_CORS_PROXY = "https://api.allorigins.win/raw?url={url}";
-    const FALLBACK_CORS_PROXY = "https://corsproxy.io/?{url}";
+    const PROXY_STORAGE_KEY = "infoDock.proxyUrl";
+    const DEFAULT_CORS_PROXY = "https://api.allorigins.win/raw?url=";
+    const PROXY_TEST_URL = "https://www.bing.com";
+    let proxyUrl = DEFAULT_CORS_PROXY;
+    let hasCustomProxyUrl = false;
     let isSortingPlatforms = false;
     let selectedSortPlatformId = "";
 
     async function boot() {
       await initializeStorage();
+      loadProxySettings();
 
       platforms = normalizePlatforms(await load(STORE_NAMES.platforms, DEFAULT_PLATFORMS));
       historyItems = normalizeHistoryItems(await load(STORE_NAMES.history, []));
@@ -1617,6 +1670,12 @@
         if (event.target === elements.snapshotModal) closeSnapshotModal();
       });
 
+      if (elements.testProxyBtn) elements.testProxyBtn.addEventListener("click", () => {
+        void testProxySettings();
+      });
+      if (elements.saveProxyBtn) elements.saveProxyBtn.addEventListener("click", saveProxySettings);
+      if (elements.resetProxyBtn) elements.resetProxyBtn.addEventListener("click", resetProxySettings);
+
       document.addEventListener("click", (event) => {
         void handleGlobalClick(event);
       });
@@ -1641,6 +1700,7 @@
       renderBookmarklet();
       renderHistory();
       renderLater();
+      renderProxySettings();
       renderGlobalSearchResults();
     }
 
@@ -2694,12 +2754,146 @@
       return String(text || "").replace(/\s+/g, " ").trim();
     }
 
-    function buildProxyUrl(url, proxyTemplate = DEFAULT_CORS_PROXY) {
+    function normalizeProxyUrl(value) {
+      return String(value || "").trim();
+    }
+
+    function isValidProxyUrl(value) {
+      try {
+        const parsed = new URL(value);
+        return parsed.protocol === "http:" || parsed.protocol === "https:";
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function readProxyUrlFromStorage() {
+      try {
+        return normalizeProxyUrl(localStorage.getItem(PROXY_STORAGE_KEY));
+      } catch (error) {
+        console.warn("读取 CORS 代理设置失败：", error);
+        return "";
+      }
+    }
+
+    function writeProxyUrlToStorage(value) {
+      localStorage.setItem(PROXY_STORAGE_KEY, value);
+    }
+
+    function removeProxyUrlFromStorage() {
+      localStorage.removeItem(PROXY_STORAGE_KEY);
+    }
+
+    function setActiveProxyUrl(value, isCustom = false) {
+      proxyUrl = normalizeProxyUrl(value) || DEFAULT_CORS_PROXY;
+      hasCustomProxyUrl = Boolean(isCustom && proxyUrl !== DEFAULT_CORS_PROXY);
+      window.INFO_DOCK_CORS_PROXY = proxyUrl;
+    }
+
+    function getActiveProxyUrl() {
+      return normalizeProxyUrl(proxyUrl) || DEFAULT_CORS_PROXY;
+    }
+
+    function loadProxySettings() {
+      const savedProxyUrl = readProxyUrlFromStorage();
+      setActiveProxyUrl(savedProxyUrl || DEFAULT_CORS_PROXY, Boolean(savedProxyUrl));
+    }
+
+    function renderProxySettings(message = "") {
+      if (!elements.proxyUrlInput || !elements.proxyStatus) return;
+      elements.proxyUrlInput.value = getActiveProxyUrl();
+      const statusText = message || (hasCustomProxyUrl
+        ? "当前使用自定义 CORS 代理。"
+        : "当前使用默认公共代理。");
+      elements.proxyStatus.textContent = statusText;
+      elements.proxyStatus.classList.remove("status-ok", "status-warn");
+    }
+
+    async function testProxySettings() {
+      if (!elements.proxyUrlInput || !elements.proxyStatus) return;
+      const candidateProxyUrl = normalizeProxyUrl(elements.proxyUrlInput.value) || DEFAULT_CORS_PROXY;
+
+      if (!isValidProxyUrl(candidateProxyUrl)) {
+        elements.proxyStatus.textContent = "请输入完整的 http/https 代理地址。";
+        elements.proxyStatus.classList.remove("status-ok");
+        elements.proxyStatus.classList.add("status-warn");
+        return;
+      }
+
+      elements.proxyStatus.textContent = "正在测试代理…";
+      elements.proxyStatus.classList.remove("status-ok", "status-warn");
+
+      try {
+        await fetchViaProxy(PROXY_TEST_URL, {
+          proxyUrl: candidateProxyUrl,
+          timeoutMs: 9000,
+          accept: "text/html,application/xhtml+xml,text/plain,*/*"
+        });
+        elements.proxyStatus.textContent = "测试成功：代理可以访问公共页面。";
+        elements.proxyStatus.classList.add("status-ok");
+        elements.proxyStatus.classList.remove("status-warn");
+      } catch (error) {
+        elements.proxyStatus.textContent = `测试失败：${error?.message || String(error)}`;
+        elements.proxyStatus.classList.add("status-warn");
+        elements.proxyStatus.classList.remove("status-ok");
+      }
+    }
+
+    function saveProxySettings() {
+      if (!elements.proxyUrlInput || !elements.proxyStatus) return;
+      const candidateProxyUrl = normalizeProxyUrl(elements.proxyUrlInput.value);
+
+      if (!candidateProxyUrl) {
+        elements.proxyStatus.textContent = "请输入要保存的 CORS 代理地址，或点击重置使用默认代理。";
+        elements.proxyStatus.classList.remove("status-ok");
+        elements.proxyStatus.classList.add("status-warn");
+        return;
+      }
+
+      if (!isValidProxyUrl(candidateProxyUrl)) {
+        elements.proxyStatus.textContent = "请输入完整的 http/https 代理地址。";
+        elements.proxyStatus.classList.remove("status-ok");
+        elements.proxyStatus.classList.add("status-warn");
+        return;
+      }
+
+      try {
+        writeProxyUrlToStorage(candidateProxyUrl);
+        setActiveProxyUrl(candidateProxyUrl, true);
+        renderProxySettings("已保存自定义 CORS 代理。 ");
+        elements.proxyStatus.classList.add("status-ok");
+        toast("已保存 CORS 代理地址。 ");
+      } catch (error) {
+        elements.proxyStatus.textContent = `保存失败：${error?.message || String(error)}`;
+        elements.proxyStatus.classList.remove("status-ok");
+        elements.proxyStatus.classList.add("status-warn");
+      }
+    }
+
+    function resetProxySettings() {
+      if (!elements.proxyUrlInput || !elements.proxyStatus) return;
+
+      try {
+        removeProxyUrlFromStorage();
+        setActiveProxyUrl(DEFAULT_CORS_PROXY, false);
+        renderProxySettings("已恢复默认公共代理。 ");
+        elements.proxyStatus.classList.add("status-ok");
+        toast("已恢复默认公共代理。 ");
+      } catch (error) {
+        elements.proxyStatus.textContent = `重置失败：${error?.message || String(error)}`;
+        elements.proxyStatus.classList.remove("status-ok");
+        elements.proxyStatus.classList.add("status-warn");
+      }
+    }
+
+    function buildProxyUrl(url, proxyTemplate = getActiveProxyUrl()) {
       const encodedUrl = encodeURIComponent(url);
-      const template = String(proxyTemplate || DEFAULT_CORS_PROXY);
-      if (template.includes("{url}")) return template.replace("{url}", encodedUrl);
-      if (/[?&=]$/.test(template)) return `${template}${encodedUrl}`;
-      return `${template}${encodedUrl}`;
+      const template = normalizeProxyUrl(proxyTemplate) || DEFAULT_CORS_PROXY;
+      if (template.includes("{url}")) return template.replaceAll("{url}", encodedUrl);
+      if (/[?&][^=]*=$/.test(template)) return `${template}${encodedUrl}`;
+      if (/[?&]$/.test(template)) return `${template}url=${encodedUrl}`;
+      if (template.includes("?")) return `${template}&url=${encodedUrl}`;
+      return `${template}?url=${encodedUrl}`;
     }
 
     async function fetchViaProxy(url, options = {}) {
@@ -2708,32 +2902,15 @@
         throw new Error("仅支持 http/https 链接。");
       }
 
-      const customProxy = window.INFO_DOCK_CORS_PROXY || "";
-      const proxyTemplates = [
-        customProxy,
-        DEFAULT_CORS_PROXY,
-        FALLBACK_CORS_PROXY
-      ].filter(Boolean);
-
-      let lastError = null;
-
-      for (const proxyTemplate of proxyTemplates) {
-        const target = buildProxyUrl(cleanUrl, proxyTemplate);
-        try {
-          const response = await fetchWithTimeout(target, options.timeoutMs || 9000, {
-            method: "GET",
-            headers: {
-              Accept: options.accept || "text/html,application/xhtml+xml,application/xml,application/json,text/plain;q=0.9,*/*;q=0.8"
-            }
-          });
-          if (!response.ok) throw new Error(`代理请求失败：${response.status}`);
-          return await response.text();
-        } catch (error) {
-          lastError = error;
+      const target = buildProxyUrl(cleanUrl, options.proxyUrl || getActiveProxyUrl());
+      const response = await fetchWithTimeout(target, options.timeoutMs || 9000, {
+        method: "GET",
+        headers: {
+          Accept: options.accept || "text/html,application/xhtml+xml,application/xml,application/json,text/plain;q=0.9,*/*;q=0.8"
         }
-      }
-
-      throw lastError || new Error("代理抓取失败。");
+      });
+      if (!response.ok) throw new Error(`代理请求失败：${response.status}`);
+      return await response.text();
     }
 
     async function fetchWithTimeout(url, timeoutMs = 9000, fetchOptions = {}) {
