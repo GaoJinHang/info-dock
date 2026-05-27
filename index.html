@@ -2827,7 +2827,8 @@
         await fetchViaProxy(PROXY_TEST_URL, {
           proxyUrl: candidateProxyUrl,
           timeoutMs: 9000,
-          accept: "text/html,application/xhtml+xml,text/plain,*/*"
+          accept: "text/html,application/xhtml+xml,text/plain,*/*",
+          allowDefaultFallback: false
         });
         elements.proxyStatus.textContent = "测试成功：代理可以访问公共页面。";
         elements.proxyStatus.classList.add("status-ok");
@@ -2896,21 +2897,52 @@
       return `${template}?url=${encodedUrl}`;
     }
 
+    function getProxyCandidates(preferredProxyUrl = "") {
+      const candidates = [];
+      const pushCandidate = (value) => {
+        const normalized = normalizeProxyUrl(value);
+        if (normalized && !candidates.includes(normalized)) candidates.push(normalized);
+      };
+
+      pushCandidate(preferredProxyUrl || getActiveProxyUrl());
+      if (hasCustomProxyUrl || preferredProxyUrl) pushCandidate(DEFAULT_CORS_PROXY);
+      if (!candidates.length) pushCandidate(DEFAULT_CORS_PROXY);
+      return candidates;
+    }
+
     async function fetchViaProxy(url, options = {}) {
       const cleanUrl = String(url || "").trim();
       if (!/^https?:\/\//i.test(cleanUrl)) {
         throw new Error("仅支持 http/https 链接。");
       }
 
-      const target = buildProxyUrl(cleanUrl, options.proxyUrl || getActiveProxyUrl());
-      const response = await fetchWithTimeout(target, options.timeoutMs || 9000, {
-        method: "GET",
-        headers: {
-          Accept: options.accept || "text/html,application/xhtml+xml,application/xml,application/json,text/plain;q=0.9,*/*;q=0.8"
+      const proxyCandidates = options.allowDefaultFallback === false
+        ? [normalizeProxyUrl(options.proxyUrl || getActiveProxyUrl()) || DEFAULT_CORS_PROXY]
+        : getProxyCandidates(options.proxyUrl || getActiveProxyUrl());
+      let lastError = null;
+
+      for (const proxyTemplate of proxyCandidates) {
+        const target = buildProxyUrl(cleanUrl, proxyTemplate);
+        try {
+          const response = await fetchWithTimeout(target, options.timeoutMs || 9000, {
+            method: "GET",
+            headers: {
+              Accept: options.accept || "text/html,application/xhtml+xml,application/xml,application/json,text/plain;q=0.9,*/*;q=0.8"
+            }
+          });
+          const text = await response.text();
+          if (!response.ok) {
+            const detail = normalizePageText(text).slice(0, 160);
+            throw new Error(`代理请求失败：${response.status}${detail ? `，${detail}` : ""}`);
+          }
+          return text;
+        } catch (error) {
+          lastError = error;
+          if (options.allowDefaultFallback === false) break;
         }
-      });
-      if (!response.ok) throw new Error(`代理请求失败：${response.status}`);
-      return await response.text();
+      }
+
+      throw lastError || new Error("代理抓取失败。");
     }
 
     async function fetchWithTimeout(url, timeoutMs = 9000, fetchOptions = {}) {
@@ -2975,22 +3007,140 @@
       return merged.join(" ").slice(0, maxLength);
     }
 
+    function decodeHtmlEntities(value) {
+      const text = String(value || "");
+      if (!text) return "";
+      const textarea = document.createElement("textarea");
+      textarea.innerHTML = text;
+      return textarea.value;
+    }
+
+    function decodeJsonStringValue(value) {
+      const raw = String(value || "");
+      if (!raw) return "";
+      try {
+        return JSON.parse(`"${raw.replace(/\r/g, "\\r").replace(/\n/g, "\\n")}"`);
+      } catch (error) {
+        return raw
+          .replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+          .replace(/\\n|\\r|\\t/g, " ")
+          .replace(/\\\//g, "/")
+          .replace(/\\"/g, '"');
+      }
+    }
+
+    function normalizeMetadataValue(value) {
+      return normalizePageText(decodeHtmlEntities(decodeJsonStringValue(value)));
+    }
+
+    function isUsefulMetadataValue(value) {
+      const text = normalizePageText(value);
+      if (text.length < 2) return false;
+      if (/^(https?:|data:|blob:|javascript:)/i.test(text)) return false;
+      if (/\.(js|css|png|jpe?g|webp|gif|svg|woff2?)(\?|$)/i.test(text)) return false;
+      if (/^[\w./?=&:%-]{24,}$/.test(text) && !/[\u4e00-\u9fff]/.test(text)) return false;
+      return /[\u4e00-\u9fffA-Za-z0-9]/.test(text);
+    }
+
+    function escapeRegExp(value) {
+      return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function extractJsonLikeValues(doc, keys, limit = 80) {
+      const values = [];
+      const seen = new Set();
+      const scripts = Array.from(doc.querySelectorAll("script"))
+        .map((node) => node.textContent || "")
+        .filter((text) => text && /[{}:]/.test(text));
+
+      const addValue = (value) => {
+        const normalized = normalizeMetadataValue(value);
+        if (!isUsefulMetadataValue(normalized)) return;
+        const key = normalized.toLowerCase();
+        if (seen.has(key)) return;
+        seen.add(key);
+        values.push(normalized);
+      };
+
+      for (const scriptText of scripts) {
+        for (const key of keys) {
+          const escapedKey = escapeRegExp(key);
+          const pattern = new RegExp(`(?:["']${escapedKey}["']|${escapedKey})\\s*:\\s*["']((?:\\\\.|[^"'\\\\]){2,4000})["']`, "gi");
+          let match;
+          while ((match = pattern.exec(scriptText)) && values.length < limit) {
+            addValue(match[1]);
+          }
+          if (values.length >= limit) break;
+        }
+        if (values.length >= limit) break;
+      }
+
+      return values;
+    }
+
+    function extractJsonLdMetadata(doc) {
+      const output = { title: "", description: "", tags: [], bodyText: "" };
+      const parts = [];
+      const tags = [];
+      const visit = (node) => {
+        if (!node) return;
+        if (Array.isArray(node)) {
+          node.forEach(visit);
+          return;
+        }
+        if (typeof node !== "object") return;
+
+        const title = normalizeMetadataValue(node.headline || node.name || node.title || "");
+        const description = normalizeMetadataValue(node.description || node.articleBody || "");
+        if (!output.title && title) output.title = title;
+        if (!output.description && description) output.description = description;
+        if (title) parts.push(title);
+        if (description) parts.push(description);
+
+        const keywords = node.keywords || node.keyword || node.about;
+        if (Array.isArray(keywords)) {
+          keywords.forEach((entry) => {
+            const value = typeof entry === "string" ? entry : entry?.name || entry?.title || "";
+            if (value) tags.push(value);
+          });
+        } else if (typeof keywords === "string") {
+          tags.push(...splitMetadataTags(keywords));
+        }
+
+        if (node["@graph"]) visit(node["@graph"]);
+        if (node.mainEntity) visit(node.mainEntity);
+      };
+
+      Array.from(doc.querySelectorAll('script[type="application/ld+json" i]')).forEach((script) => {
+        try {
+          visit(JSON.parse(script.textContent || ""));
+        } catch (error) {
+          // Ignore invalid JSON-LD blocks.
+        }
+      });
+
+      output.tags = normalizeTags(tags);
+      output.bodyText = mergeMetadataText(parts);
+      return output;
+    }
+
     function extractGenericMetadata(htmlString, url = "") {
       const doc = parseHTML(htmlString);
+      const jsonLd = extractJsonLdMetadata(doc);
       const title = readMetaContent(doc, [
         'meta[property="og:title" i]',
         'meta[name="title" i]',
         "title"
-      ]);
+      ]) || jsonLd.title;
       const description = readMetaContent(doc, [
         'meta[property="og:description" i]',
         'meta[name="description" i]'
-      ]);
+      ]) || jsonLd.description;
       const keywordTags = splitMetadataTags(readMetaContent(doc, ['meta[name="keywords" i]']));
       const articleTags = normalizeTags(Array.from(doc.querySelectorAll('meta[property="article:tag" i]'))
         .map((node) => node.getAttribute("content") || ""));
-      const tags = normalizeTags([...keywordTags, ...articleTags]);
-      const bodyText = mergeMetadataText([title, description, tags.join(" ")]);
+      const tags = normalizeTags([...keywordTags, ...articleTags, ...(jsonLd.tags || [])]);
+      const bodyText = mergeMetadataText([title, description, tags.join(" "), jsonLd.bodyText]);
 
       return {
         title,
@@ -3118,16 +3268,37 @@
         '[class*="noteText"]',
         '[class*="desc"]'
       ]);
-      const descriptionText = generic.description || "";
+      const scriptValues = extractJsonLikeValues(doc, [
+        "displayTitle",
+        "display_title",
+        "title",
+        "desc",
+        "description",
+        "content",
+        "noteContent",
+        "note_content",
+        "noteDesc",
+        "note_desc",
+        "tagName",
+        "tag_name",
+        "name",
+        "nickname"
+      ], 100);
+      const descriptionText = generic.description || scriptValues.find((value) => value.length >= 8) || "";
+      const titleText = generic.title || scriptValues.find((value) => value.length >= 4 && value.length <= 120) || "";
+      const combinedText = mergeMetadataText([extraText, descriptionText, generic.bodyText, scriptValues.join(" ")]);
       const tags = normalizeTags([
         ...generic.tags,
-        ...extractHashtags(`${extraText} ${descriptionText} ${generic.bodyText}`)
+        ...extractHashtags(combinedText),
+        ...scriptValues.filter((value) => value.length <= 30 && !/[。！？.!?]/.test(value))
       ]);
 
       return {
         ...generic,
+        title: titleText,
+        description: descriptionText,
         tags,
-        bodyText: mergeMetadataText([generic.bodyText, extraText, descriptionText, tags.join(" ")])
+        bodyText: mergeMetadataText([generic.bodyText, titleText, extraText, descriptionText, scriptValues.join(" "), tags.join(" ")])
       };
     }
 
