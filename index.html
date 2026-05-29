@@ -1570,7 +1570,10 @@
     let backlinkIndex = new Map();
     const contentFetchQueue = new Set();
     const metadataFetchQueue = new Set();
+    const metadataFetchProgress = new Map();
     const metadataCache = new Map();
+    const METADATA_MAX_ATTEMPTS = 3;
+    const METADATA_RETRY_BASE_DELAY_MS = 1000;
     const PROXY_STORAGE_KEY = "infoDock.proxyUrl";
     const DEFAULT_CORS_PROXY = "https://api.allorigins.win/raw?url=";
     const PROXY_TEST_URL = "https://www.bing.com";
@@ -2687,11 +2690,6 @@
         console.warn("抓取网页正文失败：", page.error);
       }
 
-      if (!options.silent) {
-        const latestItem = laterItems.find((entry) => entry.id === id);
-        if (latestItem) await enrichWithMetadata(latestItem, { force: true, silent: true });
-      }
-
       return page;
     }
 
@@ -2827,8 +2825,12 @@
         await fetchViaProxy(PROXY_TEST_URL, {
           proxyUrl: candidateProxyUrl,
           timeoutMs: 9000,
+          maxRetries: 1,
           accept: "text/html,application/xhtml+xml,text/plain,*/*",
-          allowDefaultFallback: false
+          allowDefaultFallback: false,
+          onAttempt: ({ attempt, totalAttempts }) => {
+            elements.proxyStatus.textContent = `正在测试代理（第 ${attempt}/${totalAttempts} 次）…`;
+          }
         });
         elements.proxyStatus.textContent = "测试成功：代理可以访问公共页面。";
         elements.proxyStatus.classList.add("status-ok");
@@ -2910,6 +2912,18 @@
       return candidates;
     }
 
+    function sleep(ms) {
+      return new Promise((resolve) => window.setTimeout(resolve, ms));
+    }
+
+    function getRetryDelay(attemptIndex, baseDelayMs = 700) {
+      return Math.round(baseDelayMs * Math.pow(2, Math.max(0, attemptIndex - 1)) + Math.random() * 250);
+    }
+
+    function shouldRetryHttpStatus(status) {
+      return status === 408 || status === 425 || status === 429 || status >= 500;
+    }
+
     async function fetchViaProxy(url, options = {}) {
       const cleanUrl = String(url || "").trim();
       if (!/^https?:\/\//i.test(cleanUrl)) {
@@ -2919,27 +2933,55 @@
       const proxyCandidates = options.allowDefaultFallback === false
         ? [normalizeProxyUrl(options.proxyUrl || getActiveProxyUrl()) || DEFAULT_CORS_PROXY]
         : getProxyCandidates(options.proxyUrl || getActiveProxyUrl());
+      const maxRetries = Math.max(0, Number.isFinite(options.maxRetries) ? options.maxRetries : 1);
+      const totalAttemptsPerProxy = maxRetries + 1;
       let lastError = null;
 
       for (const proxyTemplate of proxyCandidates) {
         const target = buildProxyUrl(cleanUrl, proxyTemplate);
-        try {
-          const response = await fetchWithTimeout(target, options.timeoutMs || 9000, {
-            method: "GET",
-            headers: {
-              Accept: options.accept || "text/html,application/xhtml+xml,application/xml,application/json,text/plain;q=0.9,*/*;q=0.8"
-            }
-          });
-          const text = await response.text();
-          if (!response.ok) {
-            const detail = normalizePageText(text).slice(0, 160);
-            throw new Error(`代理请求失败：${response.status}${detail ? `，${detail}` : ""}`);
+
+        for (let attemptIndex = 0; attemptIndex <= maxRetries; attemptIndex += 1) {
+          if (attemptIndex > 0) {
+            await sleep(getRetryDelay(attemptIndex, options.retryBaseDelayMs || 700));
           }
-          return text;
-        } catch (error) {
-          lastError = error;
-          if (options.allowDefaultFallback === false) break;
+
+          if (typeof options.onAttempt === "function") {
+            options.onAttempt({
+              attempt: attemptIndex + 1,
+              totalAttempts: totalAttemptsPerProxy,
+              proxyUrl: proxyTemplate,
+              targetUrl: cleanUrl
+            });
+          }
+
+          try {
+            const response = await fetchWithTimeout(target, options.timeoutMs || 9000, {
+              method: "GET",
+              headers: {
+                Accept: options.accept || "text/html,application/xhtml+xml,application/xml,application/json,text/plain;q=0.9,*/*;q=0.8",
+                "Cache-Control": "no-cache",
+                Pragma: "no-cache"
+              }
+            });
+            const text = await response.text();
+            if (!response.ok) {
+              const detail = normalizePageText(text).slice(0, 160);
+              const error = new Error(`代理请求失败：${response.status}${detail ? `，${detail}` : ""}`);
+              error.status = response.status;
+              throw error;
+            }
+            return text;
+          } catch (error) {
+            lastError = error;
+            const status = Number(error?.status || 0);
+            const canRetryThisProxy = attemptIndex < maxRetries && (!status || shouldRetryHttpStatus(status));
+            console.warn(`代理抓取失败，第 ${attemptIndex + 1}/${totalAttemptsPerProxy} 次：`, error);
+            if (canRetryThisProxy) continue;
+            break;
+          }
         }
+
+        if (options.allowDefaultFallback === false) break;
       }
 
       throw lastError || new Error("代理抓取失败。");
@@ -3154,45 +3196,65 @@
     async function extractBilibiliMetadata(url, htmlString = "") {
       const generic = extractGenericMetadata(htmlString, url);
       const ids = extractBilibiliIds(url, htmlString);
-      const extraParts = [];
+      const tasks = [];
 
-      try {
-        const playerUrl = buildBilibiliPlayerUrl(ids);
-        if (playerUrl) {
-          const player = await fetchJsonViaProxy(playerUrl, { timeoutMs: 9000 });
-          const subtitles = player?.data?.subtitle?.subtitles || [];
-          const subtitleTexts = [];
+      const playerUrl = buildBilibiliPlayerUrl(ids);
+      if (playerUrl) {
+        tasks.push({
+          label: "字幕",
+          run: async () => {
+            const player = await fetchJsonViaProxy(playerUrl, { timeoutMs: 9000, maxRetries: 1 });
+            const subtitles = player?.data?.subtitle?.subtitles || [];
+            const subtitleResults = await Promise.allSettled(subtitles.slice(0, 3).map(async (subtitle) => {
+              const subtitleUrl = normalizeExternalUrl(subtitle.subtitle_url || subtitle.url || "");
+              if (!subtitleUrl) return "";
+              const subtitleRaw = await fetchViaProxy(subtitleUrl, {
+                timeoutMs: 9000,
+                maxRetries: 1,
+                accept: "application/json,text/plain,*/*"
+              });
+              return parseSubtitleText(subtitleRaw);
+            }));
 
-          for (const subtitle of subtitles.slice(0, 3)) {
-            const subtitleUrl = normalizeExternalUrl(subtitle.subtitle_url || subtitle.url || "");
-            if (!subtitleUrl) continue;
-            try {
-              const subtitleRaw = await fetchViaProxy(subtitleUrl, { timeoutMs: 9000, accept: "application/json,text/plain,*/*" });
-              subtitleTexts.push(parseSubtitleText(subtitleRaw));
-            } catch (error) {
-              console.warn("B站字幕抓取失败：", error);
-            }
+            subtitleResults
+              .filter((result) => result.status === "rejected")
+              .forEach((result) => console.warn("B站字幕抓取失败：", result.reason));
+
+            return subtitleResults
+              .filter((result) => result.status === "fulfilled")
+              .map((result) => result.value)
+              .filter(Boolean)
+              .join(" ");
           }
-
-          if (subtitleTexts.length) extraParts.push(subtitleTexts.join(" "));
-        }
-      } catch (error) {
-        console.warn("B站字幕信息抓取失败：", error);
+        });
       }
 
       if (ids.aid) {
-        try {
-          const replyUrl = `https://api.bilibili.com/x/v2/reply?type=1&oid=${encodeURIComponent(ids.aid)}`;
-          const reply = await fetchJsonViaProxy(replyUrl, { timeoutMs: 9000 });
-          const comments = (reply?.data?.replies || [])
-            .slice(0, 5)
-            .map((entry) => entry?.content?.message || "")
-            .filter(Boolean);
-          if (comments.length) extraParts.push(comments.join(" "));
-        } catch (error) {
-          console.warn("B站热评抓取失败：", error);
-        }
+        tasks.push({
+          label: "热评",
+          run: async () => {
+            const replyUrl = `https://api.bilibili.com/x/v2/reply?type=1&oid=${encodeURIComponent(ids.aid)}`;
+            const reply = await fetchJsonViaProxy(replyUrl, { timeoutMs: 9000, maxRetries: 1 });
+            return (reply?.data?.replies || [])
+              .slice(0, 5)
+              .map((entry) => entry?.content?.message || "")
+              .filter(Boolean)
+              .join(" ");
+          }
+        });
       }
+
+      const results = await Promise.allSettled(tasks.map((task) => task.run()));
+      results.forEach((result, index) => {
+        if (result.status === "rejected") {
+          console.warn(`B站${tasks[index]?.label || "扩展信息"}抓取失败：`, result.reason);
+        }
+      });
+
+      const extraParts = results
+        .filter((result) => result.status === "fulfilled")
+        .map((result) => result.value)
+        .filter(Boolean);
 
       return {
         ...generic,
@@ -3350,12 +3412,21 @@
       }
     }
 
-    async function extractMetadataForUrl(url, htmlString = "") {
+    async function extractMetadataForUrl(url, htmlString = "", options = {}) {
       const hostname = getHostnameFromUrl(url);
-      if (hostname.includes("bilibili.com")) return extractBilibiliMetadata(url, htmlString);
+      if (hostname.includes("bilibili.com")) {
+        return options.lightweight ? extractGenericMetadata(htmlString, url) : extractBilibiliMetadata(url, htmlString);
+      }
       if (hostname.includes("xiaohongshu.com")) return extractXiaohongshuMetadata(url, htmlString);
       if (hostname.includes("douyin.com")) return extractDouyinMetadata(url, htmlString);
       return extractGenericMetadata(htmlString, url);
+    }
+
+    function setMetadataProgress(id, progress = null) {
+      if (!id) return;
+      if (progress) metadataFetchProgress.set(id, progress);
+      else metadataFetchProgress.delete(id);
+      renderLater();
     }
 
     function queueMetadataEnrichmentForLaterItem(item, options = {}) {
@@ -3364,16 +3435,21 @@
       if (metadataFetchQueue.has(item.id)) return;
 
       metadataFetchQueue.add(item.id);
-      renderLater();
+      setMetadataProgress(item.id, { attempt: 0, total: METADATA_MAX_ATTEMPTS, label: "等待" });
 
       window.setTimeout(async () => {
         try {
-          await enrichWithMetadata(item, { silent: true, force: Boolean(options.force) });
+          await enrichWithMetadata(item, {
+            silent: true,
+            force: Boolean(options.force),
+            lightweight: options.lightweight !== false && !options.force
+          });
         } finally {
           metadataFetchQueue.delete(item.id);
+          metadataFetchProgress.delete(item.id);
           renderLater();
         }
-      }, 0);
+      }, options.delayMs ?? 1200);
     }
 
     async function enrichWithMetadata(item, options = {}) {
@@ -3384,62 +3460,92 @@
         return current;
       }
 
-      const cacheKey = current.url;
-      let metadata = metadataCache.get(cacheKey);
+      const maxAttempts = Math.max(1, Number.isFinite(options.maxAttempts) ? options.maxAttempts : METADATA_MAX_ATTEMPTS);
+      let lastError = null;
 
-      try {
-        if (!metadata || options.force) {
-          const htmlString = await fetchViaProxy(current.url, { timeoutMs: options.timeoutMs || 10000 });
-          metadata = await extractMetadataForUrl(current.url, htmlString);
-          metadataCache.set(cacheKey, metadata);
+      for (let attemptIndex = 0; attemptIndex < maxAttempts; attemptIndex += 1) {
+        const attempt = attemptIndex + 1;
+        const latest = laterItems.find((entry) => entry.id === current.id) || current;
+
+        if (attemptIndex > 0) {
+          const delay = METADATA_RETRY_BASE_DELAY_MS * Math.pow(2, attemptIndex - 1);
+          setMetadataProgress(current.id, { attempt, total: maxAttempts, label: `${delay / 1000}s 后重试` });
+          if (!options.silent) toast(`元数据抓取失败，${delay / 1000}s 后自动重试（${attempt}/${maxAttempts}）。`);
+          await sleep(delay);
         }
 
-        const mergedTags = normalizeTags([...(current.tags || []), ...(metadata.tags || [])]);
-        const nextBodyText = mergeMetadataText([
-          current.bodyText,
-          metadata.bodyText,
-          metadata.title,
-          metadata.description,
-          mergedTags.join(" ")
-        ]);
+        setMetadataProgress(current.id, { attempt, total: maxAttempts, label: options.lightweight ? "轻量提取" : "提取中" });
+        if (!options.silent) toast(`正在提取元数据（第 ${attempt}/${maxAttempts} 次）…`);
 
-        const patch = {
-          bodyText: nextBodyText,
-          metadataFetched: Boolean(nextBodyText)
-        };
+        try {
+          const cacheKey = `${latest.url}::${options.lightweight ? "light" : "full"}`;
+          let metadata = metadataCache.get(cacheKey);
 
-        if (metadata.description && !current.autoSummary) {
-          patch.autoSummary = metadata.description;
+          if (!metadata || options.force) {
+            const htmlString = await fetchViaProxy(latest.url, {
+              timeoutMs: options.timeoutMs || 10000,
+              maxRetries: 0
+            });
+            metadata = await extractMetadataForUrl(latest.url, htmlString, { lightweight: Boolean(options.lightweight) });
+            metadataCache.set(cacheKey, metadata);
+          }
+
+          const mergedTags = normalizeTags([...(latest.tags || []), ...(metadata.tags || [])]);
+          const nextBodyText = mergeMetadataText([
+            latest.bodyText,
+            metadata.bodyText,
+            metadata.title,
+            metadata.description,
+            mergedTags.join(" ")
+          ]);
+
+          const patch = {
+            bodyText: nextBodyText,
+            metadataFetched: Boolean(nextBodyText)
+          };
+
+          if (metadata.description && !latest.autoSummary) {
+            patch.autoSummary = metadata.description;
+          }
+
+          if (metadata.title && (!latest.title || latest.title === latest.url)) {
+            patch.title = metadata.title;
+          }
+
+          if (mergedTags.length) {
+            patch.tags = mergedTags;
+          }
+
+          laterItems = laterItems.map((entry) => entry.id === latest.id ? { ...entry, ...patch } : entry);
+          await save(STORE_NAMES.later, laterItems);
+          await rebuildSearchIndex();
+          metadataFetchProgress.delete(latest.id);
+          renderLater();
+
+          if (!options.silent) {
+            toast(nextBodyText ? "已重新提取元数据。" : "未提取到可用元数据。 ");
+          }
+
+          return laterItems.find((entry) => entry.id === latest.id) || null;
+        } catch (error) {
+          lastError = error;
+          console.warn(`元数据提取失败，第 ${attempt}/${maxAttempts} 次：`, error);
         }
-
-        if (metadata.title && (!current.title || current.title === current.url)) {
-          patch.title = metadata.title;
-        }
-
-        if (mergedTags.length) {
-          patch.tags = mergedTags;
-        }
-
-        laterItems = laterItems.map((entry) => entry.id === current.id ? { ...entry, ...patch } : entry);
-        await save(STORE_NAMES.later, laterItems);
-        await rebuildSearchIndex();
-        renderLater();
-
-        if (!options.silent) {
-          toast(nextBodyText ? "已重新提取元数据。" : "未提取到可用元数据。");
-        }
-
-        return laterItems.find((entry) => entry.id === current.id) || null;
-      } catch (error) {
-        console.warn("元数据提取失败：", error);
-        if (!options.silent) toast("元数据提取失败，已保留原内容。");
-        return current;
       }
+
+      metadataFetchProgress.delete(current.id);
+      renderLater();
+      if (!options.silent) toast("元数据提取最终失败，已保留原内容。 ");
+      return laterItems.find((entry) => entry.id === current.id) || current;
     }
 
     function renderMetadataStatusTag(item) {
       if (!item.url) return "";
-      if (metadataFetchQueue.has(item.id)) return `<span class="tag warn">⏳ 元数据提取中</span>`;
+      const progress = metadataFetchProgress.get(item.id);
+      if (metadataFetchQueue.has(item.id) || progress) {
+        const detail = progress?.attempt ? ` ${progress.attempt}/${progress.total}` : "";
+        return `<span class="tag warn">⏳ 元数据提取中${detail}</span>`;
+      }
       if (item.metadataFetched || normalizePageText(item.bodyText)) return `<span class="tag ok">📄 元数据</span>`;
       return `<span class="tag">未提取元数据</span>`;
     }
@@ -3905,8 +4011,15 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (action === "refresh-later-metadata") {
         const item = laterItems.find((entry) => entry.id === id);
-        if (!item) return;
-        await enrichWithMetadata(item, { force: true, silent: false });
+        if (!item || metadataFetchQueue.has(item.id)) return;
+        metadataFetchQueue.add(item.id);
+        try {
+          await enrichWithMetadata(item, { force: true, silent: false, lightweight: false });
+        } finally {
+          metadataFetchQueue.delete(item.id);
+          metadataFetchProgress.delete(item.id);
+          renderLater();
+        }
       }
 
       if (action === "save-search-snapshot") {
@@ -4049,7 +4162,7 @@ function fillUrlTemplate(template, query, domain = "") {
       elements.laterForm.reset();
       elements.laterSource.value = "其他";
       renderLater();
-      toast("已添加到稍后看清单，正在后台抓取摘要和正文。 ");
+      toast("已添加到稍后看清单，正在后台抓取摘要和轻量元数据。 ");
     }
 
     async function addLaterFromExternal(title, url, source, reason = "通过系统分享添加。") {
@@ -4333,6 +4446,148 @@ function fillUrlTemplate(template, query, domain = "") {
 
       toast("搜索栏为空，无内容可复制。");
     }
+
+    const URL_NORMALIZE_TRACKING_PARAM_PREFIXES = [
+      "utm_"
+    ];
+    const URL_NORMALIZE_TRACKING_PARAM_NAMES = new Set([
+      "ref", "source", "campaign", "from", "spm", "spm_id_from", "xsec_token", "xsec_source",
+      "previous_page", "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
+      "fbclid", "gclid", "msclkid", "_ga", "_gl", "_gid", "_gat", "_gcl_au",
+      "igshid", "mc_cid", "mc_eid", "share_source", "share_id", "share_from",
+      "share_plat", "share_platform", "share_token", "is_from_webapp", "sender_device",
+      "vd_source", "buvid", "bbid", "ts", "timestamp"
+    ]);
+    const URL_NORMALIZE_DROP_QUERY_HOSTS = [
+      "xiaohongshu.com", "zhihu.com", "bilibili.com", "douyin.com", "iesdouyin.com",
+      "amemv.com", "mp.weixin.qq.com", "xiaoyuzhoufm.com", "xiaoyuzhou.com", "spotify.com"
+    ];
+    const URL_NORMALIZE_SHORT_LINK_HOSTS = [
+      "b23.tv", "bili2233.cn", "v.douyin.com", "xhslink.com", "xhsurl.com",
+      "t.cn", "url.cn", "dwz.cn", "suo.im", "bit.ly", "tinyurl.com", "goo.gl"
+    ];
+
+    function normalizeUrl(url) {
+      const raw = String(url || "").trim();
+      if (!raw) return "";
+
+      try {
+        const urlObj = new URL(raw);
+        const hostname = urlObj.hostname.toLowerCase().replace(/^www\./, "").replace(/^m\./, "");
+
+        if (matchesHostSuffix(hostname, URL_NORMALIZE_DROP_QUERY_HOSTS)) {
+          urlObj.search = "";
+          urlObj.hash = "";
+          return urlObj.toString();
+        }
+
+        Array.from(urlObj.searchParams.keys()).forEach((paramName) => {
+          if (shouldDropUrlParam(paramName)) {
+            urlObj.searchParams.delete(paramName);
+          }
+        });
+
+        if (!Array.from(urlObj.searchParams.keys()).length) {
+          urlObj.search = "";
+        }
+
+        return urlObj.toString();
+      } catch (error) {
+        console.warn("URL 净化失败，已保留原链接：", error);
+        return raw;
+      }
+    }
+
+    async function normalizeUrlForQuickNote(url) {
+      const raw = String(url || "").trim();
+      if (!raw) return "";
+      const expandedUrl = await expandShortUrlForNormalize(raw);
+      return normalizeUrl(expandedUrl || raw);
+    }
+
+    async function expandShortUrlForNormalize(url) {
+      if (!isLikelyShortUrl(url)) return url;
+
+      const debugUrl = buildProxyDebugUrlForNormalize(url);
+      if (debugUrl) {
+        try {
+          const response = await fetchWithTimeout(debugUrl, 3000, {
+            method: "GET",
+            headers: { Accept: "application/json,text/plain,*/*" },
+            cache: "no-store"
+          });
+          if (response.ok) {
+            const data = await response.json();
+            const location = data?.targetLocation || data?.finalUrl || "";
+            if (location && location !== url) return new URL(location, url).toString();
+          }
+        } catch (error) {
+          console.warn("短链接 debug 展开失败，继续使用原链接：", error);
+        }
+      }
+
+      try {
+        const response = await fetchWithTimeout(buildProxyUrl(url), 3000, {
+          method: "HEAD",
+          headers: { Accept: "text/html,application/xhtml+xml,*/*" },
+          redirect: "manual",
+          cache: "no-store"
+        });
+        const location = response.headers.get("Location") || response.headers.get("location") || response.headers.get("X-Info-Dock-Redirect-Location");
+        if (location) return new URL(location, url).toString();
+      } catch (error) {
+        console.warn("短链接 HEAD 展开超时或失败，继续使用原链接：", error);
+      }
+
+      return url;
+    }
+
+    function buildProxyDebugUrlForNormalize(targetUrl) {
+      const proxyTemplate = normalizeProxyUrl(getActiveProxyUrl());
+      if (!proxyTemplate || /allorigins\.win|corsproxy\.io/i.test(proxyTemplate)) return "";
+
+      try {
+        const markerIndex = proxyTemplate.indexOf("{url}");
+        const baseTemplate = markerIndex >= 0 ? proxyTemplate.slice(0, markerIndex) : proxyTemplate;
+        const proxyUrl = new URL(baseTemplate);
+        proxyUrl.pathname = `${proxyUrl.pathname.replace(/\/+$/, "")}/debug`;
+        proxyUrl.search = `?url=${encodeURIComponent(targetUrl)}`;
+        proxyUrl.hash = "";
+        return proxyUrl.toString();
+      } catch (error) {
+        return "";
+      }
+    }
+
+    function isLikelyShortUrl(url) {
+      try {
+        const urlObj = new URL(url);
+        const hostname = urlObj.hostname.toLowerCase().replace(/^www\./, "");
+        return matchesHostSuffix(hostname, URL_NORMALIZE_SHORT_LINK_HOSTS);
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function matchesHostSuffix(hostname, suffixes) {
+      const cleanHostname = String(hostname || "").toLowerCase();
+      return suffixes.some((suffix) => cleanHostname === suffix || cleanHostname.endsWith(`.${suffix}`));
+    }
+
+    function shouldDropUrlParam(paramName) {
+      const name = String(paramName || "").trim().toLowerCase();
+      if (!name) return false;
+      if (URL_NORMALIZE_TRACKING_PARAM_NAMES.has(name)) return true;
+      return URL_NORMALIZE_TRACKING_PARAM_PREFIXES.some((prefix) => name.startsWith(prefix));
+    }
+
+    function hasSameNormalizedUrl(existingUrl, nextUrl) {
+      const existing = String(existingUrl || "").trim();
+      const next = String(nextUrl || "").trim();
+      if (!existing || !next) return false;
+      return existing === next || normalizeUrl(existing) === normalizeUrl(next);
+    }
+
     async function handleQuickNoteButtonClick() {
       const inputText = elements.searchInput.value.trim();
 
@@ -4342,14 +4597,16 @@ function fillUrlTemplate(template, query, domain = "") {
       }
 
       if (/^https?:\/\//i.test(inputText)) {
-        if (laterItems.some((item) => item.url === inputText)) {
+        const normalizedInputUrl = await normalizeUrlForQuickNote(inputText);
+
+        if (laterItems.some((item) => hasSameNormalizedUrl(item.url, normalizedInputUrl))) {
           toast("这条链接已经在稍后看清单里");
           return;
         }
 
-        const source = typeof detectSourceFromUrl === "function" ? detectSourceFromUrl(inputText) : "其他";
-        const title = await fetchTitleForQuickNote(inputText);
-        const result = await addLaterFromExternal(title || inputText, inputText, source, "通过搜索框快速保存。");
+        const source = typeof detectSourceFromUrl === "function" ? detectSourceFromUrl(normalizedInputUrl) : "其他";
+        const title = await fetchTitleForQuickNote(normalizedInputUrl);
+        const result = await addLaterFromExternal(title || normalizedInputUrl, normalizedInputUrl, source, "通过搜索框快速保存。");
 
         if (!result.added && result.reason === "duplicate") {
           toast("这条链接已经在稍后看清单里");
