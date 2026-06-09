@@ -1,8 +1,10 @@
-const CACHE_NAME = "info-dock-app-v060902-refined";
+const CACHE_NAME = "info-dock-app-v060902-final";
 const APP_SHELL = [
   "./",
   "./info-dock-051904.html",
-  "./manifest.json"
+  "./manifest.json",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
 
 self.addEventListener("install", (event) => {

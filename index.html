@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#2563eb" />
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <script src="https://cdn.jsdelivr.net/npm/minisearch@6.3.0/dist/umd/index.js"></script>
   <title>Info Dock</title>
   <style>
@@ -569,7 +571,10 @@
       grid-column: 1 / -1;
       min-height: 54px;
       padding: 0 16px;
-      place-items: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      align-content: center;
       text-align: center;
       background: #111827;
       color: white;
@@ -588,15 +593,16 @@
     }
 
     .platform-actions {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 6px;
     }
 
     .platform-actions .tiny-btn {
       min-height: 28px;
-      padding: 0 8px;
+      padding: 0 7px;
       font-size: 12px;
+      white-space: nowrap;
     }
 
     .platform-card-sort-control {
@@ -707,24 +713,33 @@
     }
 
     .toolbar {
-      padding: 14px;
+      padding: 10px;
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-      align-items: end;
+      gap: 8px;
+      align-items: center;
     }
 
     .toolbar.two {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: 0.9fr 0.8fr minmax(0, 1.4fr);
     }
 
     .history-toolbar {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: 0.9fr 0.9fr 0.8fr minmax(0, 1.4fr);
       gap: 8px;
     }
 
     .history-search-field {
-      grid-column: 1 / -1;
+      grid-column: auto;
+    }
+
+    .toolbar select,
+    .toolbar input {
+      min-width: 0;
+      min-height: 38px;
+      padding: 0 9px;
+      border-radius: 12px;
+      font-size: 13px;
     }
 
 
@@ -1091,18 +1106,30 @@
         font-size: 12px;
       }
 
-      .toolbar,
-      .toolbar.two,
       .edit-grid {
         grid-template-columns: 1fr;
       }
 
+      .toolbar,
+      .toolbar.two {
+        grid-template-columns: 0.9fr 0.8fr minmax(0, 1.3fr);
+        padding: 8px;
+        gap: 6px;
+      }
+
       .history-toolbar {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: 0.9fr 0.9fr 0.82fr;
       }
 
       .history-search-field {
         grid-column: 1 / -1;
+      }
+
+      .toolbar select,
+      .toolbar input {
+        min-height: 34px;
+        padding: 0 7px;
+        font-size: 12px;
       }
 
       .search-card {
@@ -1165,12 +1192,26 @@
       .platform-card-main {
         min-height: 50px;
         padding: 0 14px;
-        place-items: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        align-content: center;
         text-align: center;
       }
 
       .platform-card h3 {
         font-size: 15px;
+      }
+
+      .platform-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 5px;
+      }
+
+      .platform-actions .tiny-btn {
+        min-height: 30px;
+        padding: 0 5px;
+        font-size: 11px;
       }
 
       #storageBadge {
@@ -1244,7 +1285,7 @@
   <div class="card pwa-install-card hidden" id="pwaInstallPrompt" role="dialog" aria-live="polite" aria-label="安装 Info Dock PWA">
     <div>
       <strong>安装 Info Dock</strong>
-      <p>安装后可从系统分享菜单保存网页到稍后看。若浏览器没有弹出安装确认，请用浏览器菜单里的“安装应用 / 添加到主屏幕”。</p>
+      <p>安装后可从系统分享菜单保存网页到稍后看。点击“安装”后会打开浏览器原生安装确认。</p>
     </div>
     <div class="actions pwa-install-actions">
       <button class="primary-btn" id="pwaInstallBtn" type="button">安装</button>
@@ -1294,7 +1335,7 @@
         <select id="historyPlatformFilter"></select>
         <select id="historyStatusFilter"></select>
         <select id="historySort">
-          <option value="newest">排序</option>
+          <option value="newest">最迟优先</option>
           <option value="oldest">最早优先</option>
         </select>
         <input id="historyTextFilter" class="field history-search-field" type="search" placeholder="搜索关键词、入口、备注" />
@@ -1317,34 +1358,10 @@
         <p class="hint">说明：PWA 分享目标和书签工具默认只保存页面标题、链接和来源；正文、摘要和元数据会沿用现有后台抓取能力。</p>
       </div>
 
-      <form class="card later-form" id="laterForm">
-        <div class="form-title">
-          <h2>添加稍后看</h2>
-          <button class="primary-btn" type="submit">添加</button>
-        </div>
-        <div class="edit-grid">
-          <label class="label">标题
-            <input id="laterTitle" class="field" type="text" placeholder="这是什么内容？" required />
-          </label>
-          <label class="label">链接
-            <input id="laterUrl" class="field" type="url" placeholder="https://..." />
-          </label>
-          <label class="label">来源平台
-            <select id="laterSource"></select>
-          </label>
-        </div>
-      </form>
-
       <div class="card toolbar two">
-        <label class="label">来源平台
-          <select id="laterSourceFilter"></select>
-        </label>
-        <label class="label">状态
-          <select id="laterStatusFilter"></select>
-        </label>
-        <label class="label">关键词
-          <input id="laterTextFilter" class="field" type="search" placeholder="搜索标题、链接、摘要、结论" />
-        </label>
+        <select id="laterSourceFilter" aria-label="来源平台"></select>
+        <select id="laterStatusFilter" aria-label="状态"></select>
+        <input id="laterTextFilter" class="field" type="search" aria-label="关键词" placeholder="搜索标题、链接、摘要、结论" />
       </div>
       <div class="list" id="laterList"></div>
     </section>
@@ -1731,7 +1748,7 @@
     let proxyUrl = DEFAULT_CORS_PROXY;
     let hasCustomProxyUrl = false;
     let deferredPwaInstallPrompt = null;
-    const PWA_INSTALL_DISMISSED_KEY = "infoDock.pwaInstallDismissed";
+    const PWA_INSTALL_DISMISSED_KEY = "infoDock.pwaInstallDismissed.v2";
     let isSortingPlatforms = false;
     let selectedSortPlatformId = "";
 
@@ -1765,12 +1782,6 @@
         hidePwaInstallPrompt();
         toast("Info Dock 已安装。");
       });
-
-      window.setTimeout(() => {
-        if (!isPwaStandalone() && shouldShowPwaInstallPrompt()) {
-          showPwaInstallPrompt();
-        }
-      }, 900);
     }
 
     function isPwaStandalone() {
@@ -1807,19 +1818,21 @@
 
     async function handlePwaInstallClick() {
       if (!deferredPwaInstallPrompt) {
-        toast("当前浏览器未返回安装弹窗，请用浏览器菜单里的“安装应用 / 添加到主屏幕”。");
+        toast("当前浏览器暂未允许网页直接安装，请确认已通过 HTTPS 部署并刷新页面。");
         return;
       }
 
       try {
-        deferredPwaInstallPrompt.prompt();
+        await deferredPwaInstallPrompt.prompt();
         const choice = await deferredPwaInstallPrompt.userChoice;
         if (choice?.outcome === "accepted") {
           toast("正在安装 Info Dock。");
+        } else {
+          toast("已取消安装。");
         }
       } catch (error) {
         console.warn("PWA 安装弹窗调用失败：", error);
-        toast("安装弹窗没有打开，请用浏览器菜单安装。");
+        toast("安装弹窗没有打开，请确认浏览器支持 PWA 安装。");
       } finally {
         deferredPwaInstallPrompt = null;
         hidePwaInstallPrompt();
@@ -1834,10 +1847,10 @@
         return;
       }
 
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./service-worker.js").catch((error) => {
-          console.warn("Info Dock Service Worker 注册失败：", error);
-        });
+      navigator.serviceWorker.register("./service-worker.js").then((registration) => {
+        registration.update?.();
+      }).catch((error) => {
+        console.warn("Info Dock Service Worker 注册失败：", error);
       });
     }
 
@@ -1901,7 +1914,7 @@
         }
       });
 
-      elements.laterForm.addEventListener("submit", async (event) => {
+      if (elements.laterForm) elements.laterForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         await addLaterItem();
       });
@@ -4291,7 +4304,7 @@
       fillSelect(elements.historyStatusFilter, ["全部状态", ...SEARCH_STATUSES], "全部状态");
 
       const sourceOptions = getAllLaterSources();
-      fillSelect(elements.laterSource, sourceOptions, sourceOptions.includes("其他") ? "其他" : sourceOptions[0]);
+      if (elements.laterSource) fillSelect(elements.laterSource, sourceOptions, sourceOptions.includes("其他") ? "其他" : sourceOptions[0]);
       fillSelect(elements.laterSourceFilter, ["全部来源", ...sourceOptions], "全部来源");
       fillSelect(elements.laterStatusFilter, ["全部状态", ...LATER_STATUSES], "全部状态");
     }
@@ -4305,6 +4318,7 @@
     }
 
     function fillSelect(select, options, selectedValue) {
+      if (!select) return;
       const previousValue = select.value || selectedValue;
       select.innerHTML = "";
       options.forEach((option) => {
@@ -4503,17 +4517,17 @@ function fillUrlTemplate(template, query, domain = "") {
               <button class="danger-btn" type="button" data-action="history-delete" data-id="${escapeAttribute(item.id)}">删除</button>
             </div>
           </div>
-          <div class="edit-grid">
-            <label class="label">状态
+          <div class="compact-edit-grid">
+            <label class="compact-field"><span>状态</span>
               <select data-action="history-status" data-id="${escapeAttribute(item.id)}">
                 ${SEARCH_STATUSES.map((status) => `<option value="${escapeAttribute(status)}" ${status === item.status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
               </select>
             </label>
-            <label class="label wide">备注
-              <textarea data-action="history-note" data-id="${escapeAttribute(item.id)}" placeholder="记录搜到什么、没找到什么、下一步怎么处理。">${escapeHtml(item.note || "")}</textarea>
+            <label class="compact-field wide"><span>备注</span>
+              <textarea data-action="history-note" data-id="${escapeAttribute(item.id)}" placeholder="记录搜到什么、没找到什么、下一步。">${escapeHtml(item.note || "")}</textarea>
             </label>
             ${renderWikiPreview(item.note)}
-            <label class="label wide">标签
+            <label class="compact-field wide"><span>标签</span>
               <input class="field tag-edit-field" data-action="history-tags" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(formatTagsForEdit(item.tags))}" placeholder="#AI #教程 #观点" />
             </label>
           </div>
@@ -4879,8 +4893,8 @@ function fillUrlTemplate(template, query, domain = "") {
       rebuildBacklinkIndex();
       queueContentFetchForLaterItem(item);
       queueMetadataEnrichmentForLaterItem(item);
-      elements.laterForm.reset();
-      elements.laterSource.value = "其他";
+      if (elements.laterForm) elements.laterForm.reset();
+      if (elements.laterSource) elements.laterSource.value = "其他";
       renderLater();
       toast("已添加到稍后看清单，正在后台抓取摘要和轻量元数据。 ");
     }
