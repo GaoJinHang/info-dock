@@ -22,7 +22,7 @@
     }
   ],
   "share_target": {
-    "action": "./info-dock-051904.html",
+    "action": "./info-dock-051904.html?shareTarget=1",
     "method": "GET",
     "enctype": "application/x-www-form-urlencoded",
     "params": {

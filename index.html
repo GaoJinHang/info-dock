@@ -1167,12 +1167,13 @@
           <h2>从外部页面一键加入</h2>
           <button class="ghost-btn" id="copyBookmarkletBtn" type="button">复制收藏脚本</button>
         </div>
-        <p class="hint"><strong>手机快速保存：</strong>将本页面添加到主屏幕（iOS：分享按钮 → 添加到主屏幕；Android：菜单 → 添加到主屏幕）。之后在任何网页中点击分享按钮，选择 Info Dock，即可快速保存到稍后看清单。</p>
-        <p class="hint">电脑浏览器、file:// 本地打开，或暂不支持分享目标的浏览器，仍可使用下面的书签工具作为备选。</p>
+        <p class="hint"><strong>Android 推荐：</strong>用 Chrome / Edge / Samsung Internet 通过 HTTPS 打开并安装 Info Dock PWA。安装后，在网页中点系统分享按钮，选择 Info Dock，即可保存到稍后看清单。</p>
+        <p class="hint"><strong>通用兜底：</strong>复制链接后回到 Info Dock，点击顶部搜索框右侧的 📝 笔记；按钮会优先读取剪贴板中的 URL 并自动保存。iOS 或不支持分享目标的浏览器建议使用这个方式，或用快捷指令打开导入链接。</p>
+        <p class="hint"><strong>桌面 / 高级备用：</strong>下面的书签工具更适合电脑浏览器书签栏；手机端不再推荐把它作为主方案。</p>
         <div class="actions">
-          <a class="primary-btn" id="bookmarkletLink" href="#">拖到书签栏：加入 Info Dock</a>
+          <a class="primary-btn" id="bookmarkletLink" href="#">桌面书签工具：加入 Info Dock</a>
         </div>
-        <p class="hint">说明：分享目标和书签工具默认只保存页面标题、链接和来源，不抓取网页正文；正文和搜索快照的 IndexedDB 存储接口已预留。</p>
+        <p class="hint">说明：PWA 分享目标和书签工具默认只保存页面标题、链接和来源；正文、摘要和元数据会沿用现有后台抓取能力。</p>
       </div>
 
       <form class="card later-form" id="laterForm">
@@ -1606,8 +1607,23 @@
       rebuildBacklinkIndex();
       renderAll();
       bindEvents();
-      await consumeIncomingLaterItem();
       await handleSharedData();
+      await consumeIncomingLaterItem();
+    }
+
+    function registerServiceWorker() {
+      if (!("serviceWorker" in navigator)) return;
+
+      if (!/^https?:$/.test(window.location.protocol)) {
+        console.info("Info Dock：Service Worker 需要 http(s) 环境，file:// 下已跳过注册。");
+        return;
+      }
+
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+          console.warn("Info Dock Service Worker 注册失败：", error);
+        });
+      });
     }
 
     function handleBootError(error) {
@@ -1647,7 +1663,7 @@
         const bookmarklet = buildBookmarklet();
         elements.bookmarkletLink.href = bookmarklet;
         copyText(bookmarklet);
-        toast("已复制收藏脚本。也可以直接把蓝色按钮拖到书签栏。");
+        toast("已复制收藏脚本。桌面浏览器可拖到书签栏；手机端建议使用系统分享或 📝 笔记。");
       });
 
       elements.bookmarkletLink.addEventListener("click", (event) => {
@@ -1655,7 +1671,7 @@
         const bookmarklet = buildBookmarklet();
         elements.bookmarkletLink.href = bookmarklet;
         copyText(bookmarklet);
-        toast("已复制收藏脚本。请拖到书签栏，或新建书签后粘贴到网址栏。");
+        toast("已复制收藏脚本。桌面可拖到书签栏；手机如需使用，请手动新建书签并粘贴脚本。");
       });
 
       elements.bookmarkletLink.addEventListener("dragstart", (event) => {
@@ -1835,6 +1851,7 @@
 
     let storageMode = "indexedDB";
 
+    registerServiceWorker();
     boot().catch(handleBootError);
 
     async function initializeStorage() {
@@ -4635,16 +4652,20 @@ function fillUrlTemplate(template, query, domain = "") {
 
     async function addLaterFromExternal(title, url, source, reason = "通过系统分享添加。") {
       const cleanTitle = String(title || "").trim();
-      const cleanUrl = String(url || extractFirstUrl(cleanTitle) || "").trim();
+      const rawCleanUrl = String(url || extractFirstUrl(cleanTitle) || "").trim();
+      const cleanUrl = rawCleanUrl ? await normalizeUrlForQuickNote(rawCleanUrl) : "";
       const finalTitle = cleanTitle || cleanUrl || "未命名内容";
       const finalSource = normalizeLaterSource(source || detectSourceFromUrl(cleanUrl));
 
-      if (cleanUrl && laterItems.some((item) => item.url === cleanUrl)) {
-        return {
-          added: false,
-          reason: "duplicate",
-          item: laterItems.find((item) => item.url === cleanUrl) || null
-        };
+      if (cleanUrl) {
+        const duplicateItem = laterItems.find((item) => hasSameNormalizedUrl(item.url, cleanUrl));
+        if (duplicateItem) {
+          return {
+            added: false,
+            reason: "duplicate",
+            item: duplicateItem
+          };
+        }
       }
 
       const item = {
@@ -4757,6 +4778,14 @@ function fillUrlTemplate(template, query, domain = "") {
       return url.href;
     }
 
+    function pickBestSharedUrl(...values) {
+      for (const value of values) {
+        const candidate = extractFirstUrl(value);
+        if (candidate) return candidate;
+      }
+      return "";
+    }
+
     async function handleSharedData() {
       const params = new URLSearchParams(window.location.search);
       const hasShareParams = ["title", "text", "url"].some((key) => params.has(key));
@@ -4765,8 +4794,9 @@ function fillUrlTemplate(template, query, domain = "") {
 
       const sharedTitle = params.get("title") || "";
       const sharedText = params.get("text") || "";
-      const sharedUrl = params.get("url") || extractFirstUrl(sharedText) || "";
-      const source = inferSourceFromSharedData(params, sharedUrl, sharedText);
+      const rawSharedUrl = params.get("url") || "";
+      const sharedUrl = pickBestSharedUrl(rawSharedUrl, sharedText, sharedTitle);
+      const source = inferSourceFromSharedData(params, sharedUrl, `${sharedTitle} ${sharedText} ${rawSharedUrl}`);
       const result = await addLaterFromExternal(sharedTitle || sharedText || sharedUrl, sharedUrl, source);
 
       clearIncomingParams();
@@ -5059,34 +5089,64 @@ function fillUrlTemplate(template, query, domain = "") {
 
     async function handleQuickNoteButtonClick() {
       const inputText = elements.searchInput.value.trim();
+      const clipboardUrl = await readClipboardUrlForQuickNote();
+
+      if (clipboardUrl) {
+        elements.searchInput.value = clipboardUrl;
+        await saveUrlFromQuickNote(clipboardUrl);
+        return;
+      }
 
       if (!inputText) {
-        toast("请输入内容或链接");
+        elements.searchInput.focus();
+        toast("请输入内容或粘贴链接后点📝 笔记");
         return;
       }
 
-      if (/^https?:\/\//i.test(inputText)) {
-        const normalizedInputUrl = await normalizeUrlForQuickNote(inputText);
-
-        if (laterItems.some((item) => hasSameNormalizedUrl(item.url, normalizedInputUrl))) {
-          toast("这条链接已经在稍后看清单里");
-          return;
-        }
-
-        const source = typeof detectSourceFromUrl === "function" ? detectSourceFromUrl(normalizedInputUrl) : "其他";
-        const title = await fetchTitleForQuickNote(normalizedInputUrl);
-        const result = await addLaterFromExternal(title || normalizedInputUrl, normalizedInputUrl, source, "通过搜索框快速保存。");
-
-        if (!result.added && result.reason === "duplicate") {
-          toast("这条链接已经在稍后看清单里");
-          return;
-        }
-
-        elements.searchInput.value = "";
-        toast("已保存到稍后看");
+      const inputUrl = extractFirstUrl(inputText);
+      if (inputUrl) {
+        await saveUrlFromQuickNote(inputUrl);
         return;
       }
 
+      await saveTextQuickNote(inputText);
+    }
+
+    async function readClipboardUrlForQuickNote() {
+      if (!navigator.clipboard || typeof navigator.clipboard.readText !== "function") return "";
+
+      try {
+        const clipboardText = await navigator.clipboard.readText();
+        return extractFirstUrl(clipboardText);
+      } catch (error) {
+        console.warn("读取剪贴板失败，继续使用搜索框内容：", error);
+        return "";
+      }
+    }
+
+    async function saveUrlFromQuickNote(url) {
+      const normalizedInputUrl = await normalizeUrlForQuickNote(url);
+
+      if (laterItems.some((item) => hasSameNormalizedUrl(item.url, normalizedInputUrl))) {
+        toast("这条链接已经在稍后看清单里");
+        return false;
+      }
+
+      const source = typeof detectSourceFromUrl === "function" ? detectSourceFromUrl(normalizedInputUrl) : "其他";
+      const title = await fetchTitleForQuickNote(normalizedInputUrl);
+      const result = await addLaterFromExternal(title || normalizedInputUrl, normalizedInputUrl, source, "通过搜索框快速保存。");
+
+      if (!result.added && result.reason === "duplicate") {
+        toast("这条链接已经在稍后看清单里");
+        return false;
+      }
+
+      elements.searchInput.value = "";
+      toast("已保存到稍后看");
+      return true;
+    }
+
+    async function saveTextQuickNote(inputText) {
       const item = {
         id: createId(),
         title: inputText,
@@ -5111,6 +5171,7 @@ function fillUrlTemplate(template, query, domain = "") {
       renderLater();
       elements.searchInput.value = "";
       toast("已保存到稍后看");
+      return true;
     }
 
     async function fetchTitleForQuickNote(url) {
@@ -5136,7 +5197,7 @@ function fillUrlTemplate(template, query, domain = "") {
 
     function extractFirstUrl(text) {
       const match = String(text || "").match(/https?:\/\/[^\s<>'"]+/i);
-      return match ? match[0] : "";
+      return match ? match[0].replace(/[\]\)）】》。，、,.;；:：!?！？]+$/g, "") : "";
     }
 
     function inferSourceFromSharedData(params, url, text) {
