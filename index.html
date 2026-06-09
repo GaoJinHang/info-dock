@@ -337,6 +337,111 @@
       line-height: 1.6;
     }
 
+    .pwa-install-card {
+      position: fixed;
+      left: 50%;
+      bottom: calc(22px + env(safe-area-inset-bottom));
+      z-index: 130;
+      width: min(560px, calc(100% - 28px));
+      transform: translateX(-50%);
+      padding: 14px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      box-shadow: 0 18px 44px rgba(15, 23, 42, 0.18);
+    }
+
+    .pwa-install-card strong {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 3px;
+    }
+
+    .pwa-install-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+
+    .pwa-install-actions {
+      flex-wrap: nowrap;
+    }
+
+    .compact-details {
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgba(248, 250, 252, 0.92);
+      overflow: hidden;
+    }
+
+    .compact-details summary {
+      padding: 8px 10px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      list-style-position: inside;
+    }
+
+    .compact-details[open] summary {
+      border-bottom: 1px solid var(--line);
+      color: var(--text);
+      background: white;
+    }
+
+    .compact-details .auto-summary,
+    .compact-details .metadata-preview {
+      max-height: 132px;
+      overflow: auto;
+      padding: 9px 10px;
+    }
+
+    .compact-edit-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+      align-items: start;
+    }
+
+    .compact-field {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 7px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+      min-width: 0;
+    }
+
+    .compact-field.wide {
+      grid-column: 1 / -1;
+    }
+
+    .compact-field span {
+      white-space: nowrap;
+    }
+
+    .compact-field input,
+    .compact-field select,
+    .compact-field textarea {
+      min-width: 0;
+    }
+
+    .item .compact-field .field,
+    .item .compact-field textarea,
+    .item .compact-field select {
+      padding: 7px 9px;
+      border-radius: 11px;
+      min-height: 36px;
+    }
+
+    .item .compact-field textarea {
+      min-height: 42px;
+    }
+
     .wiki-preview,
     .backlinks-box {
       grid-column: 1 / -1;
@@ -464,7 +569,8 @@
       grid-column: 1 / -1;
       min-height: 54px;
       padding: 0 16px;
-      align-content: center;
+      place-items: center;
+      text-align: center;
       background: #111827;
       color: white;
       cursor: pointer;
@@ -636,9 +742,9 @@
     }
 
     .item {
-      padding: 12px;
+      padding: 11px;
       display: grid;
-      gap: 9px;
+      gap: 7px;
     }
 
     .item-head {
@@ -650,8 +756,8 @@
 
     .item-title {
       margin: 0;
-      font-size: 15px;
-      line-height: 1.32;
+      font-size: 14.5px;
+      line-height: 1.3;
       word-break: break-word;
     }
 
@@ -1059,6 +1165,8 @@
       .platform-card-main {
         min-height: 50px;
         padding: 0 14px;
+        place-items: center;
+        text-align: center;
       }
 
       .platform-card h3 {
@@ -1099,6 +1207,29 @@
         min-height: 32px;
       }
 
+      .compact-edit-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .compact-field {
+        grid-template-columns: 42px minmax(0, 1fr);
+      }
+
+      .compact-details .auto-summary,
+      .compact-details .metadata-preview {
+        max-height: 118px;
+      }
+
+      .pwa-install-card {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        bottom: calc(14px + env(safe-area-inset-bottom));
+      }
+
+      .pwa-install-actions {
+        justify-content: stretch;
+      }
+
       .modal-backdrop:not(.sheet) {
         padding: 12px;
       }
@@ -1110,6 +1241,16 @@
   </style>
 </head>
 <body>
+  <div class="card pwa-install-card hidden" id="pwaInstallPrompt" role="dialog" aria-live="polite" aria-label="安装 Info Dock PWA">
+    <div>
+      <strong>安装 Info Dock</strong>
+      <p>安装后可从系统分享菜单保存网页到稍后看。若浏览器没有弹出安装确认，请用浏览器菜单里的“安装应用 / 添加到主屏幕”。</p>
+    </div>
+    <div class="actions pwa-install-actions">
+      <button class="primary-btn" id="pwaInstallBtn" type="button">安装</button>
+      <button class="ghost-btn" id="pwaDismissBtn" type="button">暂不</button>
+    </div>
+  </div>
   <main class="app">
     <header class="hero">
       <div class="brand-row">
@@ -1191,12 +1332,6 @@
           <label class="label">来源平台
             <select id="laterSource"></select>
           </label>
-          <label class="label">预计耗时
-            <input id="laterEstimate" class="field" type="text" placeholder="例如：10 分钟 / 1 小时" />
-          </label>
-          <label class="label wide">为什么想看
-            <textarea id="laterReason" placeholder="先记录目的，避免只是因为推荐标题吸引人。"></textarea>
-          </label>
         </div>
       </form>
 
@@ -1208,7 +1343,7 @@
           <select id="laterStatusFilter"></select>
         </label>
         <label class="label">关键词
-          <input id="laterTextFilter" class="field" type="search" placeholder="搜索标题、原因、结论" />
+          <input id="laterTextFilter" class="field" type="search" placeholder="搜索标题、链接、摘要、结论" />
         </label>
       </div>
       <div class="list" id="laterList"></div>
@@ -1412,7 +1547,10 @@
       resetProxyBtn: $("#resetProxyBtn"),
       proxyStatus: $("#proxyStatus"),
       toast: $("#toast"),
-      storageBadge: $("#storageBadge")
+      storageBadge: $("#storageBadge"),
+      pwaInstallPrompt: $("#pwaInstallPrompt"),
+      pwaInstallBtn: $("#pwaInstallBtn"),
+      pwaDismissBtn: $("#pwaDismissBtn")
     };
 
     const searchEngine = (() => {
@@ -1592,6 +1730,8 @@
     const PROXY_TEST_URL = "https://www.bing.com";
     let proxyUrl = DEFAULT_CORS_PROXY;
     let hasCustomProxyUrl = false;
+    let deferredPwaInstallPrompt = null;
+    const PWA_INSTALL_DISMISSED_KEY = "infoDock.pwaInstallDismissed";
     let isSortingPlatforms = false;
     let selectedSortPlatformId = "";
 
@@ -1609,6 +1749,81 @@
       bindEvents();
       await handleSharedData();
       await consumeIncomingLaterItem();
+    }
+
+    function setupPwaInstallPrompt() {
+      if (isPwaStandalone()) return;
+
+      window.addEventListener("beforeinstallprompt", (event) => {
+        event.preventDefault();
+        deferredPwaInstallPrompt = event;
+        showPwaInstallPrompt();
+      });
+
+      window.addEventListener("appinstalled", () => {
+        deferredPwaInstallPrompt = null;
+        hidePwaInstallPrompt();
+        toast("Info Dock 已安装。");
+      });
+
+      window.setTimeout(() => {
+        if (!isPwaStandalone() && shouldShowPwaInstallPrompt()) {
+          showPwaInstallPrompt();
+        }
+      }, 900);
+    }
+
+    function isPwaStandalone() {
+      return window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true;
+    }
+
+    function shouldShowPwaInstallPrompt() {
+      if (!elements.pwaInstallPrompt) return false;
+      if (!/^https?:$/.test(window.location.protocol)) return false;
+      try {
+        return localStorage.getItem(PWA_INSTALL_DISMISSED_KEY) !== "1";
+      } catch (error) {
+        return true;
+      }
+    }
+
+    function showPwaInstallPrompt() {
+      if (!shouldShowPwaInstallPrompt()) return;
+      elements.pwaInstallPrompt.classList.remove("hidden");
+    }
+
+    function hidePwaInstallPrompt() {
+      if (elements.pwaInstallPrompt) elements.pwaInstallPrompt.classList.add("hidden");
+    }
+
+    function dismissPwaInstallPrompt() {
+      hidePwaInstallPrompt();
+      try {
+        localStorage.setItem(PWA_INSTALL_DISMISSED_KEY, "1");
+      } catch (error) {
+        // Ignore storage errors; dismissal only affects this browser.
+      }
+    }
+
+    async function handlePwaInstallClick() {
+      if (!deferredPwaInstallPrompt) {
+        toast("当前浏览器未返回安装弹窗，请用浏览器菜单里的“安装应用 / 添加到主屏幕”。");
+        return;
+      }
+
+      try {
+        deferredPwaInstallPrompt.prompt();
+        const choice = await deferredPwaInstallPrompt.userChoice;
+        if (choice?.outcome === "accepted") {
+          toast("正在安装 Info Dock。");
+        }
+      } catch (error) {
+        console.warn("PWA 安装弹窗调用失败：", error);
+        toast("安装弹窗没有打开，请用浏览器菜单安装。");
+      } finally {
+        deferredPwaInstallPrompt = null;
+        hidePwaInstallPrompt();
+      }
     }
 
     function registerServiceWorker() {
@@ -1638,6 +1853,8 @@
 
     function bindEvents() {
       elements.quickNoteBtn.addEventListener("click", handleQuickNoteButtonClick);
+      if (elements.pwaInstallBtn) elements.pwaInstallBtn.addEventListener("click", handlePwaInstallClick);
+      if (elements.pwaDismissBtn) elements.pwaDismissBtn.addEventListener("click", dismissPwaInstallPrompt);
       elements.globalSearchInput.addEventListener("input", renderGlobalSearchResults);
       elements.globalSearchInput.addEventListener("focus", renderGlobalSearchResults);
 
@@ -1851,6 +2068,7 @@
 
     let storageMode = "indexedDB";
 
+    setupPwaInstallPrompt();
     registerServiceWorker();
     boot().catch(handleBootError);
 
@@ -2466,7 +2684,6 @@
           title: getItemTitle(item, "later"),
           sourceLabel: "稍后看",
           fields: [
-            { key: "reason", label: "为什么想看", value: item.reason || "" },
             { key: "conclusion", label: "看完后的结论", value: item.conclusion || "" }
           ]
         }))
@@ -4027,7 +4244,7 @@
 
       const bingCard = bing ? `
         <button class="platform-card platform-card-main" type="button" data-action="platform-bing" data-platform-id="${escapeAttribute(bing.id)}">
-          <h3>${escapeHtml(bing.name)}</h3>
+          <h3>${escapeHtml(bing.name === "必应" ? "必应搜索" : `${bing.name}搜索`)}</h3>
         </button>
       ` : "";
 
@@ -4304,6 +4521,30 @@ function fillUrlTemplate(template, query, domain = "") {
         </article>
       `).join("");
     }
+    function estimateLaterItemTime(item = {}) {
+      if (item.estimate) return item.estimate;
+
+      const text = [item.title, item.autoSummary, item.bodyText, item.conclusion]
+        .filter(Boolean)
+        .join(" ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      const cjkCount = (text.match(/[\u4e00-\u9fff]/g) || []).length;
+      const wordCount = (text.match(/[A-Za-z0-9_]+/g) || []).length;
+      const readingUnits = cjkCount + wordCount;
+
+      if (!item.url && readingUnits < 80) return "约 1 分钟";
+      if (readingUnits < 120) return item.url ? "约 3 分钟" : "约 2 分钟";
+
+      const minutes = Math.min(45, Math.max(3, Math.ceil(readingUnits / 450)));
+      if (minutes <= 5) return "约 5 分钟";
+      if (minutes <= 10) return "约 10 分钟";
+      if (minutes <= 15) return "约 15 分钟";
+      if (minutes <= 25) return "约 20 分钟";
+      if (minutes <= 35) return "约 30 分钟";
+      return "约 45 分钟";
+    }
 
     function renderLater() {
       const sourceFilter = elements.laterSourceFilter.value || "全部来源";
@@ -4339,6 +4580,7 @@ function fillUrlTemplate(template, query, domain = "") {
           : escapeHtml(item.title);
         const summaryBusy = contentRefreshQueue.has(item.id) || contentFetchQueue.has(item.id) || contentFetchProgress.has(item.id);
         const metadataBusy = metadataFetchQueue.has(item.id) || metadataFetchProgress.has(item.id);
+        const estimateLabel = estimateLaterItemTime(item);
 
         return `
           <article class="card item" data-item-type="later" data-item-id="${escapeAttribute(item.id)}">
@@ -4348,7 +4590,7 @@ function fillUrlTemplate(template, query, domain = "") {
                 <div class="meta">
                   <span class="tag">${escapeHtml(item.source)}</span>
                   <span class="tag ${laterTagClass(item.status)}">${escapeHtml(item.status)}</span>
-                  <span class="tag">预计：${escapeHtml(item.estimate || "未填写")}</span>
+                  <span class="tag">预计：${escapeHtml(estimateLabel)}</span>
                   <span class="tag">${formatTime(item.createdAt)}</span>
                   ${renderContentFetchStatusTag(item)}
                   ${renderMetadataStatusTag(item)}
@@ -4357,43 +4599,36 @@ function fillUrlTemplate(template, query, domain = "") {
                 ${renderSuggestedTagButtons(item, "later")}
               </div>
               <div class="actions">
-                ${item.url ? `<button class="tiny-btn" type="button" data-action="refresh-later-summary" data-id="${escapeAttribute(item.id)}" ${summaryBusy ? "disabled" : ""}>${summaryBusy ? "摘要刷新中" : "刷新摘要"}</button>` : ""}
-                ${item.url ? `<button class="tiny-btn" type="button" data-action="refresh-later-metadata" data-id="${escapeAttribute(item.id)}" ${metadataBusy ? "disabled" : ""}>${metadataBusy ? "元数据提取中" : "重新提取元数据"}</button>` : ""}
-                ${item.url ? `<button class="tiny-btn" type="button" data-action="open-later" data-id="${escapeAttribute(item.id)}">打开链接</button>` : ""}
+                ${item.url ? `<button class="tiny-btn" type="button" data-action="refresh-later-summary" data-id="${escapeAttribute(item.id)}" ${summaryBusy ? "disabled" : ""}>${summaryBusy ? "摘要中" : "刷新摘要"}</button>` : ""}
+                ${item.url ? `<button class="tiny-btn" type="button" data-action="refresh-later-metadata" data-id="${escapeAttribute(item.id)}" ${metadataBusy ? "disabled" : ""}>${metadataBusy ? "提取中" : "元数据"}</button>` : ""}
+                ${item.url ? `<button class="tiny-btn" type="button" data-action="open-later" data-id="${escapeAttribute(item.id)}">打开</button>` : ""}
                 <button class="danger-btn" type="button" data-action="delete-later" data-id="${escapeAttribute(item.id)}">删除</button>
               </div>
             </div>
-            ${item.autoSummary && !hasUserProvidedLaterReason(item.reason) ? `<p class="auto-summary"><strong>自动摘要（自动）：</strong>${escapeHtml(item.autoSummary)}</p>` : ""}
-            ${item.bodyText ? `<p class="metadata-preview"><strong>元数据：</strong>${escapeHtml(truncateMetadataText(item.bodyText, 220))}</p>` : ""}
-            <div class="edit-grid">
-              <label class="label">状态
+            ${item.autoSummary ? `<details class="compact-details"><summary>自动摘要</summary><p class="auto-summary">${escapeHtml(item.autoSummary)}</p></details>` : ""}
+            ${item.bodyText ? `<details class="compact-details"><summary>元数据 / 正文预览</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.bodyText, 420))}</p></details>` : ""}
+            <div class="compact-edit-grid">
+              <label class="compact-field"><span>状态</span>
                 <select data-action="later-status" data-id="${escapeAttribute(item.id)}">
                   ${LATER_STATUSES.map((status) => `<option value="${escapeAttribute(status)}" ${status === item.status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
                 </select>
               </label>
-              <label class="label">来源平台
+              <label class="compact-field"><span>来源</span>
                 <select data-action="later-source" data-id="${escapeAttribute(item.id)}">
                   ${getAllLaterSources().map((source) => `<option value="${escapeAttribute(source)}" ${source === item.source ? "selected" : ""}>${escapeHtml(source)}</option>`).join("")}
                 </select>
               </label>
-              <label class="label">标题
+              <label class="compact-field wide"><span>标题</span>
                 <input class="field" data-action="later-title" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.title || "")}" />
               </label>
-              <label class="label">链接
+              <label class="compact-field wide"><span>链接</span>
                 <input class="field" data-action="later-url" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.url || "")}" placeholder="https://..." />
               </label>
-              <label class="label">预计耗时
-                <input class="field" data-action="later-estimate" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.estimate || "")}" placeholder="例如：15 分钟" />
-              </label>
-              <label class="label">标签
+              <label class="compact-field wide"><span>标签</span>
                 <input class="field tag-edit-field" data-action="later-tags" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(formatTagsForEdit(item.tags))}" placeholder="#AI #教程 #开源" />
               </label>
-              <label class="label wide">为什么想看
-                <textarea data-action="later-reason" data-id="${escapeAttribute(item.id)}" placeholder="记录这个内容和当前问题的关系。">${escapeHtml(item.reason || "")}</textarea>
-              </label>
-              ${renderWikiPreview(item.reason)}
-              <label class="label wide">看完后的结论
-                <textarea data-action="later-conclusion" data-id="${escapeAttribute(item.id)}" placeholder="看完后写一句结论：有无帮助，下一步是什么。">${escapeHtml(item.conclusion || "")}</textarea>
+              <label class="compact-field wide"><span>结论</span>
+                <textarea data-action="later-conclusion" data-id="${escapeAttribute(item.id)}" placeholder="看完后写一句结论。">${escapeHtml(item.conclusion || "")}</textarea>
               </label>
               ${renderWikiPreview(item.conclusion)}
             </div>
@@ -4402,6 +4637,7 @@ function fillUrlTemplate(template, query, domain = "") {
         `;
       }).join("");
     }
+
 
     async function handleGlobalClick(event) {
       const node = event.target.closest("[data-action]");
@@ -4577,8 +4813,6 @@ function fillUrlTemplate(template, query, domain = "") {
         "later-source": "source",
         "later-title": "title",
         "later-url": "url",
-        "later-estimate": "estimate",
-        "later-reason": "reason",
         "later-conclusion": "conclusion",
         "later-tags": "tags"
       };
@@ -4590,7 +4824,7 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (laterKeyMap[action]) {
         const shouldRender = action === "later-status" || action === "later-source" || (
-          event.type === "change" && (action === "later-reason" || action === "later-conclusion")
+          event.type === "change" && action === "later-conclusion"
         );
         await updateLaterItem(id, { [laterKeyMap[action]]: node.value }, shouldRender);
       }
@@ -4610,6 +4844,7 @@ function fillUrlTemplate(template, query, domain = "") {
     async function addLaterItem() {
       const title = elements.laterTitle.value.trim();
       const url = elements.laterUrl.value.trim();
+      const source = elements.laterSource.value;
 
       if (!title) {
         toast("稍后看标题不能为空。");
@@ -4625,13 +4860,13 @@ function fillUrlTemplate(template, query, domain = "") {
         id: createId(),
         title,
         url,
-        source: elements.laterSource.value,
-        reason: elements.laterReason.value.trim(),
+        source,
+        reason: "",
         autoSummary: "",
         bodyText: "",
         metadataFetched: false,
         tags: [],
-        estimate: elements.laterEstimate.value.trim(),
+        estimate: estimateLaterItemTime({ title, url, source }),
         status: "未看",
         conclusion: "",
         createdAt: new Date().toISOString(),
@@ -4678,7 +4913,7 @@ function fillUrlTemplate(template, query, domain = "") {
         bodyText: "",
         metadataFetched: false,
         tags: [],
-        estimate: "",
+        estimate: estimateLaterItemTime({ title: finalTitle, url: cleanUrl, source: finalSource }),
         status: "未看",
         conclusion: "",
         createdAt: new Date().toISOString(),
@@ -4712,7 +4947,7 @@ function fillUrlTemplate(template, query, domain = "") {
         bodyText: "",
         metadataFetched: false,
         tags: [],
-        estimate: "",
+        estimate: estimateLaterItemTime({ title: `${historyItem.platform}：${historyItem.keyword}`, url, source: historyItem.platform }),
         status: "未看",
         conclusion: "",
         createdAt: new Date().toISOString(),
@@ -5157,7 +5392,7 @@ function fillUrlTemplate(template, query, domain = "") {
         bodyText: "",
         metadataFetched: false,
         tags: [],
-        estimate: "",
+        estimate: estimateLaterItemTime({ title: inputText, source: "快速笔记" }),
         status: "未看",
         conclusion: "",
         createdAt: new Date().toISOString(),

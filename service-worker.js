@@ -1,4 +1,4 @@
-const CACHE_NAME = "info-dock-app-v060902";
+const CACHE_NAME = "info-dock-app-v060902-refined";
 const APP_SHELL = [
   "./",
   "./info-dock-051904.html",
