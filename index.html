@@ -1569,13 +1569,25 @@
     let laterItems = [];
     let backlinkIndex = new Map();
     const contentFetchQueue = new Set();
+    const contentRefreshQueue = new Set();
+    const contentFetchProgress = new Map();
     const metadataFetchQueue = new Set();
     const metadataFetchProgress = new Map();
+    const metadataDeferredQueue = new Set();
     const metadataCache = new Map();
-    const METADATA_MAX_ATTEMPTS = 3;
-    const METADATA_RETRY_BASE_DELAY_MS = 1000;
+    const proxyFetchInflight = new Map();
+    const METADATA_MAX_ATTEMPTS = 2;
+    const METADATA_RETRY_BASE_DELAY_MS = 1500;
+    const METADATA_FETCH_TIMEOUT_MS = 15000;
+    const METADATA_PROXY_MAX_RETRIES = 0;
+    const CONTENT_FETCH_MAX_ATTEMPTS = 2;
+    const CONTENT_FETCH_TIMEOUT_MS = 15000;
+    const CONTENT_FETCH_PROXY_MAX_RETRIES = 0;
+    const CONTENT_FETCH_RETRY_BASE_DELAY_MS = 1500;
+    const PROXY_FETCH_MAX_CANDIDATES = 2;
     const PROXY_STORAGE_KEY = "infoDock.proxyUrl";
     const DEFAULT_CORS_PROXY = "https://api.allorigins.win/raw?url=";
+    const FALLBACK_CORS_PROXIES = ["https://corsproxy.io/?url="];
     const PROXY_TEST_URL = "https://www.bing.com";
     let proxyUrl = DEFAULT_CORS_PROXY;
     let hasCustomProxyUrl = false;
@@ -1922,6 +1934,29 @@
         .filter(Boolean);
     }
 
+    async function loadLatestPageBodySnapshot(id) {
+      const snapshots = await loadContentSnapshots(id);
+      return snapshots
+        .filter((entry) => entry && entry.type === "page-body")
+        .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0))[0] || null;
+    }
+
+    function hasUsableSnapshotContent(snapshot) {
+      return Boolean(snapshot && (
+        normalizePageText(snapshot.text) ||
+        normalizePageText(snapshot.metaDescription) ||
+        normalizePageText(snapshot.title) ||
+        normalizePageText(snapshot.rawHtml)
+      ));
+    }
+
+    async function savePageBodySnapshotIfUseful(snapshot, previousSnapshot = null) {
+      if (!hasUsableSnapshotContent(snapshot)) {
+        return previousSnapshot || null;
+      }
+      return saveContentSnapshot(snapshot);
+    }
+
     async function loadAllContentSnapshots() {
       if (storageMode === "indexedDB") {
         return InfoDockDB.getAll(STORE_NAMES.contents);
@@ -2101,6 +2136,13 @@
         autoSummary: item.autoSummary || "",
         bodyText: item.bodyText || "",
         metadataFetched: Boolean(item.metadataFetched),
+        lastSummaryFetchAt: item.lastSummaryFetchAt || "",
+        lastSummaryFetchStatus: item.lastSummaryFetchStatus || "",
+        lastSummaryFetchError: item.lastSummaryFetchError || "",
+        lastMetadataFetchAt: item.lastMetadataFetchAt || "",
+        lastMetadataFetchStatus: item.lastMetadataFetchStatus || "",
+        lastMetadataFetchError: item.lastMetadataFetchError || "",
+        lastSuccessfulFetchAt: item.lastSuccessfulFetchAt || "",
         tags: normalizeTags(item.tags || []),
         estimate: item.estimate || "",
         status: LATER_STATUSES.includes(item.status) ? item.status : "未看",
@@ -2642,13 +2684,19 @@
     }
 
     function queueContentFetchForLaterItem(item) {
-      if (!item || !item.id || !item.url || contentFetchQueue.has(item.id)) return;
+      if (!item || !item.id || !item.url || contentFetchQueue.has(item.id) || contentRefreshQueue.has(item.id)) return;
       contentFetchQueue.add(item.id);
+      contentFetchProgress.set(item.id, { label: "自动摘要中", attempt: 0, total: CONTENT_FETCH_MAX_ATTEMPTS });
       window.setTimeout(async () => {
+        contentRefreshQueue.add(item.id);
+        renderLater();
         try {
           await refreshLaterContent(item.id, { silent: true });
         } finally {
           contentFetchQueue.delete(item.id);
+          contentRefreshQueue.delete(item.id);
+          contentFetchProgress.delete(item.id);
+          renderLater();
         }
       }, 0);
     }
@@ -2660,22 +2708,114 @@
         return null;
       }
 
-      if (!options.silent) toast("正在刷新摘要和正文索引…");
-      const page = await fetchPageText(item.url);
+      const maxAttempts = Math.max(1, Number.isFinite(options.maxAttempts) ? options.maxAttempts : CONTENT_FETCH_MAX_ATTEMPTS);
+      const previousSnapshot = await loadLatestPageBodySnapshot(item.id);
+      let page = null;
+      let metadata = null;
+      let lastError = null;
+      const fetchStartedAt = new Date().toISOString();
 
-      await saveContentSnapshot({
-        id: item.id,
-        type: "page-body",
-        rawHtml: page.rawHtml || "",
-        text: page.text || "",
-        metaDescription: page.metaDescription || "",
-        title: item.title,
-        url: item.url,
-        timestamp: new Date().toISOString()
-      });
+      for (let attemptIndex = 0; attemptIndex < maxAttempts; attemptIndex += 1) {
+        const attempt = attemptIndex + 1;
+        if (attemptIndex > 0) {
+          const delay = getRetryDelay(attemptIndex, options.retryBaseDelayMs || CONTENT_FETCH_RETRY_BASE_DELAY_MS);
+          if (!options.silent) toast(`摘要抓取失败，${Math.ceil(delay / 1000)}s 后自动重试（${attempt}/${maxAttempts}）。`);
+          await sleep(delay);
+        }
 
-      if (page.metaDescription) {
-        laterItems = laterItems.map((entry) => entry.id === item.id ? { ...entry, autoSummary: page.metaDescription } : entry);
+        contentFetchProgress.set(item.id, { label: options.silent ? "自动摘要中" : "刷新摘要中", attempt, total: maxAttempts });
+        if (!options.silent) toast(maxAttempts > 1 ? `正在刷新摘要和正文索引（第 ${attempt}/${maxAttempts} 次）…` : "正在刷新摘要和正文索引…");
+
+        try {
+          page = await fetchPageText(item.url, {
+            timeoutMs: options.timeoutMs || CONTENT_FETCH_TIMEOUT_MS,
+            maxRetries: Number.isFinite(options.proxyMaxRetries) ? options.proxyMaxRetries : CONTENT_FETCH_PROXY_MAX_RETRIES,
+            retryBaseDelayMs: options.retryBaseDelayMs || CONTENT_FETCH_RETRY_BASE_DELAY_MS,
+            maxProxyCandidates: Number.isFinite(options.maxProxyCandidates) ? options.maxProxyCandidates : PROXY_FETCH_MAX_CANDIDATES
+          });
+
+          if (page.rawHtml) {
+            try {
+              metadata = await extractMetadataForUrl(item.url, page.rawHtml, { lightweight: true });
+              if (hasUsableMetadata(metadata)) {
+                metadataCache.set(`${item.url}::light`, metadata);
+              }
+            } catch (metadataError) {
+              console.warn("刷新摘要时解析元数据失败：", metadataError);
+            }
+          }
+
+          if (hasUsablePageContent(page) || hasUsableMetadata(metadata)) break;
+          lastError = new Error(page.error || "未抓取到可用正文或摘要。");
+        } catch (error) {
+          lastError = error;
+          page = {
+            rawHtml: "",
+            text: "",
+            metaDescription: "",
+            title: "",
+            error: error?.message || String(error)
+          };
+          console.warn(`刷新摘要失败，第 ${attempt}/${maxAttempts} 次：`, error);
+        }
+      }
+
+      const latest = laterItems.find((entry) => entry.id === item.id) || item;
+      const metadataText = metadata ? mergeMetadataText([
+        metadata.bodyText,
+        metadata.title,
+        metadata.description,
+        Array.isArray(metadata.tags) ? metadata.tags.join(" ") : ""
+      ]) : "";
+      const snapshotText = page?.text || metadataText || "";
+      const summary = pickAutoSummary(page, metadata);
+      const stableSummary = pickStableAutoSummary(summary, latest.autoSummary);
+      const metaDescription = page?.metaDescription || metadata?.description || stableSummary || previousSnapshot?.metaDescription || "";
+      const pageTitle = page?.title || metadata?.title || previousSnapshot?.title || latest.title;
+      const hasFreshContent = Boolean(hasUsablePageContent(page) || hasUsableMetadata(metadata) || normalizePageText(page?.rawHtml));
+      const fetchErrorText = classifyFetchError(page?.error || lastError || "未抓取到可用正文或摘要。");
+      const freshSuccessText = snapshotText || stableSummary || (hasFreshContent ? metaDescription : "");
+      const retainedText = freshSuccessText || previousSnapshot?.text || previousSnapshot?.metaDescription || latest.autoSummary || "";
+
+      if (hasFreshContent) {
+        await savePageBodySnapshotIfUseful({
+          id: latest.id,
+          type: "page-body",
+          rawHtml: page?.rawHtml || previousSnapshot?.rawHtml || "",
+          text: snapshotText || previousSnapshot?.text || "",
+          metaDescription,
+          title: pageTitle,
+          url: latest.url,
+          timestamp: fetchStartedAt
+        }, previousSnapshot);
+      }
+
+      const patch = {
+        lastSummaryFetchAt: fetchStartedAt,
+        lastSummaryFetchStatus: freshSuccessText ? "success" : "failed",
+        lastSummaryFetchError: freshSuccessText ? "" : fetchErrorText
+      };
+      if (freshSuccessText) patch.lastSuccessfulFetchAt = fetchStartedAt;
+      if (stableSummary && (!options.silent || !latest.autoSummary)) {
+        patch.autoSummary = stableSummary;
+      }
+
+      if (metadata && hasUsableMetadata(metadata)) {
+        const mergedTags = normalizeTags([...(latest.tags || []), ...(metadata.tags || [])]);
+        if (mergedTags.length) patch.tags = mergedTags;
+        const nextBodyText = mergeMetadataText([latest.bodyText, metadataText]);
+        if (nextBodyText) {
+          patch.bodyText = nextBodyText;
+          patch.metadataFetched = true;
+        }
+      }
+
+      if (pageTitle && (!latest.title || latest.title === latest.url)) {
+        patch.title = pageTitle;
+      }
+
+      if (Object.keys(patch).length) {
+        laterItems = laterItems.map((entry) => entry.id === latest.id ? { ...entry, ...patch } : entry);
         await save(STORE_NAMES.later, laterItems);
       }
 
@@ -2683,38 +2823,108 @@
       renderLater();
 
       if (!options.silent) {
-        toast(page.text || page.metaDescription ? "已刷新摘要和正文索引。" : "未能抓取正文，可能被 CORS 或站点策略限制。");
+        if (freshSuccessText) {
+          toast("已刷新摘要和正文索引。");
+        } else if (retainedText) {
+          toast(`${fetchErrorText} 已保留上次成功内容。`);
+        } else {
+          toast(`${fetchErrorText} 已保留原内容。`);
+        }
       }
 
-      if (page.error) {
-        console.warn("抓取网页正文失败：", page.error);
+      if ((page?.error || lastError) && !freshSuccessText) {
+        console.warn("抓取网页正文失败：", page?.error || lastError);
       }
 
       return page;
     }
 
-    async function fetchPageText(url) {
+    function removeBoilerplateNodes(doc) {
+      doc.querySelectorAll([
+        "script", "style", "noscript", "template", "svg", "iframe",
+        "header", "footer", "nav", "aside", "form",
+        "[aria-hidden='true']", "[hidden]",
+        "[class*='cookie' i]", "[id*='cookie' i]",
+        "[class*='banner' i]", "[id*='banner' i]",
+        "[class*='advert' i]", "[id*='advert' i]",
+        "[class*='ads' i]", "[id*='ads' i]",
+        "[class*='comment' i]", "[id*='comment' i]",
+        "[class*='recommend' i]", "[id*='recommend' i]",
+        "[class*='related' i]", "[id*='related' i]",
+        "[class*='share' i]", "[id*='share' i]",
+        "[class*='login' i]", "[id*='login' i]",
+        "[class*='modal' i]", "[id*='modal' i]"
+      ].join(",")).forEach((node) => node.remove());
+    }
+
+    function scoreReadableText(text, node = null) {
+      const value = normalizePageText(text);
+      if (value.length < 40) return 0;
+      const linkText = node ? normalizePageText(Array.from(node.querySelectorAll("a")).map((entry) => entry.textContent || "").join(" ")) : "";
+      const linkDensity = value ? linkText.length / value.length : 0;
+      const punctuationCount = (value.match(/[。！？.!?，,；;：:]/g) || []).length;
+      const cjkCount = (value.match(/[\u4e00-\u9fff]/g) || []).length;
+      let score = Math.min(value.length, 1200) + punctuationCount * 12 + cjkCount * 0.2;
+      if (linkDensity > 0.45) score *= 0.35;
+      if (/(登录|注册|验证码|打开APP|下载APP|关注我们|相关推荐|热门评论|发表评论)/.test(value.slice(0, 180))) score *= 0.55;
+      return score;
+    }
+
+    function extractReadableBodyText(doc, maxLength = 8000) {
+      removeBoilerplateNodes(doc);
+      const root = doc.querySelector("article") || doc.querySelector("main") || doc.querySelector('[role="main"]') || doc.body;
+      if (!root) return "";
+      const blocks = Array.from(root.querySelectorAll("article, section, p, div, li, blockquote"))
+        .map((node, index) => ({ node, index, text: normalizePageText(node.textContent || "") }))
+        .filter((entry) => entry.text.length >= 40)
+        .map((entry) => ({ ...entry, score: scoreReadableText(entry.text, entry.node) }))
+        .filter((entry) => entry.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 12)
+        .sort((a, b) => a.index - b.index);
+
+      const seen = new Set();
+      const selected = [];
+      blocks.forEach((entry) => {
+        const key = entry.text.slice(0, 120).toLowerCase();
+        if (seen.has(key)) return;
+        seen.add(key);
+        selected.push(entry.text);
+      });
+
+      const scoredText = normalizePageText(selected.join(" "));
+      const fallbackText = normalizePageText(root.textContent || "");
+      return (scoredText.length >= 120 ? scoredText : fallbackText).slice(0, maxLength);
+    }
+
+    async function fetchPageText(url, options = {}) {
       const cleanUrl = String(url || "").trim();
       if (!/^https?:\/\//i.test(cleanUrl)) {
-        return { rawHtml: "", text: "", metaDescription: "", error: "仅支持抓取 http/https 链接。" };
+        return { rawHtml: "", text: "", metaDescription: "", title: "", error: "仅支持抓取 http/https 链接。" };
       }
 
       try {
-        const rawHtml = await fetchHtmlWithFallback(cleanUrl);
+        const rawHtml = await fetchHtmlWithFallback(cleanUrl, {
+          timeoutMs: options.timeoutMs || CONTENT_FETCH_TIMEOUT_MS,
+          maxRetries: Number.isFinite(options.maxRetries) ? options.maxRetries : CONTENT_FETCH_PROXY_MAX_RETRIES,
+          retryBaseDelayMs: options.retryBaseDelayMs || CONTENT_FETCH_RETRY_BASE_DELAY_MS,
+          maxProxyCandidates: Number.isFinite(options.maxProxyCandidates) ? options.maxProxyCandidates : PROXY_FETCH_MAX_CANDIDATES,
+          accept: options.accept || "text/html,application/xhtml+xml,application/xml,application/json,text/plain;q=0.9,*/*;q=0.8"
+        });
         const doc = new DOMParser().parseFromString(rawHtml, "text/html");
         const metaDescription = extractMetaDescription(doc);
-        const pageTitle = (
-          doc.querySelector('meta[property="og:title"]')?.getAttribute("content") ||
-          doc.querySelector("title")?.textContent ||
-          ""
-        ).trim();
+        const pageTitle = readMetaContent(doc, [
+          'meta[property="og:title" i]',
+          'meta[name="twitter:title" i]',
+          'meta[property="twitter:title" i]',
+          'meta[name="title" i]',
+          "title"
+        ]);
 
-        doc.querySelectorAll("script, style, noscript, template, svg").forEach((node) => node.remove());
-        const root = doc.querySelector("article") || doc.querySelector("main") || doc.body;
-        const text = normalizePageText(root ? root.textContent : "").slice(0, 5000);
+        const text = extractReadableBodyText(doc, 8000);
 
         return {
-          rawHtml: rawHtml.slice(0, 50000),
+          rawHtml: rawHtml.slice(0, 100000),
           text,
           metaDescription,
           title: pageTitle,
@@ -2731,8 +2941,8 @@
       }
     }
 
-    async function fetchHtmlWithFallback(url) {
-      return fetchViaProxy(url);
+    async function fetchHtmlWithFallback(url, options = {}) {
+      return fetchViaProxy(url, options);
     }
 
     function isSameOriginUrl(url) {
@@ -2744,12 +2954,82 @@
     }
 
     function extractMetaDescription(doc) {
-      const node = doc.querySelector('meta[name="description" i], meta[property="og:description" i]');
-      return node ? normalizePageText(node.getAttribute("content") || "").slice(0, 600) : "";
+      return readMetaContent(doc, [
+        'meta[property="og:description" i]',
+        'meta[name="twitter:description" i]',
+        'meta[property="twitter:description" i]',
+        'meta[name="description" i]',
+        'meta[itemprop="description" i]',
+        'meta[name="dc.description" i]'
+      ]).slice(0, 600);
     }
 
     function normalizePageText(text) {
       return String(text || "").replace(/\s+/g, " ").trim();
+    }
+
+    function hasUsablePageContent(page) {
+      return Boolean(page && (normalizePageText(page.text) || normalizePageText(page.metaDescription) || normalizePageText(page.title)));
+    }
+
+    function hasUsableMetadata(metadata) {
+      if (!metadata) return false;
+      return Boolean(
+        normalizePageText(metadata.title) ||
+        normalizePageText(metadata.description) ||
+        normalizePageText(metadata.bodyText) ||
+        normalizeTags(metadata.tags || []).length
+      );
+    }
+
+    function classifyFetchError(error) {
+      const message = normalizePageText(error?.message || error || "");
+      const status = Number(error?.status || (message.match(/(?:代理请求失败|HTTP)[:：]?\s*(\d{3})/) || [])[1] || 0);
+      if (status === 429) return "429：站点限流，已停止自动重试。";
+      if (status === 403 || status === 401) return `${status}：站点拒绝访问，可能需要登录或验证。`;
+      if (status === 404 || status === 410) return `${status}：页面不存在或已失效。`;
+      if (status >= 500) return `${status}：站点或代理临时异常。`;
+      if (/timeout|timed out|超时/i.test(message)) return "请求超时，可能是站点响应慢或代理不可用。";
+      if (/未抓取到可用正文|未提取到可用元数据/.test(message)) return message;
+      return message || "抓取失败，已保留上次成功内容。";
+    }
+
+    function isLowQualitySummary(text) {
+      const value = normalizePageText(text);
+      if (!value) return true;
+      if (value.length < 12) return true;
+      if (/^(登录|注册|下载|打开|分享|首页|验证码|请输入|关注|评论|收藏|点赞|Loading|Please wait)$/i.test(value)) return true;
+      if (/(登录|注册|验证码|请开启|enable javascript|access denied|forbidden|cloudflare|checking your browser)/i.test(value) && value.length < 160) return true;
+      const urlish = (value.match(/https?:\/\//gi) || []).length;
+      if (urlish >= 2 && urlish * 24 > value.length) return true;
+      return false;
+    }
+
+    function pickStableAutoSummary(candidate, current = "") {
+      const next = normalizePageText(candidate);
+      if (!next) return "";
+      if (isLowQualitySummary(next) && normalizePageText(current)) return "";
+      if (normalizePageText(current) && next === normalizePageText(current)) return "";
+      return next.slice(0, 600);
+    }
+
+    function summarizePlainText(text, maxLength = 360) {
+      const value = normalizePageText(text);
+      if (!value) return "";
+      if (value.length <= maxLength) return value;
+
+      const sample = value.slice(0, maxLength + 80);
+      const sentenceEnds = ["。", "！", "？", ".", "!", "?"]
+        .map((mark) => sample.lastIndexOf(mark, maxLength))
+        .filter((index) => index >= 80);
+      const cutAt = sentenceEnds.length ? Math.max(...sentenceEnds) + 1 : maxLength;
+      return `${value.slice(0, cutAt)}…`;
+    }
+
+    function pickAutoSummary(page = {}, metadata = null) {
+      const directSummary = normalizePageText(page?.metaDescription || metadata?.description || "");
+      if (directSummary) return directSummary.slice(0, 600);
+      return summarizePlainText(metadata?.bodyText || page?.text || "");
     }
 
     function normalizeProxyUrl(value) {
@@ -2907,7 +3187,9 @@
       };
 
       pushCandidate(preferredProxyUrl || getActiveProxyUrl());
-      if (hasCustomProxyUrl || preferredProxyUrl) pushCandidate(DEFAULT_CORS_PROXY);
+      pushCandidate(getActiveProxyUrl());
+      pushCandidate(DEFAULT_CORS_PROXY);
+      FALLBACK_CORS_PROXIES.forEach(pushCandidate);
       if (!candidates.length) pushCandidate(DEFAULT_CORS_PROXY);
       return candidates;
     }
@@ -2921,7 +3203,11 @@
     }
 
     function shouldRetryHttpStatus(status) {
-      return status === 408 || status === 425 || status === 429 || status >= 500;
+      return status === 408 || status === 425 || status >= 500;
+    }
+
+    function shouldStopProxyFallbackStatus(status) {
+      return status === 401 || status === 403 || status === 404 || status === 410 || status === 429;
     }
 
     async function fetchViaProxy(url, options = {}) {
@@ -2930,61 +3216,80 @@
         throw new Error("仅支持 http/https 链接。");
       }
 
-      const proxyCandidates = options.allowDefaultFallback === false
-        ? [normalizeProxyUrl(options.proxyUrl || getActiveProxyUrl()) || DEFAULT_CORS_PROXY]
-        : getProxyCandidates(options.proxyUrl || getActiveProxyUrl());
-      const maxRetries = Math.max(0, Number.isFinite(options.maxRetries) ? options.maxRetries : 1);
-      const totalAttemptsPerProxy = maxRetries + 1;
-      let lastError = null;
-
-      for (const proxyTemplate of proxyCandidates) {
-        const target = buildProxyUrl(cleanUrl, proxyTemplate);
-
-        for (let attemptIndex = 0; attemptIndex <= maxRetries; attemptIndex += 1) {
-          if (attemptIndex > 0) {
-            await sleep(getRetryDelay(attemptIndex, options.retryBaseDelayMs || 700));
-          }
-
-          if (typeof options.onAttempt === "function") {
-            options.onAttempt({
-              attempt: attemptIndex + 1,
-              totalAttempts: totalAttemptsPerProxy,
-              proxyUrl: proxyTemplate,
-              targetUrl: cleanUrl
-            });
-          }
-
-          try {
-            const response = await fetchWithTimeout(target, options.timeoutMs || 9000, {
-              method: "GET",
-              headers: {
-                Accept: options.accept || "text/html,application/xhtml+xml,application/xml,application/json,text/plain;q=0.9,*/*;q=0.8",
-                "Cache-Control": "no-cache",
-                Pragma: "no-cache"
-              }
-            });
-            const text = await response.text();
-            if (!response.ok) {
-              const detail = normalizePageText(text).slice(0, 160);
-              const error = new Error(`代理请求失败：${response.status}${detail ? `，${detail}` : ""}`);
-              error.status = response.status;
-              throw error;
-            }
-            return text;
-          } catch (error) {
-            lastError = error;
-            const status = Number(error?.status || 0);
-            const canRetryThisProxy = attemptIndex < maxRetries && (!status || shouldRetryHttpStatus(status));
-            console.warn(`代理抓取失败，第 ${attemptIndex + 1}/${totalAttemptsPerProxy} 次：`, error);
-            if (canRetryThisProxy) continue;
-            break;
-          }
-        }
-
-        if (options.allowDefaultFallback === false) break;
+      const accept = options.accept || "text/html,application/xhtml+xml,application/xml,application/json,text/plain;q=0.9,*/*;q=0.8";
+      const dedupeKey = `${cleanUrl}::${accept}`;
+      if (options.dedupe !== false && proxyFetchInflight.has(dedupeKey)) {
+        return proxyFetchInflight.get(dedupeKey);
       }
 
-      throw lastError || new Error("代理抓取失败。");
+      const run = (async () => {
+        let proxyCandidates = options.allowDefaultFallback === false
+          ? [normalizeProxyUrl(options.proxyUrl || getActiveProxyUrl()) || DEFAULT_CORS_PROXY]
+          : getProxyCandidates(options.proxyUrl || getActiveProxyUrl());
+        const maxProxyCandidates = Math.max(1, Number.isFinite(options.maxProxyCandidates) ? options.maxProxyCandidates : PROXY_FETCH_MAX_CANDIDATES);
+        proxyCandidates = proxyCandidates.slice(0, maxProxyCandidates);
+        const maxRetries = Math.max(0, Number.isFinite(options.maxRetries) ? options.maxRetries : CONTENT_FETCH_PROXY_MAX_RETRIES);
+        const totalAttemptsPerProxy = maxRetries + 1;
+        let lastError = null;
+
+        for (const proxyTemplate of proxyCandidates) {
+          const target = buildProxyUrl(cleanUrl, proxyTemplate);
+
+          for (let attemptIndex = 0; attemptIndex <= maxRetries; attemptIndex += 1) {
+            if (attemptIndex > 0) {
+              await sleep(getRetryDelay(attemptIndex, options.retryBaseDelayMs || 700));
+            }
+
+            if (typeof options.onAttempt === "function") {
+              options.onAttempt({
+                attempt: attemptIndex + 1,
+                totalAttempts: totalAttemptsPerProxy,
+                proxyUrl: proxyTemplate,
+                targetUrl: cleanUrl
+              });
+            }
+
+            try {
+              const response = await fetchWithTimeout(target, options.timeoutMs || 9000, {
+                method: "GET",
+                headers: {
+                  Accept: accept
+                }
+              });
+              const text = await response.text();
+              if (!response.ok) {
+                const detail = normalizePageText(text).slice(0, 160);
+                const error = new Error(`代理请求失败：${response.status}${detail ? `，${detail}` : ""}`);
+                error.status = response.status;
+                throw error;
+              }
+              return text;
+            } catch (error) {
+              lastError = error;
+              const status = Number(error?.status || 0);
+              const canRetryThisProxy = attemptIndex < maxRetries && (!status || shouldRetryHttpStatus(status));
+              console.warn(`代理抓取失败，第 ${attemptIndex + 1}/${totalAttemptsPerProxy} 次：`, error);
+              if (canRetryThisProxy) continue;
+              if (shouldStopProxyFallbackStatus(status)) throw error;
+              break;
+            }
+          }
+
+          if (options.allowDefaultFallback === false) break;
+        }
+
+        throw lastError || new Error("代理抓取失败。");
+      })();
+
+      if (options.dedupe === false) return run;
+      proxyFetchInflight.set(dedupeKey, run);
+      try {
+        return await run;
+      } finally {
+        if (proxyFetchInflight.get(dedupeKey) === run) {
+          proxyFetchInflight.delete(dedupeKey);
+        }
+      }
     }
 
     async function fetchWithTimeout(url, timeoutMs = 9000, fetchOptions = {}) {
@@ -3012,7 +3317,7 @@
     function readMetaContent(doc, selectors) {
       for (const selector of selectors) {
         const node = doc.querySelector(selector);
-        const value = node?.getAttribute("content") || node?.textContent || "";
+        const value = node?.getAttribute("content") || node?.getAttribute("datetime") || node?.textContent || "";
         if (value.trim()) return normalizePageText(value);
       }
       return "";
@@ -3166,30 +3471,85 @@
       return output;
     }
 
+    function extractScriptPayloadMetadata(doc) {
+      const values = extractJsonLikeValues(doc, [
+        "headline",
+        "abstract",
+        "articleBody",
+        "article_body",
+        "description",
+        "desc",
+        "summary",
+        "title",
+        "name",
+        "keywords",
+        "keyword",
+        "tags",
+        "tag",
+        "author",
+        "siteName",
+        "site_name"
+      ], 140);
+      const title = values.find((value) => value.length >= 4 && value.length <= 120 && !/[。！？.!?].{20,}/.test(value)) || "";
+      const description = values.find((value) => value.length >= 24 && value.length <= 700) || "";
+      const tags = normalizeTags(values
+        .filter((value) => value.length <= 32 && !/[。！？.!?]/.test(value))
+        .flatMap((value) => splitMetadataTags(value)));
+      return {
+        title,
+        description,
+        tags,
+        bodyText: mergeMetadataText(values)
+      };
+    }
+
     function extractGenericMetadata(htmlString, url = "") {
       const doc = parseHTML(htmlString);
       const jsonLd = extractJsonLdMetadata(doc);
+      const payload = extractScriptPayloadMetadata(doc);
       const title = readMetaContent(doc, [
         'meta[property="og:title" i]',
+        'meta[name="twitter:title" i]',
+        'meta[property="twitter:title" i]',
         'meta[name="title" i]',
         "title"
-      ]) || jsonLd.title;
+      ]) || jsonLd.title || payload.title;
       const description = readMetaContent(doc, [
         'meta[property="og:description" i]',
-        'meta[name="description" i]'
-      ]) || jsonLd.description;
+        'meta[name="twitter:description" i]',
+        'meta[property="twitter:description" i]',
+        'meta[name="description" i]',
+        'meta[itemprop="description" i]',
+        'meta[name="dc.description" i]',
+        'meta[property="article:summary" i]'
+      ]) || jsonLd.description || payload.description;
       const keywordTags = splitMetadataTags(readMetaContent(doc, ['meta[name="keywords" i]']));
-      const articleTags = normalizeTags(Array.from(doc.querySelectorAll('meta[property="article:tag" i]'))
+      const articleTags = normalizeTags(Array.from(doc.querySelectorAll('meta[property="article:tag" i], meta[name="article:tag" i]'))
         .map((node) => node.getAttribute("content") || ""));
-      const tags = normalizeTags([...keywordTags, ...articleTags, ...(jsonLd.tags || [])]);
-      const bodyText = mergeMetadataText([title, description, tags.join(" "), jsonLd.bodyText]);
+      const author = readMetaContent(doc, [
+        'meta[name="author" i]',
+        'meta[property="article:author" i]'
+      ]);
+      const publishedAt = readMetaContent(doc, [
+        'meta[property="article:published_time" i]',
+        'meta[name="pubdate" i]',
+        'meta[name="publishdate" i]',
+        'time[datetime]'
+      ]);
+      const siteName = readMetaContent(doc, [
+        'meta[property="og:site_name" i]',
+        'meta[name="application-name" i]'
+      ]);
+      const canonical = doc.querySelector('link[rel="canonical" i]')?.getAttribute("href") || url || "";
+      const tags = normalizeTags([...keywordTags, ...articleTags, ...(jsonLd.tags || []), ...(payload.tags || [])]);
+      const bodyText = mergeMetadataText([title, description, author, siteName, publishedAt, tags.join(" "), jsonLd.bodyText, payload.bodyText]);
 
       return {
         title,
         description,
         tags,
         bodyText,
-        url
+        url: canonical || url
       };
     }
 
@@ -3203,14 +3563,15 @@
         tasks.push({
           label: "字幕",
           run: async () => {
-            const player = await fetchJsonViaProxy(playerUrl, { timeoutMs: 9000, maxRetries: 1 });
+            const player = await fetchJsonViaProxy(playerUrl, { timeoutMs: 9000, maxRetries: 0, maxProxyCandidates: 1 });
             const subtitles = player?.data?.subtitle?.subtitles || [];
-            const subtitleResults = await Promise.allSettled(subtitles.slice(0, 3).map(async (subtitle) => {
+            const subtitleResults = await Promise.allSettled(subtitles.slice(0, 2).map(async (subtitle) => {
               const subtitleUrl = normalizeExternalUrl(subtitle.subtitle_url || subtitle.url || "");
               if (!subtitleUrl) return "";
               const subtitleRaw = await fetchViaProxy(subtitleUrl, {
                 timeoutMs: 9000,
-                maxRetries: 1,
+                maxRetries: 0,
+                maxProxyCandidates: 1,
                 accept: "application/json,text/plain,*/*"
               });
               return parseSubtitleText(subtitleRaw);
@@ -3234,7 +3595,7 @@
           label: "热评",
           run: async () => {
             const replyUrl = `https://api.bilibili.com/x/v2/reply?type=1&oid=${encodeURIComponent(ids.aid)}`;
-            const reply = await fetchJsonViaProxy(replyUrl, { timeoutMs: 9000, maxRetries: 1 });
+            const reply = await fetchJsonViaProxy(replyUrl, { timeoutMs: 9000, maxRetries: 0, maxProxyCandidates: 1 });
             return (reply?.data?.replies || [])
               .slice(0, 5)
               .map((entry) => entry?.content?.message || "")
@@ -3244,12 +3605,15 @@
         });
       }
 
-      const results = await Promise.allSettled(tasks.map((task) => task.run()));
-      results.forEach((result, index) => {
-        if (result.status === "rejected") {
-          console.warn(`B站${tasks[index]?.label || "扩展信息"}抓取失败：`, result.reason);
+      const results = [];
+      for (const task of tasks) {
+        try {
+          results.push({ status: "fulfilled", value: await task.run() });
+        } catch (error) {
+          console.warn(`B站${task?.label || "扩展信息"}抓取失败：`, error);
+          results.push({ status: "rejected", reason: error });
         }
-      });
+      }
 
       const extraParts = results
         .filter((result) => result.status === "fulfilled")
@@ -3434,6 +3798,19 @@
       if (!options.force && (item.metadataFetched || normalizePageText(item.bodyText))) return;
       if (metadataFetchQueue.has(item.id)) return;
 
+      if (!options.force && (contentFetchQueue.has(item.id) || contentRefreshQueue.has(item.id))) {
+        if (metadataDeferredQueue.has(item.id)) return;
+        metadataDeferredQueue.add(item.id);
+        window.setTimeout(() => {
+          metadataDeferredQueue.delete(item.id);
+          const latest = laterItems.find((entry) => entry.id === item.id);
+          if (latest && !latest.metadataFetched && !normalizePageText(latest.bodyText)) {
+            queueMetadataEnrichmentForLaterItem(latest, { ...options, delayMs: 0 });
+          }
+        }, Math.max(1200, Number.isFinite(options.delayMs) ? options.delayMs : 1800));
+        return;
+      }
+
       metadataFetchQueue.add(item.id);
       setMetadataProgress(item.id, { attempt: 0, total: METADATA_MAX_ATTEMPTS, label: "等待" });
 
@@ -3442,7 +3819,10 @@
           await enrichWithMetadata(item, {
             silent: true,
             force: Boolean(options.force),
-            lightweight: options.lightweight !== false && !options.force
+            lightweight: options.lightweight !== false && !options.force,
+            maxAttempts: Number.isFinite(options.maxAttempts) ? options.maxAttempts : METADATA_MAX_ATTEMPTS,
+            proxyMaxRetries: Number.isFinite(options.proxyMaxRetries) ? options.proxyMaxRetries : METADATA_PROXY_MAX_RETRIES,
+            maxProxyCandidates: Number.isFinite(options.maxProxyCandidates) ? options.maxProxyCandidates : PROXY_FETCH_MAX_CANDIDATES
           });
         } finally {
           metadataFetchQueue.delete(item.id);
@@ -3461,6 +3841,7 @@
       }
 
       const maxAttempts = Math.max(1, Number.isFinite(options.maxAttempts) ? options.maxAttempts : METADATA_MAX_ATTEMPTS);
+      const fetchStartedAt = new Date().toISOString();
       let lastError = null;
 
       for (let attemptIndex = 0; attemptIndex < maxAttempts; attemptIndex += 1) {
@@ -3479,15 +3860,50 @@
 
         try {
           const cacheKey = `${latest.url}::${options.lightweight ? "light" : "full"}`;
-          let metadata = metadataCache.get(cacheKey);
+          let metadata = options.force ? null : metadataCache.get(cacheKey);
+          let metadataSource = metadata ? "memory" : "";
 
-          if (!metadata || options.force) {
+          if (!metadata) {
+            const cachedSnapshot = await loadLatestPageBodySnapshot(latest.id);
+            if (hasUsableSnapshotContent(cachedSnapshot) && cachedSnapshot.rawHtml) {
+              metadata = await extractMetadataForUrl(latest.url, cachedSnapshot.rawHtml, { lightweight: Boolean(options.lightweight) });
+              if (hasUsableMetadata(metadata)) {
+                metadataSource = "snapshot";
+                metadataCache.set(cacheKey, metadata);
+              } else {
+                metadata = null;
+              }
+            }
+          }
+
+          if (!metadata) {
             const htmlString = await fetchViaProxy(latest.url, {
-              timeoutMs: options.timeoutMs || 10000,
-              maxRetries: 0
+              timeoutMs: options.timeoutMs || METADATA_FETCH_TIMEOUT_MS,
+              maxRetries: Number.isFinite(options.proxyMaxRetries) ? options.proxyMaxRetries : METADATA_PROXY_MAX_RETRIES,
+              retryBaseDelayMs: options.retryBaseDelayMs || METADATA_RETRY_BASE_DELAY_MS,
+              maxProxyCandidates: Number.isFinite(options.maxProxyCandidates) ? options.maxProxyCandidates : PROXY_FETCH_MAX_CANDIDATES
             });
             metadata = await extractMetadataForUrl(latest.url, htmlString, { lightweight: Boolean(options.lightweight) });
-            metadataCache.set(cacheKey, metadata);
+            if (hasUsableMetadata(metadata)) {
+              metadataSource = "network";
+              metadataCache.set(cacheKey, metadata);
+              await savePageBodySnapshotIfUseful({
+                id: latest.id,
+                type: "page-body",
+                rawHtml: htmlString.slice(0, 100000),
+                text: "",
+                metaDescription: metadata.description || "",
+                title: metadata.title || latest.title,
+                url: latest.url,
+                timestamp: fetchStartedAt
+              }, await loadLatestPageBodySnapshot(latest.id));
+            } else {
+              metadataCache.delete(cacheKey);
+            }
+          }
+
+          if (!hasUsableMetadata(metadata)) {
+            throw new Error("未提取到可用元数据。");
           }
 
           const mergedTags = normalizeTags([...(latest.tags || []), ...(metadata.tags || [])]);
@@ -3501,11 +3917,16 @@
 
           const patch = {
             bodyText: nextBodyText,
-            metadataFetched: Boolean(nextBodyText)
+            metadataFetched: Boolean(nextBodyText),
+            lastMetadataFetchAt: fetchStartedAt,
+            lastMetadataFetchStatus: "success",
+            lastMetadataFetchError: "",
+            lastSuccessfulFetchAt: fetchStartedAt
           };
 
-          if (metadata.description && !latest.autoSummary) {
-            patch.autoSummary = metadata.description;
+          const stableMetadataSummary = pickStableAutoSummary(metadata.description, latest.autoSummary);
+          if (stableMetadataSummary && (options.force || !latest.autoSummary)) {
+            patch.autoSummary = stableMetadataSummary;
           }
 
           if (metadata.title && (!latest.title || latest.title === latest.url)) {
@@ -3523,7 +3944,8 @@
           renderLater();
 
           if (!options.silent) {
-            toast(nextBodyText ? "已重新提取元数据。" : "未提取到可用元数据。 ");
+            const sourceText = metadataSource === "snapshot" ? "（使用已保存页面）" : metadataSource === "memory" ? "（使用缓存）" : "";
+            toast(nextBodyText ? `已重新提取元数据${sourceText}。` : "未提取到可用元数据。 ");
           }
 
           return laterItems.find((entry) => entry.id === latest.id) || null;
@@ -3533,10 +3955,33 @@
         }
       }
 
+      const latest = laterItems.find((entry) => entry.id === current.id) || current;
+      const failureText = classifyFetchError(lastError || "未提取到可用元数据。");
+      laterItems = laterItems.map((entry) => entry.id === latest.id ? {
+        ...entry,
+        lastMetadataFetchAt: fetchStartedAt,
+        lastMetadataFetchStatus: "failed",
+        lastMetadataFetchError: failureText
+      } : entry);
+      await save(STORE_NAMES.later, laterItems);
       metadataFetchProgress.delete(current.id);
+      await rebuildSearchIndex();
       renderLater();
-      if (!options.silent) toast("元数据提取最终失败，已保留原内容。 ");
+      if (!options.silent) toast(`${failureText} 已保留原内容。`);
       return laterItems.find((entry) => entry.id === current.id) || current;
+    }
+
+    function renderContentFetchStatusTag(item) {
+      if (!item.url) return "";
+      const progress = contentFetchProgress.get(item.id);
+      if (contentRefreshQueue.has(item.id) || contentFetchQueue.has(item.id) || progress) {
+        const detail = progress?.attempt ? ` ${progress.attempt}/${progress.total}` : "";
+        return `<span class="tag warn">⏳ 摘要刷新中${detail}</span>`;
+      }
+      if (item.lastSummaryFetchStatus === "failed" && !normalizePageText(item.autoSummary)) {
+        return `<span class="tag warn" title="${escapeAttribute(item.lastSummaryFetchError || "摘要抓取失败")}">摘要失败</span>`;
+      }
+      return "";
     }
 
     function renderMetadataStatusTag(item) {
@@ -3547,6 +3992,9 @@
         return `<span class="tag warn">⏳ 元数据提取中${detail}</span>`;
       }
       if (item.metadataFetched || normalizePageText(item.bodyText)) return `<span class="tag ok">📄 元数据</span>`;
+      if (item.lastMetadataFetchStatus === "failed") {
+        return `<span class="tag warn" title="${escapeAttribute(item.lastMetadataFetchError || "元数据提取失败")}">元数据失败</span>`;
+      }
       return `<span class="tag">未提取元数据</span>`;
     }
 
@@ -3872,6 +4320,8 @@ function fillUrlTemplate(template, query, domain = "") {
         const titleHtml = item.url
           ? `<a href="${escapeAttribute(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>`
           : escapeHtml(item.title);
+        const summaryBusy = contentRefreshQueue.has(item.id) || contentFetchQueue.has(item.id) || contentFetchProgress.has(item.id);
+        const metadataBusy = metadataFetchQueue.has(item.id) || metadataFetchProgress.has(item.id);
 
         return `
           <article class="card item" data-item-type="later" data-item-id="${escapeAttribute(item.id)}">
@@ -3883,14 +4333,15 @@ function fillUrlTemplate(template, query, domain = "") {
                   <span class="tag ${laterTagClass(item.status)}">${escapeHtml(item.status)}</span>
                   <span class="tag">预计：${escapeHtml(item.estimate || "未填写")}</span>
                   <span class="tag">${formatTime(item.createdAt)}</span>
+                  ${renderContentFetchStatusTag(item)}
                   ${renderMetadataStatusTag(item)}
                   ${renderExistingTagButtons(item, "later")}
                 </div>
                 ${renderSuggestedTagButtons(item, "later")}
               </div>
               <div class="actions">
-                ${item.url ? `<button class="tiny-btn" type="button" data-action="refresh-later-summary" data-id="${escapeAttribute(item.id)}">刷新摘要</button>` : ""}
-                ${item.url ? `<button class="tiny-btn" type="button" data-action="refresh-later-metadata" data-id="${escapeAttribute(item.id)}">重新提取元数据</button>` : ""}
+                ${item.url ? `<button class="tiny-btn" type="button" data-action="refresh-later-summary" data-id="${escapeAttribute(item.id)}" ${summaryBusy ? "disabled" : ""}>${summaryBusy ? "摘要刷新中" : "刷新摘要"}</button>` : ""}
+                ${item.url ? `<button class="tiny-btn" type="button" data-action="refresh-later-metadata" data-id="${escapeAttribute(item.id)}" ${metadataBusy ? "disabled" : ""}>${metadataBusy ? "元数据提取中" : "重新提取元数据"}</button>` : ""}
                 ${item.url ? `<button class="tiny-btn" type="button" data-action="open-later" data-id="${escapeAttribute(item.id)}">打开链接</button>` : ""}
                 <button class="danger-btn" type="button" data-action="delete-later" data-id="${escapeAttribute(item.id)}">删除</button>
               </div>
@@ -4006,15 +4457,32 @@ function fillUrlTemplate(template, query, domain = "") {
       }
 
       if (action === "refresh-later-summary") {
-        await refreshLaterContent(id, { silent: false });
+        const item = laterItems.find((entry) => entry.id === id);
+        if (!item || contentRefreshQueue.has(item.id) || contentFetchQueue.has(item.id)) {
+          toast("摘要刷新正在进行，请稍后。 ");
+          return;
+        }
+        contentRefreshQueue.add(item.id);
+        contentFetchProgress.set(item.id, { label: "刷新摘要中", attempt: 0, total: CONTENT_FETCH_MAX_ATTEMPTS });
+        renderLater();
+        try {
+          await refreshLaterContent(id, { silent: false });
+        } finally {
+          contentRefreshQueue.delete(item.id);
+          contentFetchProgress.delete(item.id);
+          renderLater();
+        }
       }
 
       if (action === "refresh-later-metadata") {
         const item = laterItems.find((entry) => entry.id === id);
-        if (!item || metadataFetchQueue.has(item.id)) return;
+        if (!item || metadataFetchQueue.has(item.id) || metadataFetchProgress.has(item.id)) {
+          toast("元数据提取正在进行，请稍后。 ");
+          return;
+        }
         metadataFetchQueue.add(item.id);
         try {
-          await enrichWithMetadata(item, { force: true, silent: false, lightweight: false });
+          await enrichWithMetadata(item, { force: true, silent: false, lightweight: false, maxAttempts: METADATA_MAX_ATTEMPTS, proxyMaxRetries: METADATA_PROXY_MAX_RETRIES });
         } finally {
           metadataFetchQueue.delete(item.id);
           metadataFetchProgress.delete(item.id);
@@ -4251,6 +4719,7 @@ function fillUrlTemplate(template, query, domain = "") {
       const nextItem = laterItems.find((item) => item.id === id);
       if (nextItem && Object.prototype.hasOwnProperty.call(patch, "url") && patch.url !== previousUrl) {
         queueContentFetchForLaterItem(nextItem);
+        queueMetadataEnrichmentForLaterItem(nextItem, { force: true });
       }
 
       if (shouldRender) {
