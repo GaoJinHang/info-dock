@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>正在打开 Info Dock</title>
+</head>
+<body>
+  <p>正在打开 Info Dock…</p>
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const target = new URL("../info-dock-051904.html", window.location.href);
+      function copyParam(targetName, ...sourceNames) {
+        for (const sourceName of sourceNames) {
+          const value = params.get(sourceName);
+          if (typeof value === "string" && value.trim()) {
+            target.searchParams.set(targetName, value);
+            return;
+          }
+        }
+      }
+      target.searchParams.set("shareTarget", "1");
+      copyParam("title", "title", "name");
+      copyParam("text", "text", "description");
+      copyParam("url", "url", "link");
+      window.location.replace(target.href);
+    })();
+  </script>
+</body>
+</html>

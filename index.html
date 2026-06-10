@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#2563eb" />
-  <link rel="manifest" href="./manifest.webmanifest?v=061003-honor-install-share-fix">
+  <link rel="manifest" href="manifest.json?v=061010-share-target-v2">
   <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
   <link rel="apple-touch-icon" href="icon-192.png">
   <script src="https://cdn.jsdelivr.net/npm/minisearch@6.3.0/dist/umd/index.js"></script>
@@ -1307,7 +1307,7 @@
   <div class="card pwa-install-card hidden" id="pwaInstallPrompt" role="dialog" aria-live="polite" aria-label="安装 Info Dock PWA">
     <div>
       <strong>安装 Info Dock</strong>
-      <p>安装后可从系统分享菜单保存网页到稍后看。若浏览器已开放网页内安装入口，点击“安装”会打开原生确认；否则请按设置页提示从浏览器菜单安装。</p>
+      <p>安装后，支持 Web Share Target 的浏览器会把 Info Dock 注册到系统分享面板。点击“安装”后会打开浏览器原生安装确认。</p>
     </div>
     <div class="actions pwa-install-actions">
       <button class="primary-btn" id="pwaInstallBtn" type="button">安装</button>
@@ -1398,15 +1398,15 @@
         </div>
         <div class="settings-subpanel" aria-label="PWA 安装和分享目标">
           <h3>📲 PWA 安装 / 分享目标</h3>
-          <p class="hint">荣耀手机上的 Edge、夸克、华为浏览器对“PWA 安装”和“系统分享目标”的支持点不一样：网页内安装弹窗、添加到桌面、安装后注册分享目标是三件事。本版只在浏览器真正发出安装事件时调用原生弹窗；未发出时给出菜单安装指引，不再误报为“不支持 PWA”。</p>
+          <p class="hint">安装成功不等于一定已注册系统分享目标；分享目标需要浏览器在安装时读取到 manifest 里的 share_target 并写入系统分享面板。本版已改为专用分享入口、全新 PWA 身份，并避免缓存旧 manifest。</p>
           <ol class="install-steps">
-            <li>Edge 若提示“已安装”但桌面没有图标，通常是 Edge/系统里已有同源 PWA 记录或旧 manifest 身份缓存。本版已换用新的 manifest 路径和应用 id，并避免缓存 manifest；仍提示时需在 Edge 应用管理或系统应用列表清掉旧记录。</li>
-            <li>夸克“支持 PWA”通常指可通过菜单添加到桌面，不等于一定向网页开放 beforeinstallprompt 弹窗；请优先用菜单里的“添加到桌面 / 安装应用”。</li>
-            <li>华为浏览器能安装桌面图标不代表一定支持 Web Share Target。若安装后系统分享面板没有 Info Dock，请使用复制链接后点 📝 笔记的兜底方式；如浏览器后续支持分享目标，重装新版后才会注册。</li>
+            <li>Edge / 华为浏览器如果已经安装但分享面板没有 Info Dock，请先卸载旧 Info Dock，再从本版页面重新安装；分享目标只会在安装阶段注册。</li>
+            <li>重新安装后，请完全关闭浏览器和目标 App，再重新打开目标网页测试系统分享；Android 分享面板有时会延迟刷新目标列表。</li>
+            <li>如果仍没有 Info Dock，说明当前浏览器安装方式没有把 Web Share Target 写入系统分享面板；网页代码无法强制系统显示，只能使用复制链接后点 📝 笔记兜底。</li>
           </ol>
           <div class="actions settings-actions">
-            <button class="primary-btn" id="manualPwaInstallBtn" type="button">安装 / 查看安装方式</button>
-            <button class="ghost-btn" id="resetPwaInstallDismissBtn" type="button">刷新 PWA 缓存状态</button>
+            <button class="primary-btn" id="manualPwaInstallBtn" type="button">手动安装 PWA</button>
+            <button class="ghost-btn" id="resetPwaInstallDismissBtn" type="button">刷新安装状态</button>
           </div>
           <p class="hint proxy-status" id="pwaInstallStatus" aria-live="polite"></p>
         </div>
@@ -1787,7 +1787,7 @@
     let proxyUrl = DEFAULT_CORS_PROXY;
     let hasCustomProxyUrl = false;
     let deferredPwaInstallPrompt = null;
-    const PWA_INSTALL_DISMISSED_KEY = "infoDock.pwaInstallDismissed.v4";
+    const PWA_INSTALL_DISMISSED_KEY = "infoDock.pwaInstallDismissed.v3";
     let isSortingPlatforms = false;
     let selectedSortPlatformId = "";
 
@@ -1819,7 +1819,7 @@
         deferredPwaInstallPrompt = null;
         hidePwaInstallPrompt();
         renderPwaInstallStatus();
-        toast("Info Dock 已安装。若分享面板还没有目标，请完全关闭浏览器后重新打开再试。 ");
+        toast("Info Dock 已安装。请完全关闭浏览器和目标 App 后重新分享；分享目标由浏览器安装时注册到系统。 ");
       });
     }
 
@@ -1834,47 +1834,19 @@
     function getBrowserInstallHint() {
       const ua = navigator.userAgent || "";
       if (/Quark|QuarkPC|UCBrowser|UCWEB/i.test(ua)) {
-        return "夸克可以尝试菜单里的“添加到桌面 / 安装应用”；它即使支持 PWA，也可能不向网页开放安装弹窗。";
+        return "夸克可能支持添加到桌面，但不一定把 PWA 注册为系统分享目标；没有目标时请用复制链接 + 📝 笔记兜底。";
       }
       if (/EdgA|Edg\//i.test(ua)) {
-        return "Edge 若显示“已安装”但桌面没有图标，请先到 Edge 的应用管理、手机系统应用列表或桌面隐藏应用里删除旧 Info Dock；本版已更换 manifest 路径和应用 id，用于避开旧安装记录。";
+        return "Edge 需要在安装时读取到新版 manifest 的 share_target；如果已装旧版，请卸载旧 Info Dock 后重装。";
       }
       if (/HuaweiBrowser|HONOR|HUAWEI/i.test(ua)) {
-        return "华为 / 荣耀浏览器可先用菜单“添加到桌面”；但系统分享面板是否出现 Info Dock 取决于浏览器是否实现 Web Share Target，网页代码无法强制添加。";
+        return "华为 / 荣耀浏览器可能只完成桌面安装，不一定实现 Web Share Target；没有目标时不是页面保存逻辑失效。";
       }
-      return "可使用浏览器菜单中的“安装应用 / 添加到主屏幕 / 添加到桌面”。";
-    }
-
-    function getPwaInstallStatusMessage() {
-      if (isPwaStandalone()) {
-        return "当前已在 PWA 独立窗口运行。若系统分享面板没有 Info Dock，说明安装它的浏览器可能没有注册 Web Share Target；可复制链接后用 📝 笔记兜底保存。";
-      }
-
-      if (!canUsePwaInstallFeatures()) {
-        return "PWA 安装和系统分享目标需要 HTTPS，或 localhost 本地调试环境。请不要用 file:// 或普通 http 长期使用。";
-      }
-
-      if (!("serviceWorker" in navigator)) {
-        return "当前浏览器没有 Service Worker，无法成为完整 PWA，也无法注册 PWA 分享目标。";
-      }
-
-      if (deferredPwaInstallPrompt) {
-        return `当前浏览器已开放网页内安装弹窗。点击“安装 / 查看安装方式”可调起原生安装确认。安装后若分享面板没有 Info Dock，请完全关闭浏览器后再试。${getBrowserInstallHint()}`;
-      }
-
-      return `当前页面具备 PWA 基础条件，但浏览器尚未向网页发出安装弹窗事件。请从浏览器菜单安装 / 添加到桌面；这不等于网页不支持 PWA。${getBrowserInstallHint()}`;
-    }
-
-    function showManualPwaInstallGuide() {
-      const message = getPwaInstallStatusMessage();
-      if (elements.pwaInstallStatus) elements.pwaInstallStatus.textContent = message;
-      setStatus(message);
-      toast("请按设置页提示从浏览器菜单安装 / 添加到桌面。 ");
+      return "安装后若分享面板没有目标，请卸载旧图标后重装，并确认浏览器支持 Web Share Target。";
     }
 
     function shouldShowPwaInstallPrompt() {
       if (!elements.pwaInstallPrompt) return false;
-      if (!deferredPwaInstallPrompt) return false;
       if (isPwaStandalone()) return false;
       if (!canUsePwaInstallFeatures()) return false;
       try {
@@ -1921,18 +1893,39 @@
 
       showPwaInstallPrompt();
       renderPwaInstallStatus();
-      toast("已刷新 PWA 缓存状态。若浏览器仍显示旧安装记录，请关闭浏览器后重新打开本页。 ");
+      toast("已刷新 PWA 安装状态。若浏览器仍显示旧状态，请关闭浏览器后重新打开本页。 ");
     }
 
     function renderPwaInstallStatus() {
       if (!elements.pwaInstallStatus) return;
-      elements.pwaInstallStatus.textContent = getPwaInstallStatusMessage();
+
+      if (isPwaStandalone()) {
+        elements.pwaInstallStatus.textContent = "当前已在 PWA 独立窗口运行。若系统分享面板没有 Info Dock，通常是浏览器没有注册 Web Share Target，或安装时仍读取了旧 manifest。";
+        return;
+      }
+
+      if (!("serviceWorker" in navigator)) {
+        elements.pwaInstallStatus.textContent = "当前浏览器不支持 Service Worker，无法完整支持 PWA 分享目标接收流程。";
+        return;
+      }
+
+      if (!canUsePwaInstallFeatures()) {
+        elements.pwaInstallStatus.textContent = "PWA 安装和系统分享目标需要 HTTPS，或 localhost 本地调试环境。";
+        return;
+      }
+
+      if (deferredPwaInstallPrompt) {
+        elements.pwaInstallStatus.textContent = `当前浏览器已准备好安装。请安装新版后完全关闭浏览器，再重新分享网页检查 Info Dock 目标。${getBrowserInstallHint()}`;
+        return;
+      }
+
+      elements.pwaInstallStatus.textContent = `当前浏览器未提供网页内安装弹窗。请用浏览器菜单安装；系统分享目标是否出现取决于该浏览器是否支持 Web Share Target。${getBrowserInstallHint()}`;
     }
 
     async function handlePwaInstallClick() {
       if (!deferredPwaInstallPrompt) {
         renderPwaInstallStatus();
-        showManualPwaInstallGuide();
+        toast("没有拿到浏览器原生安装弹窗，请从浏览器菜单手动添加到桌面 / 安装应用。 ");
         return;
       }
 
@@ -1957,7 +1950,7 @@
     async function handleManualPwaInstallClick() {
       if (isPwaStandalone()) {
         renderPwaInstallStatus();
-        toast("当前已经在 PWA 中运行。分享目标缺失时，请使用 📝 笔记兜底，或换支持 Web Share Target 的浏览器重新安装。 ");
+        toast("当前已经在 PWA 中运行。若分享目标缺失，请卸载旧图标后从新版页面重新安装。 ");
         return;
       }
 
@@ -1967,12 +1960,7 @@
         return;
       }
 
-      if (deferredPwaInstallPrompt) {
-        await handlePwaInstallClick();
-        return;
-      }
-
-      showManualPwaInstallGuide();
+      await handlePwaInstallClick();
     }
 
     function registerServiceWorker() {
@@ -5186,15 +5174,26 @@ function fillUrlTemplate(template, query, domain = "") {
         .trim();
     }
 
+    function getFirstParam(params, ...keys) {
+      for (const key of keys) {
+        const value = params.get(key);
+        if (typeof value === "string" && value.trim()) return value;
+      }
+      return "";
+    }
+
     async function handleSharedData() {
       const params = new URLSearchParams(window.location.search);
-      const hasShareParams = ["title", "text", "url"].some((key) => params.has(key));
+      const hasShareParams = ["title", "text", "url", "name", "description", "link", "shareTarget"].some((key) => params.has(key));
 
       if (!hasShareParams || params.get("addLater") === "1") return false;
 
-      const sharedTitle = params.get("title") || "";
-      const sharedText = params.get("text") || "";
-      const rawSharedUrl = params.get("url") || "";
+      const sharedTitle = getFirstParam(params, "title", "name");
+      const sharedText = getFirstParam(params, "text", "description");
+      const rawSharedUrl = getFirstParam(params, "url", "link");
+      const hasActualShareData = [sharedTitle, sharedText, rawSharedUrl].some((value) => String(value || "").trim());
+      if (!hasActualShareData) return false;
+
       const sharedUrl = pickBestSharedUrl(rawSharedUrl, sharedText, sharedTitle);
       const sharedTitleFallback = stripUrlFromSharedText(sharedTitle || sharedText || rawSharedUrl);
       const source = inferSourceFromSharedData(params, sharedUrl, `${sharedTitle} ${sharedText} ${rawSharedUrl}`);

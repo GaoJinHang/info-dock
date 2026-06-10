@@ -2,7 +2,7 @@
   "name": "Info Dock",
   "short_name": "Info Dock",
   "description": "快速保存网页到 Info Dock 稍后看清单。",
-  "start_url": "./info-dock-051904.html?source=pwa&infoDockPwa=061003-honor-install-share-fix",
+  "start_url": "./info-dock-051904.html?source=pwa&v=061010-share-target-v2",
   "scope": "./",
   "display": "standalone",
   "theme_color": "#2563eb",
@@ -22,7 +22,7 @@
     }
   ],
   "share_target": {
-    "action": "./info-dock-051904.html?shareTarget=1",
+    "action": "./share-target/index.html",
     "method": "GET",
     "params": {
       "title": "title",
@@ -30,7 +30,7 @@
       "url": "url"
     }
   },
-  "id": "/info-dock/pwa-061003-honor-install-share-fix?identity=20260610",
+  "id": "./info-dock-pwa-v061010-share-target-v2",
   "display_override": [
     "standalone",
     "minimal-ui"
