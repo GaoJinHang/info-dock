@@ -2,31 +2,34 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>正在导入到 Info Dock</title>
   <meta name="robots" content="noindex">
-  <title>正在打开 Info Dock</title>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;min-height:100vh;display:grid;place-items:center;background:#f6f7f9;color:#111827}
+    main{max-width:28rem;padding:1.25rem;text-align:center}
+    p{color:#6b7280;line-height:1.6}
+  </style>
 </head>
 <body>
-  <p>正在打开 Info Dock…</p>
+  <main>
+    <h1>正在导入到 Info Dock</h1>
+    <p>如果没有自动跳转，请返回 Info Dock 主页面，或复制链接后使用 📝 笔记兜底保存。</p>
+  </main>
   <script>
     (function () {
-      const params = new URLSearchParams(window.location.search);
-      const target = new URL("../info-dock-051904.html", window.location.href);
-      function copyParam(targetName, ...sourceNames) {
-        for (const sourceName of sourceNames) {
-          const value = params.get(sourceName);
-          if (typeof value === "string" && value.trim()) {
-            target.searchParams.set(targetName, value);
-            return;
-          }
-        }
-      }
+      var target = new URL("../info-dock-051904.html", window.location.href);
+      var incoming = new URL(window.location.href);
+      ["title", "text", "url", "name", "description", "link"].forEach(function (key) {
+        var value = incoming.searchParams.get(key);
+        if (value) target.searchParams.set(key, value);
+      });
+      if (!target.searchParams.has("title") && incoming.searchParams.has("name")) target.searchParams.set("title", incoming.searchParams.get("name"));
+      if (!target.searchParams.has("text") && incoming.searchParams.has("description")) target.searchParams.set("text", incoming.searchParams.get("description"));
+      if (!target.searchParams.has("url") && incoming.searchParams.has("link")) target.searchParams.set("url", incoming.searchParams.get("link"));
       target.searchParams.set("shareTarget", "1");
-      copyParam("title", "title", "name");
-      copyParam("text", "text", "description");
-      copyParam("url", "url", "link");
       window.location.replace(target.href);
-    })();
+    }());
   </script>
 </body>
 </html>

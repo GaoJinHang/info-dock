@@ -1,22 +1,13 @@
-const CACHE_NAME = "info-dock-app-v061010-share-target-v2";
+const CACHE_NAME = "info-dock-app-v061010-share-target-post";
 const APP_PAGE = "./info-dock-051904.html";
-const SHARE_TARGET_ENTRY = "./share-target/index.html";
+const SHARE_TARGET_PAGE = "./share-target/";
 const APP_SHELL = [
   "./",
   APP_PAGE,
-  SHARE_TARGET_ENTRY,
+  "./share-target/index.html",
   "./icon-192.png",
   "./icon-512.png"
 ];
-
-function normalizedPath(url) {
-  return url.pathname.replace(/\/+$/, "");
-}
-
-const SHARE_TARGET_PATHS = new Set([
-  normalizedPath(new URL("./share-target/", self.registration.scope)),
-  normalizedPath(new URL(SHARE_TARGET_ENTRY, self.registration.scope))
-]);
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -39,17 +30,21 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+function trimSlash(value) {
+  return String(value || "").replace(/\/+$/, "");
+}
+
 function appendShareParam(targetUrl, key, value) {
-  if (typeof value !== "string") return;
-  const cleanValue = value.trim();
+  if (value == null) return;
+  const cleanValue = String(value).trim();
   if (cleanValue) targetUrl.searchParams.set(key, cleanValue);
 }
 
-function appendFirstShareParam(targetUrl, targetKey, data, ...sourceKeys) {
-  for (const sourceKey of sourceKeys) {
-    const value = data.get(sourceKey);
-    if (typeof value === "string" && value.trim()) {
-      appendShareParam(targetUrl, targetKey, value);
+function appendAliasedShareParam(targetUrl, canonicalKey, data, aliases) {
+  for (const key of [canonicalKey].concat(aliases || [])) {
+    const value = data.get ? data.get(key) : data[key];
+    if (value != null && String(value).trim()) {
+      appendShareParam(targetUrl, canonicalKey, value);
       return;
     }
   }
@@ -57,25 +52,27 @@ function appendFirstShareParam(targetUrl, targetKey, data, ...sourceKeys) {
 
 function isShareTargetRequest(request, url) {
   if (url.origin !== self.location.origin) return false;
-  return SHARE_TARGET_PATHS.has(normalizedPath(url)) && ["GET", "POST"].includes(request.method);
+  const targetPath = trimSlash(new URL(SHARE_TARGET_PAGE, self.registration.scope).pathname);
+  const requestPath = trimSlash(url.pathname);
+  return (requestPath === targetPath || requestPath === `${targetPath}/index.html`) && ["GET", "POST"].includes(request.method);
 }
 
-async function handleShareTargetRequest(request, url) {
+async function handleShareTarget(request, url) {
   const redirectUrl = new URL(APP_PAGE, self.registration.scope);
   redirectUrl.searchParams.set("shareTarget", "1");
 
   if (request.method === "GET") {
-    appendFirstShareParam(redirectUrl, "title", url.searchParams, "title", "name");
-    appendFirstShareParam(redirectUrl, "text", url.searchParams, "text", "description");
-    appendFirstShareParam(redirectUrl, "url", url.searchParams, "url", "link");
+    appendAliasedShareParam(redirectUrl, "title", url.searchParams, ["name"]);
+    appendAliasedShareParam(redirectUrl, "text", url.searchParams, ["description"]);
+    appendAliasedShareParam(redirectUrl, "url", url.searchParams, ["link"]);
     return Response.redirect(redirectUrl.href, 303);
   }
 
   try {
     const formData = await request.formData();
-    appendFirstShareParam(redirectUrl, "title", formData, "title", "name");
-    appendFirstShareParam(redirectUrl, "text", formData, "text", "description");
-    appendFirstShareParam(redirectUrl, "url", formData, "url", "link");
+    appendAliasedShareParam(redirectUrl, "title", formData, ["name"]);
+    appendAliasedShareParam(redirectUrl, "text", formData, ["description"]);
+    appendAliasedShareParam(redirectUrl, "url", formData, ["link"]);
   } catch (error) {
     console.warn("Info Dock 读取分享内容失败：", error);
   }
@@ -83,16 +80,14 @@ async function handleShareTargetRequest(request, url) {
   return Response.redirect(redirectUrl.href, 303);
 }
 
-function shouldBypassCache(url) {
-  return url.pathname.endsWith("/manifest.json") ||
-    url.pathname.endsWith("/manifest.webmanifest") ||
-    url.pathname.endsWith("/service-worker.js");
+function shouldNeverCache(url) {
+  return /(?:^|\/)(?:manifest\.json|manifest\.webmanifest|service-worker\.js)$/.test(url.pathname);
 }
 
 function fetchAndUpdateCache(request) {
   return fetch(request).then((response) => {
-    const copy = response.clone();
-    if (response.ok) {
+    if (response.ok && !shouldNeverCache(new URL(request.url))) {
+      const copy = response.clone();
       caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
     }
     return response;
@@ -104,26 +99,24 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
 
   if (isShareTargetRequest(request, url)) {
-    event.respondWith(handleShareTargetRequest(request, url));
+    event.respondWith(handleShareTarget(request, url));
     return;
   }
 
   if (request.method !== "GET") return;
   if (url.origin !== self.location.origin) return;
 
-  if (shouldBypassCache(url)) return;
+  if (shouldNeverCache(url)) {
+    event.respondWith(fetch(request, { cache: "no-store" }));
+    return;
+  }
 
   if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request).catch(() => caches.match(APP_PAGE))
-    );
+    event.respondWith(fetch(request).catch(() => caches.match(APP_PAGE)));
     return;
   }
 
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetchAndUpdateCache(request);
-    })
+    caches.match(request).then((cached) => cached || fetchAndUpdateCache(request))
   );
 });
