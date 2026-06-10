@@ -1,11 +1,13 @@
-const CACHE_NAME = "info-dock-app-v060910-honor-share";
+const CACHE_NAME = "info-dock-app-v061003-pwa-share-target";
 const APP_PAGE = "./info-dock-051904.html";
-const MANIFEST_FILE = "./manifest.json";
+const MANIFEST_FILE = "./manifest.webmanifest";
+const LEGACY_MANIFEST_FILE = "./manifest.json";
 const SHARE_TARGET_PATH = new URL("./share-target/", self.registration.scope).pathname.replace(/\/+$/, "");
 const APP_SHELL = [
   "./",
   APP_PAGE,
   MANIFEST_FILE,
+  LEGACY_MANIFEST_FILE,
   "./icon-192.png",
   "./icon-512.png"
 ];
@@ -83,7 +85,7 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   if (url.origin !== self.location.origin) return;
 
-  if (url.pathname.endsWith("/manifest.json") || url.pathname.endsWith("/service-worker.js")) {
+  if (url.pathname.endsWith("/manifest.webmanifest") || url.pathname.endsWith("/manifest.json") || url.pathname.endsWith("/service-worker.js")) {
     event.respondWith(fetchAndUpdateCache(request).catch(() => caches.match(request)));
     return;
   }
