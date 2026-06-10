@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#2563eb" />
-  <link rel="manifest" href="./manifest.webmanifest?v=061010-share-target-post" type="application/manifest+json">
+  <link rel="manifest" href="./manifest.webmanifest?v=061010-share-target-get-index">
   <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
   <link rel="apple-touch-icon" href="icon-192.png">
   <script src="https://cdn.jsdelivr.net/npm/minisearch@6.3.0/dist/umd/index.js"></script>
@@ -1840,7 +1840,7 @@
         return "Edge 安装成功后仍无分享目标，多半是安装时没有注册 Web Share Target 或系统仍保留旧身份；请删除旧 Info Dock 后安装本版。";
       }
       if (/HuaweiBrowser|HONOR|HUAWEI/i.test(ua)) {
-        return "华为 / 荣耀浏览器能安装 PWA，不代表一定会把 Web Share Target 注册进系统分享面板；本版已改为标准 POST 分享入口。";
+        return "华为 / 荣耀浏览器能安装 PWA，不代表一定会把 Web Share Target 注册进系统分享面板；本版已改为显式 GET 分享入口，尽量避开目录 action 和 POST 兼容性问题。";
       }
       return "若没有弹出原生安装框，请使用浏览器菜单中的“安装应用 / 添加到主屏幕 / 添加到桌面”。";
     }
@@ -1900,7 +1900,7 @@
       if (!elements.pwaInstallStatus) return;
 
       if (isPwaStandalone()) {
-        elements.pwaInstallStatus.textContent = "当前已在 PWA 独立窗口运行。本版 manifest 使用 POST Web Share Target；若系统分享面板仍没有 Info Dock，说明安装浏览器/系统没有完成分享目标注册。";
+        elements.pwaInstallStatus.textContent = "当前已在 PWA 独立窗口运行。本版 manifest 使用显式 GET Web Share Target；若系统分享面板仍没有 Info Dock，说明安装浏览器/系统没有完成分享目标注册。";
         return;
       }
 
@@ -1915,7 +1915,7 @@
       }
 
       if (deferredPwaInstallPrompt) {
-        elements.pwaInstallStatus.textContent = `当前浏览器已准备好安装。本版会在 manifest 中声明 POST 分享目标；安装后请完全退出浏览器再测试分享面板。${getBrowserInstallHint()}`;
+        elements.pwaInstallStatus.textContent = `当前浏览器已准备好安装。本版会在 manifest 中声明显式 GET 分享目标；安装后请完全退出浏览器再测试分享面板。${getBrowserInstallHint()}`;
         return;
       }
 
