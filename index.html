@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#2563eb" />
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
   <script src="https://cdn.jsdelivr.net/npm/minisearch@6.3.0/dist/umd/index.js"></script>
   <title>Info Dock</title>
@@ -339,111 +339,6 @@
       line-height: 1.6;
     }
 
-    .pwa-install-card {
-      position: fixed;
-      left: 50%;
-      bottom: calc(22px + env(safe-area-inset-bottom));
-      z-index: 130;
-      width: min(560px, calc(100% - 28px));
-      transform: translateX(-50%);
-      padding: 14px;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 14px;
-      align-items: center;
-      box-shadow: 0 18px 44px rgba(15, 23, 42, 0.18);
-    }
-
-    .pwa-install-card strong {
-      display: block;
-      font-size: 15px;
-      margin-bottom: 3px;
-    }
-
-    .pwa-install-card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 12.5px;
-      line-height: 1.5;
-    }
-
-    .pwa-install-actions {
-      flex-wrap: nowrap;
-    }
-
-    .compact-details {
-      border: 1px solid var(--line);
-      border-radius: 13px;
-      background: rgba(248, 250, 252, 0.92);
-      overflow: hidden;
-    }
-
-    .compact-details summary {
-      padding: 8px 10px;
-      cursor: pointer;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 750;
-      list-style-position: inside;
-    }
-
-    .compact-details[open] summary {
-      border-bottom: 1px solid var(--line);
-      color: var(--text);
-      background: white;
-    }
-
-    .compact-details .auto-summary,
-    .compact-details .metadata-preview {
-      max-height: 132px;
-      overflow: auto;
-      padding: 9px 10px;
-    }
-
-    .compact-edit-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 7px;
-      align-items: start;
-    }
-
-    .compact-field {
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
-      gap: 7px;
-      align-items: center;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 650;
-      min-width: 0;
-    }
-
-    .compact-field.wide {
-      grid-column: 1 / -1;
-    }
-
-    .compact-field span {
-      white-space: nowrap;
-    }
-
-    .compact-field input,
-    .compact-field select,
-    .compact-field textarea {
-      min-width: 0;
-    }
-
-    .item .compact-field .field,
-    .item .compact-field textarea,
-    .item .compact-field select {
-      padding: 7px 9px;
-      border-radius: 11px;
-      min-height: 36px;
-    }
-
-    .item .compact-field textarea {
-      min-height: 42px;
-    }
-
     .wiki-preview,
     .backlinks-box {
       grid-column: 1 / -1;
@@ -571,11 +466,7 @@
       grid-column: 1 / -1;
       min-height: 54px;
       padding: 0 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       align-content: center;
-      text-align: center;
       background: #111827;
       color: white;
       cursor: pointer;
@@ -593,16 +484,15 @@
     }
 
     .platform-actions {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      display: flex;
+      flex-wrap: wrap;
       gap: 6px;
     }
 
     .platform-actions .tiny-btn {
       min-height: 28px;
-      padding: 0 7px;
+      padding: 0 8px;
       font-size: 12px;
-      white-space: nowrap;
     }
 
     .platform-card-sort-control {
@@ -713,33 +603,24 @@
     }
 
     .toolbar {
-      padding: 10px;
+      padding: 14px;
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
-      align-items: center;
+      gap: 10px;
+      align-items: end;
     }
 
     .toolbar.two {
-      grid-template-columns: 0.9fr 0.8fr minmax(0, 1.4fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     .history-toolbar {
-      grid-template-columns: 0.9fr 0.9fr 0.8fr minmax(0, 1.4fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 8px;
     }
 
     .history-search-field {
-      grid-column: auto;
-    }
-
-    .toolbar select,
-    .toolbar input {
-      min-width: 0;
-      min-height: 38px;
-      padding: 0 9px;
-      border-radius: 12px;
-      font-size: 13px;
+      grid-column: 1 / -1;
     }
 
 
@@ -757,9 +638,9 @@
     }
 
     .item {
-      padding: 11px;
+      padding: 12px;
       display: grid;
-      gap: 7px;
+      gap: 9px;
     }
 
     .item-head {
@@ -771,8 +652,8 @@
 
     .item-title {
       margin: 0;
-      font-size: 14.5px;
-      line-height: 1.3;
+      font-size: 15px;
+      line-height: 1.32;
       word-break: break-word;
     }
 
@@ -1106,30 +987,18 @@
         font-size: 12px;
       }
 
+      .toolbar,
+      .toolbar.two,
       .edit-grid {
         grid-template-columns: 1fr;
       }
 
-      .toolbar,
-      .toolbar.two {
-        grid-template-columns: 0.9fr 0.8fr minmax(0, 1.3fr);
-        padding: 8px;
-        gap: 6px;
-      }
-
       .history-toolbar {
-        grid-template-columns: 0.9fr 0.9fr 0.82fr;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
       .history-search-field {
         grid-column: 1 / -1;
-      }
-
-      .toolbar select,
-      .toolbar input {
-        min-height: 34px;
-        padding: 0 7px;
-        font-size: 12px;
       }
 
       .search-card {
@@ -1192,26 +1061,10 @@
       .platform-card-main {
         min-height: 50px;
         padding: 0 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        align-content: center;
-        text-align: center;
       }
 
       .platform-card h3 {
         font-size: 15px;
-      }
-
-      .platform-actions {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 5px;
-      }
-
-      .platform-actions .tiny-btn {
-        min-height: 30px;
-        padding: 0 5px;
-        font-size: 11px;
       }
 
       #storageBadge {
@@ -1248,29 +1101,6 @@
         min-height: 32px;
       }
 
-      .compact-edit-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .compact-field {
-        grid-template-columns: 42px minmax(0, 1fr);
-      }
-
-      .compact-details .auto-summary,
-      .compact-details .metadata-preview {
-        max-height: 118px;
-      }
-
-      .pwa-install-card {
-        grid-template-columns: 1fr;
-        gap: 10px;
-        bottom: calc(14px + env(safe-area-inset-bottom));
-      }
-
-      .pwa-install-actions {
-        justify-content: stretch;
-      }
-
       .modal-backdrop:not(.sheet) {
         padding: 12px;
       }
@@ -1282,16 +1112,6 @@
   </style>
 </head>
 <body>
-  <div class="card pwa-install-card hidden" id="pwaInstallPrompt" role="dialog" aria-live="polite" aria-label="安装 Info Dock PWA">
-    <div>
-      <strong>安装 Info Dock</strong>
-      <p>安装后可从系统分享菜单保存网页到稍后看。点击“安装”后会打开浏览器原生安装确认。</p>
-    </div>
-    <div class="actions pwa-install-actions">
-      <button class="primary-btn" id="pwaInstallBtn" type="button">安装</button>
-      <button class="ghost-btn" id="pwaDismissBtn" type="button">暂不</button>
-    </div>
-  </div>
   <main class="app">
     <header class="hero">
       <div class="brand-row">
@@ -1335,7 +1155,7 @@
         <select id="historyPlatformFilter"></select>
         <select id="historyStatusFilter"></select>
         <select id="historySort">
-          <option value="newest">最迟优先</option>
+          <option value="newest">排序</option>
           <option value="oldest">最早优先</option>
         </select>
         <input id="historyTextFilter" class="field history-search-field" type="search" placeholder="搜索关键词、入口、备注" />
@@ -1349,19 +1169,48 @@
           <h2>从外部页面一键加入</h2>
           <button class="ghost-btn" id="copyBookmarkletBtn" type="button">复制收藏脚本</button>
         </div>
-        <p class="hint"><strong>Android 推荐：</strong>用 Chrome / Edge / Samsung Internet 通过 HTTPS 打开并安装 Info Dock PWA。安装后，在网页中点系统分享按钮，选择 Info Dock，即可保存到稍后看清单。</p>
-        <p class="hint"><strong>通用兜底：</strong>复制链接后回到 Info Dock，点击顶部搜索框右侧的 📝 笔记；按钮会优先读取剪贴板中的 URL 并自动保存。iOS 或不支持分享目标的浏览器建议使用这个方式，或用快捷指令打开导入链接。</p>
-        <p class="hint"><strong>桌面 / 高级备用：</strong>下面的书签工具更适合电脑浏览器书签栏；手机端不再推荐把它作为主方案。</p>
+        <p class="hint"><strong>手机快速保存：</strong>将本页面添加到主屏幕（iOS：分享按钮 → 添加到主屏幕；Android：菜单 → 添加到主屏幕）。之后在任何网页中点击分享按钮，选择 Info Dock，即可快速保存到稍后看清单。</p>
+        <p class="hint">电脑浏览器、file:// 本地打开，或暂不支持分享目标的浏览器，仍可使用下面的书签工具作为备选。</p>
         <div class="actions">
-          <a class="primary-btn" id="bookmarkletLink" href="#">桌面书签工具：加入 Info Dock</a>
+          <a class="primary-btn" id="bookmarkletLink" href="#">拖到书签栏：加入 Info Dock</a>
         </div>
-        <p class="hint">说明：PWA 分享目标和书签工具默认只保存页面标题、链接和来源；正文、摘要和元数据会沿用现有后台抓取能力。</p>
+        <p class="hint">说明：分享目标和书签工具默认只保存页面标题、链接和来源，不抓取网页正文；正文和搜索快照的 IndexedDB 存储接口已预留。</p>
       </div>
 
+      <form class="card later-form" id="laterForm">
+        <div class="form-title">
+          <h2>添加稍后看</h2>
+          <button class="primary-btn" type="submit">添加</button>
+        </div>
+        <div class="edit-grid">
+          <label class="label">标题
+            <input id="laterTitle" class="field" type="text" placeholder="这是什么内容？" required />
+          </label>
+          <label class="label">链接
+            <input id="laterUrl" class="field" type="url" placeholder="https://..." />
+          </label>
+          <label class="label">来源平台
+            <select id="laterSource"></select>
+          </label>
+          <label class="label">预计耗时
+            <input id="laterEstimate" class="field" type="text" placeholder="例如：10 分钟 / 1 小时" />
+          </label>
+          <label class="label wide">为什么想看
+            <textarea id="laterReason" placeholder="先记录目的，避免只是因为推荐标题吸引人。"></textarea>
+          </label>
+        </div>
+      </form>
+
       <div class="card toolbar two">
-        <select id="laterSourceFilter" aria-label="来源平台"></select>
-        <select id="laterStatusFilter" aria-label="状态"></select>
-        <input id="laterTextFilter" class="field" type="search" aria-label="关键词" placeholder="搜索标题、链接、摘要、结论" />
+        <label class="label">来源平台
+          <select id="laterSourceFilter"></select>
+        </label>
+        <label class="label">状态
+          <select id="laterStatusFilter"></select>
+        </label>
+        <label class="label">关键词
+          <input id="laterTextFilter" class="field" type="search" placeholder="搜索标题、原因、结论" />
+        </label>
       </div>
       <div class="list" id="laterList"></div>
     </section>
@@ -1564,10 +1413,7 @@
       resetProxyBtn: $("#resetProxyBtn"),
       proxyStatus: $("#proxyStatus"),
       toast: $("#toast"),
-      storageBadge: $("#storageBadge"),
-      pwaInstallPrompt: $("#pwaInstallPrompt"),
-      pwaInstallBtn: $("#pwaInstallBtn"),
-      pwaDismissBtn: $("#pwaDismissBtn")
+      storageBadge: $("#storageBadge")
     };
 
     const searchEngine = (() => {
@@ -1747,13 +1593,12 @@
     const PROXY_TEST_URL = "https://www.bing.com";
     let proxyUrl = DEFAULT_CORS_PROXY;
     let hasCustomProxyUrl = false;
-    let deferredPwaInstallPrompt = null;
-    const PWA_INSTALL_DISMISSED_KEY = "infoDock.pwaInstallDismissed.v2";
     let isSortingPlatforms = false;
     let selectedSortPlatformId = "";
 
     async function boot() {
       await initializeStorage();
+      await registerInfoDockServiceWorker();
       loadProxySettings();
 
       platforms = normalizePlatforms(await load(STORE_NAMES.platforms, DEFAULT_PLATFORMS));
@@ -1768,92 +1613,6 @@
       await consumeIncomingLaterItem();
     }
 
-    function setupPwaInstallPrompt() {
-      if (isPwaStandalone()) return;
-
-      window.addEventListener("beforeinstallprompt", (event) => {
-        event.preventDefault();
-        deferredPwaInstallPrompt = event;
-        showPwaInstallPrompt();
-      });
-
-      window.addEventListener("appinstalled", () => {
-        deferredPwaInstallPrompt = null;
-        hidePwaInstallPrompt();
-        toast("Info Dock 已安装。");
-      });
-    }
-
-    function isPwaStandalone() {
-      return window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true;
-    }
-
-    function shouldShowPwaInstallPrompt() {
-      if (!elements.pwaInstallPrompt) return false;
-      if (!/^https?:$/.test(window.location.protocol)) return false;
-      try {
-        return localStorage.getItem(PWA_INSTALL_DISMISSED_KEY) !== "1";
-      } catch (error) {
-        return true;
-      }
-    }
-
-    function showPwaInstallPrompt() {
-      if (!shouldShowPwaInstallPrompt()) return;
-      elements.pwaInstallPrompt.classList.remove("hidden");
-    }
-
-    function hidePwaInstallPrompt() {
-      if (elements.pwaInstallPrompt) elements.pwaInstallPrompt.classList.add("hidden");
-    }
-
-    function dismissPwaInstallPrompt() {
-      hidePwaInstallPrompt();
-      try {
-        localStorage.setItem(PWA_INSTALL_DISMISSED_KEY, "1");
-      } catch (error) {
-        // Ignore storage errors; dismissal only affects this browser.
-      }
-    }
-
-    async function handlePwaInstallClick() {
-      if (!deferredPwaInstallPrompt) {
-        toast("当前浏览器暂未允许网页直接安装，请确认已通过 HTTPS 部署并刷新页面。");
-        return;
-      }
-
-      try {
-        await deferredPwaInstallPrompt.prompt();
-        const choice = await deferredPwaInstallPrompt.userChoice;
-        if (choice?.outcome === "accepted") {
-          toast("正在安装 Info Dock。");
-        } else {
-          toast("已取消安装。");
-        }
-      } catch (error) {
-        console.warn("PWA 安装弹窗调用失败：", error);
-        toast("安装弹窗没有打开，请确认浏览器支持 PWA 安装。");
-      } finally {
-        deferredPwaInstallPrompt = null;
-        hidePwaInstallPrompt();
-      }
-    }
-
-    function registerServiceWorker() {
-      if (!("serviceWorker" in navigator)) return;
-
-      if (!/^https?:$/.test(window.location.protocol)) {
-        console.info("Info Dock：Service Worker 需要 http(s) 环境，file:// 下已跳过注册。");
-        return;
-      }
-
-      navigator.serviceWorker.register("./service-worker.js").then((registration) => {
-        registration.update?.();
-      }).catch((error) => {
-        console.warn("Info Dock Service Worker 注册失败：", error);
-      });
-    }
-
     function handleBootError(error) {
       console.error("Info Dock 启动失败：", error);
       if (elements.storageBadge) {
@@ -1866,8 +1625,6 @@
 
     function bindEvents() {
       elements.quickNoteBtn.addEventListener("click", handleQuickNoteButtonClick);
-      if (elements.pwaInstallBtn) elements.pwaInstallBtn.addEventListener("click", handlePwaInstallClick);
-      if (elements.pwaDismissBtn) elements.pwaDismissBtn.addEventListener("click", dismissPwaInstallPrompt);
       elements.globalSearchInput.addEventListener("input", renderGlobalSearchResults);
       elements.globalSearchInput.addEventListener("focus", renderGlobalSearchResults);
 
@@ -1893,7 +1650,7 @@
         const bookmarklet = buildBookmarklet();
         elements.bookmarkletLink.href = bookmarklet;
         copyText(bookmarklet);
-        toast("已复制收藏脚本。桌面浏览器可拖到书签栏；手机端建议使用系统分享或 📝 笔记。");
+        toast("已复制收藏脚本。也可以直接把蓝色按钮拖到书签栏。");
       });
 
       elements.bookmarkletLink.addEventListener("click", (event) => {
@@ -1901,7 +1658,7 @@
         const bookmarklet = buildBookmarklet();
         elements.bookmarkletLink.href = bookmarklet;
         copyText(bookmarklet);
-        toast("已复制收藏脚本。桌面可拖到书签栏；手机如需使用，请手动新建书签并粘贴脚本。");
+        toast("已复制收藏脚本。请拖到书签栏，或新建书签后粘贴到网址栏。");
       });
 
       elements.bookmarkletLink.addEventListener("dragstart", (event) => {
@@ -1914,7 +1671,7 @@
         }
       });
 
-      if (elements.laterForm) elements.laterForm.addEventListener("submit", async (event) => {
+      elements.laterForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         await addLaterItem();
       });
@@ -2081,8 +1838,22 @@
 
     let storageMode = "indexedDB";
 
-    setupPwaInstallPrompt();
-    registerServiceWorker();
+
+    async function registerInfoDockServiceWorker() {
+      if (!("serviceWorker" in navigator)) return;
+      if (window.location.protocol === "file:") {
+        console.warn("Info Dock PWA 分享目标需要通过 HTTPS 或 localhost 访问，file:// 无法注册 Service Worker。");
+        return;
+      }
+
+      try {
+        await navigator.serviceWorker.register("./service-worker.js", { scope: "./" });
+        await navigator.serviceWorker.ready;
+      } catch (error) {
+        console.warn("Info Dock Service Worker 注册失败，系统分享目标可能无法出现：", error);
+      }
+    }
+
     boot().catch(handleBootError);
 
     async function initializeStorage() {
@@ -2697,6 +2468,7 @@
           title: getItemTitle(item, "later"),
           sourceLabel: "稍后看",
           fields: [
+            { key: "reason", label: "为什么想看", value: item.reason || "" },
             { key: "conclusion", label: "看完后的结论", value: item.conclusion || "" }
           ]
         }))
@@ -4257,7 +4029,7 @@
 
       const bingCard = bing ? `
         <button class="platform-card platform-card-main" type="button" data-action="platform-bing" data-platform-id="${escapeAttribute(bing.id)}">
-          <h3>${escapeHtml(bing.name === "必应" ? "必应搜索" : `${bing.name}搜索`)}</h3>
+          <h3>${escapeHtml(bing.name)}</h3>
         </button>
       ` : "";
 
@@ -4304,7 +4076,7 @@
       fillSelect(elements.historyStatusFilter, ["全部状态", ...SEARCH_STATUSES], "全部状态");
 
       const sourceOptions = getAllLaterSources();
-      if (elements.laterSource) fillSelect(elements.laterSource, sourceOptions, sourceOptions.includes("其他") ? "其他" : sourceOptions[0]);
+      fillSelect(elements.laterSource, sourceOptions, sourceOptions.includes("其他") ? "其他" : sourceOptions[0]);
       fillSelect(elements.laterSourceFilter, ["全部来源", ...sourceOptions], "全部来源");
       fillSelect(elements.laterStatusFilter, ["全部状态", ...LATER_STATUSES], "全部状态");
     }
@@ -4318,7 +4090,6 @@
     }
 
     function fillSelect(select, options, selectedValue) {
-      if (!select) return;
       const previousValue = select.value || selectedValue;
       select.innerHTML = "";
       options.forEach((option) => {
@@ -4517,47 +4288,23 @@ function fillUrlTemplate(template, query, domain = "") {
               <button class="danger-btn" type="button" data-action="history-delete" data-id="${escapeAttribute(item.id)}">删除</button>
             </div>
           </div>
-          <div class="compact-edit-grid">
-            <label class="compact-field"><span>状态</span>
+          <div class="edit-grid">
+            <label class="label">状态
               <select data-action="history-status" data-id="${escapeAttribute(item.id)}">
                 ${SEARCH_STATUSES.map((status) => `<option value="${escapeAttribute(status)}" ${status === item.status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
               </select>
             </label>
-            <label class="compact-field wide"><span>备注</span>
-              <textarea data-action="history-note" data-id="${escapeAttribute(item.id)}" placeholder="记录搜到什么、没找到什么、下一步。">${escapeHtml(item.note || "")}</textarea>
+            <label class="label wide">备注
+              <textarea data-action="history-note" data-id="${escapeAttribute(item.id)}" placeholder="记录搜到什么、没找到什么、下一步怎么处理。">${escapeHtml(item.note || "")}</textarea>
             </label>
             ${renderWikiPreview(item.note)}
-            <label class="compact-field wide"><span>标签</span>
+            <label class="label wide">标签
               <input class="field tag-edit-field" data-action="history-tags" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(formatTagsForEdit(item.tags))}" placeholder="#AI #教程 #观点" />
             </label>
           </div>
           ${renderBacklinks("history", item.id)}
         </article>
       `).join("");
-    }
-    function estimateLaterItemTime(item = {}) {
-      if (item.estimate) return item.estimate;
-
-      const text = [item.title, item.autoSummary, item.bodyText, item.conclusion]
-        .filter(Boolean)
-        .join(" ")
-        .replace(/\s+/g, " ")
-        .trim();
-
-      const cjkCount = (text.match(/[\u4e00-\u9fff]/g) || []).length;
-      const wordCount = (text.match(/[A-Za-z0-9_]+/g) || []).length;
-      const readingUnits = cjkCount + wordCount;
-
-      if (!item.url && readingUnits < 80) return "约 1 分钟";
-      if (readingUnits < 120) return item.url ? "约 3 分钟" : "约 2 分钟";
-
-      const minutes = Math.min(45, Math.max(3, Math.ceil(readingUnits / 450)));
-      if (minutes <= 5) return "约 5 分钟";
-      if (minutes <= 10) return "约 10 分钟";
-      if (minutes <= 15) return "约 15 分钟";
-      if (minutes <= 25) return "约 20 分钟";
-      if (minutes <= 35) return "约 30 分钟";
-      return "约 45 分钟";
     }
 
     function renderLater() {
@@ -4594,7 +4341,6 @@ function fillUrlTemplate(template, query, domain = "") {
           : escapeHtml(item.title);
         const summaryBusy = contentRefreshQueue.has(item.id) || contentFetchQueue.has(item.id) || contentFetchProgress.has(item.id);
         const metadataBusy = metadataFetchQueue.has(item.id) || metadataFetchProgress.has(item.id);
-        const estimateLabel = estimateLaterItemTime(item);
 
         return `
           <article class="card item" data-item-type="later" data-item-id="${escapeAttribute(item.id)}">
@@ -4604,7 +4350,7 @@ function fillUrlTemplate(template, query, domain = "") {
                 <div class="meta">
                   <span class="tag">${escapeHtml(item.source)}</span>
                   <span class="tag ${laterTagClass(item.status)}">${escapeHtml(item.status)}</span>
-                  <span class="tag">预计：${escapeHtml(estimateLabel)}</span>
+                  <span class="tag">预计：${escapeHtml(item.estimate || "未填写")}</span>
                   <span class="tag">${formatTime(item.createdAt)}</span>
                   ${renderContentFetchStatusTag(item)}
                   ${renderMetadataStatusTag(item)}
@@ -4613,36 +4359,43 @@ function fillUrlTemplate(template, query, domain = "") {
                 ${renderSuggestedTagButtons(item, "later")}
               </div>
               <div class="actions">
-                ${item.url ? `<button class="tiny-btn" type="button" data-action="refresh-later-summary" data-id="${escapeAttribute(item.id)}" ${summaryBusy ? "disabled" : ""}>${summaryBusy ? "摘要中" : "刷新摘要"}</button>` : ""}
-                ${item.url ? `<button class="tiny-btn" type="button" data-action="refresh-later-metadata" data-id="${escapeAttribute(item.id)}" ${metadataBusy ? "disabled" : ""}>${metadataBusy ? "提取中" : "元数据"}</button>` : ""}
-                ${item.url ? `<button class="tiny-btn" type="button" data-action="open-later" data-id="${escapeAttribute(item.id)}">打开</button>` : ""}
+                ${item.url ? `<button class="tiny-btn" type="button" data-action="refresh-later-summary" data-id="${escapeAttribute(item.id)}" ${summaryBusy ? "disabled" : ""}>${summaryBusy ? "摘要刷新中" : "刷新摘要"}</button>` : ""}
+                ${item.url ? `<button class="tiny-btn" type="button" data-action="refresh-later-metadata" data-id="${escapeAttribute(item.id)}" ${metadataBusy ? "disabled" : ""}>${metadataBusy ? "元数据提取中" : "重新提取元数据"}</button>` : ""}
+                ${item.url ? `<button class="tiny-btn" type="button" data-action="open-later" data-id="${escapeAttribute(item.id)}">打开链接</button>` : ""}
                 <button class="danger-btn" type="button" data-action="delete-later" data-id="${escapeAttribute(item.id)}">删除</button>
               </div>
             </div>
-            ${item.autoSummary ? `<details class="compact-details"><summary>自动摘要</summary><p class="auto-summary">${escapeHtml(item.autoSummary)}</p></details>` : ""}
-            ${item.bodyText ? `<details class="compact-details"><summary>元数据 / 正文预览</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.bodyText, 420))}</p></details>` : ""}
-            <div class="compact-edit-grid">
-              <label class="compact-field"><span>状态</span>
+            ${item.autoSummary && !hasUserProvidedLaterReason(item.reason) ? `<p class="auto-summary"><strong>自动摘要（自动）：</strong>${escapeHtml(item.autoSummary)}</p>` : ""}
+            ${item.bodyText ? `<p class="metadata-preview"><strong>元数据：</strong>${escapeHtml(truncateMetadataText(item.bodyText, 220))}</p>` : ""}
+            <div class="edit-grid">
+              <label class="label">状态
                 <select data-action="later-status" data-id="${escapeAttribute(item.id)}">
                   ${LATER_STATUSES.map((status) => `<option value="${escapeAttribute(status)}" ${status === item.status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
                 </select>
               </label>
-              <label class="compact-field"><span>来源</span>
+              <label class="label">来源平台
                 <select data-action="later-source" data-id="${escapeAttribute(item.id)}">
                   ${getAllLaterSources().map((source) => `<option value="${escapeAttribute(source)}" ${source === item.source ? "selected" : ""}>${escapeHtml(source)}</option>`).join("")}
                 </select>
               </label>
-              <label class="compact-field wide"><span>标题</span>
+              <label class="label">标题
                 <input class="field" data-action="later-title" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.title || "")}" />
               </label>
-              <label class="compact-field wide"><span>链接</span>
+              <label class="label">链接
                 <input class="field" data-action="later-url" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.url || "")}" placeholder="https://..." />
               </label>
-              <label class="compact-field wide"><span>标签</span>
+              <label class="label">预计耗时
+                <input class="field" data-action="later-estimate" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.estimate || "")}" placeholder="例如：15 分钟" />
+              </label>
+              <label class="label">标签
                 <input class="field tag-edit-field" data-action="later-tags" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(formatTagsForEdit(item.tags))}" placeholder="#AI #教程 #开源" />
               </label>
-              <label class="compact-field wide"><span>结论</span>
-                <textarea data-action="later-conclusion" data-id="${escapeAttribute(item.id)}" placeholder="看完后写一句结论。">${escapeHtml(item.conclusion || "")}</textarea>
+              <label class="label wide">为什么想看
+                <textarea data-action="later-reason" data-id="${escapeAttribute(item.id)}" placeholder="记录这个内容和当前问题的关系。">${escapeHtml(item.reason || "")}</textarea>
+              </label>
+              ${renderWikiPreview(item.reason)}
+              <label class="label wide">看完后的结论
+                <textarea data-action="later-conclusion" data-id="${escapeAttribute(item.id)}" placeholder="看完后写一句结论：有无帮助，下一步是什么。">${escapeHtml(item.conclusion || "")}</textarea>
               </label>
               ${renderWikiPreview(item.conclusion)}
             </div>
@@ -4651,7 +4404,6 @@ function fillUrlTemplate(template, query, domain = "") {
         `;
       }).join("");
     }
-
 
     async function handleGlobalClick(event) {
       const node = event.target.closest("[data-action]");
@@ -4827,6 +4579,8 @@ function fillUrlTemplate(template, query, domain = "") {
         "later-source": "source",
         "later-title": "title",
         "later-url": "url",
+        "later-estimate": "estimate",
+        "later-reason": "reason",
         "later-conclusion": "conclusion",
         "later-tags": "tags"
       };
@@ -4838,7 +4592,7 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (laterKeyMap[action]) {
         const shouldRender = action === "later-status" || action === "later-source" || (
-          event.type === "change" && action === "later-conclusion"
+          event.type === "change" && (action === "later-reason" || action === "later-conclusion")
         );
         await updateLaterItem(id, { [laterKeyMap[action]]: node.value }, shouldRender);
       }
@@ -4858,7 +4612,6 @@ function fillUrlTemplate(template, query, domain = "") {
     async function addLaterItem() {
       const title = elements.laterTitle.value.trim();
       const url = elements.laterUrl.value.trim();
-      const source = elements.laterSource.value;
 
       if (!title) {
         toast("稍后看标题不能为空。");
@@ -4874,13 +4627,13 @@ function fillUrlTemplate(template, query, domain = "") {
         id: createId(),
         title,
         url,
-        source,
-        reason: "",
+        source: elements.laterSource.value,
+        reason: elements.laterReason.value.trim(),
         autoSummary: "",
         bodyText: "",
         metadataFetched: false,
         tags: [],
-        estimate: estimateLaterItemTime({ title, url, source }),
+        estimate: elements.laterEstimate.value.trim(),
         status: "未看",
         conclusion: "",
         createdAt: new Date().toISOString(),
@@ -4893,28 +4646,24 @@ function fillUrlTemplate(template, query, domain = "") {
       rebuildBacklinkIndex();
       queueContentFetchForLaterItem(item);
       queueMetadataEnrichmentForLaterItem(item);
-      if (elements.laterForm) elements.laterForm.reset();
-      if (elements.laterSource) elements.laterSource.value = "其他";
+      elements.laterForm.reset();
+      elements.laterSource.value = "其他";
       renderLater();
       toast("已添加到稍后看清单，正在后台抓取摘要和轻量元数据。 ");
     }
 
     async function addLaterFromExternal(title, url, source, reason = "通过系统分享添加。") {
       const cleanTitle = String(title || "").trim();
-      const rawCleanUrl = String(url || extractFirstUrl(cleanTitle) || "").trim();
-      const cleanUrl = rawCleanUrl ? await normalizeUrlForQuickNote(rawCleanUrl) : "";
+      const cleanUrl = String(url || extractFirstUrl(cleanTitle) || "").trim();
       const finalTitle = cleanTitle || cleanUrl || "未命名内容";
       const finalSource = normalizeLaterSource(source || detectSourceFromUrl(cleanUrl));
 
-      if (cleanUrl) {
-        const duplicateItem = laterItems.find((item) => hasSameNormalizedUrl(item.url, cleanUrl));
-        if (duplicateItem) {
-          return {
-            added: false,
-            reason: "duplicate",
-            item: duplicateItem
-          };
-        }
+      if (cleanUrl && laterItems.some((item) => item.url === cleanUrl)) {
+        return {
+          added: false,
+          reason: "duplicate",
+          item: laterItems.find((item) => item.url === cleanUrl) || null
+        };
       }
 
       const item = {
@@ -4927,7 +4676,7 @@ function fillUrlTemplate(template, query, domain = "") {
         bodyText: "",
         metadataFetched: false,
         tags: [],
-        estimate: estimateLaterItemTime({ title: finalTitle, url: cleanUrl, source: finalSource }),
+        estimate: "",
         status: "未看",
         conclusion: "",
         createdAt: new Date().toISOString(),
@@ -4961,7 +4710,7 @@ function fillUrlTemplate(template, query, domain = "") {
         bodyText: "",
         metadataFetched: false,
         tags: [],
-        estimate: estimateLaterItemTime({ title: `${historyItem.platform}：${historyItem.keyword}`, url, source: historyItem.platform }),
+        estimate: "",
         status: "未看",
         conclusion: "",
         createdAt: new Date().toISOString(),
@@ -5027,10 +4776,14 @@ function fillUrlTemplate(template, query, domain = "") {
       return url.href;
     }
 
+
     function pickBestSharedUrl(...values) {
       for (const value of values) {
-        const candidate = extractFirstUrl(value);
-        if (candidate) return candidate;
+        const text = String(value || "").trim();
+        if (!text) continue;
+        if (/^https?:\/\//i.test(text)) return text;
+        const extracted = extractFirstUrl(text);
+        if (extracted) return extracted;
       }
       return "";
     }
@@ -5043,9 +4796,8 @@ function fillUrlTemplate(template, query, domain = "") {
 
       const sharedTitle = params.get("title") || "";
       const sharedText = params.get("text") || "";
-      const rawSharedUrl = params.get("url") || "";
-      const sharedUrl = pickBestSharedUrl(rawSharedUrl, sharedText, sharedTitle);
-      const source = inferSourceFromSharedData(params, sharedUrl, `${sharedTitle} ${sharedText} ${rawSharedUrl}`);
+      const sharedUrl = pickBestSharedUrl(params.get("url"), sharedText, sharedTitle);
+      const source = inferSourceFromSharedData(params, sharedUrl, `${sharedText} ${sharedTitle}`);
       const result = await addLaterFromExternal(sharedTitle || sharedText || sharedUrl, sharedUrl, source);
 
       clearIncomingParams();
@@ -5338,64 +5090,34 @@ function fillUrlTemplate(template, query, domain = "") {
 
     async function handleQuickNoteButtonClick() {
       const inputText = elements.searchInput.value.trim();
-      const clipboardUrl = await readClipboardUrlForQuickNote();
-
-      if (clipboardUrl) {
-        elements.searchInput.value = clipboardUrl;
-        await saveUrlFromQuickNote(clipboardUrl);
-        return;
-      }
 
       if (!inputText) {
-        elements.searchInput.focus();
-        toast("请输入内容或粘贴链接后点📝 笔记");
+        toast("请输入内容或链接");
         return;
       }
 
-      const inputUrl = extractFirstUrl(inputText);
-      if (inputUrl) {
-        await saveUrlFromQuickNote(inputUrl);
+      if (/^https?:\/\//i.test(inputText)) {
+        const normalizedInputUrl = await normalizeUrlForQuickNote(inputText);
+
+        if (laterItems.some((item) => hasSameNormalizedUrl(item.url, normalizedInputUrl))) {
+          toast("这条链接已经在稍后看清单里");
+          return;
+        }
+
+        const source = typeof detectSourceFromUrl === "function" ? detectSourceFromUrl(normalizedInputUrl) : "其他";
+        const title = await fetchTitleForQuickNote(normalizedInputUrl);
+        const result = await addLaterFromExternal(title || normalizedInputUrl, normalizedInputUrl, source, "通过搜索框快速保存。");
+
+        if (!result.added && result.reason === "duplicate") {
+          toast("这条链接已经在稍后看清单里");
+          return;
+        }
+
+        elements.searchInput.value = "";
+        toast("已保存到稍后看");
         return;
       }
 
-      await saveTextQuickNote(inputText);
-    }
-
-    async function readClipboardUrlForQuickNote() {
-      if (!navigator.clipboard || typeof navigator.clipboard.readText !== "function") return "";
-
-      try {
-        const clipboardText = await navigator.clipboard.readText();
-        return extractFirstUrl(clipboardText);
-      } catch (error) {
-        console.warn("读取剪贴板失败，继续使用搜索框内容：", error);
-        return "";
-      }
-    }
-
-    async function saveUrlFromQuickNote(url) {
-      const normalizedInputUrl = await normalizeUrlForQuickNote(url);
-
-      if (laterItems.some((item) => hasSameNormalizedUrl(item.url, normalizedInputUrl))) {
-        toast("这条链接已经在稍后看清单里");
-        return false;
-      }
-
-      const source = typeof detectSourceFromUrl === "function" ? detectSourceFromUrl(normalizedInputUrl) : "其他";
-      const title = await fetchTitleForQuickNote(normalizedInputUrl);
-      const result = await addLaterFromExternal(title || normalizedInputUrl, normalizedInputUrl, source, "通过搜索框快速保存。");
-
-      if (!result.added && result.reason === "duplicate") {
-        toast("这条链接已经在稍后看清单里");
-        return false;
-      }
-
-      elements.searchInput.value = "";
-      toast("已保存到稍后看");
-      return true;
-    }
-
-    async function saveTextQuickNote(inputText) {
       const item = {
         id: createId(),
         title: inputText,
@@ -5406,7 +5128,7 @@ function fillUrlTemplate(template, query, domain = "") {
         bodyText: "",
         metadataFetched: false,
         tags: [],
-        estimate: estimateLaterItemTime({ title: inputText, source: "快速笔记" }),
+        estimate: "",
         status: "未看",
         conclusion: "",
         createdAt: new Date().toISOString(),
@@ -5420,7 +5142,6 @@ function fillUrlTemplate(template, query, domain = "") {
       renderLater();
       elements.searchInput.value = "";
       toast("已保存到稍后看");
-      return true;
     }
 
     async function fetchTitleForQuickNote(url) {
@@ -5446,7 +5167,7 @@ function fillUrlTemplate(template, query, domain = "") {
 
     function extractFirstUrl(text) {
       const match = String(text || "").match(/https?:\/\/[^\s<>'"]+/i);
-      return match ? match[0].replace(/[\]\)）】》。，、,.;；:：!?！？]+$/g, "") : "";
+      return match ? match[0] : "";
     }
 
     function inferSourceFromSharedData(params, url, text) {

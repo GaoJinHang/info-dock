@@ -1,6 +1,5 @@
-const CACHE_NAME = "info-dock-app-v060902-final";
+const CACHE_NAME = "info-dock-pwa-share-target-v20260610";
 const APP_SHELL = [
-  "./",
   "./info-dock-051904.html",
   "./manifest.json",
   "./icon-192.png",
@@ -8,51 +7,59 @@ const APP_SHELL = [
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_SHELL))
-      .catch((error) => {
-        console.warn("Info Dock Service Worker 安装缓存失败：", error);
-      })
-  );
-  self.skipWaiting();
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await Promise.allSettled(APP_SHELL.map((asset) => cache.add(asset)));
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys
-        .filter((key) => key !== CACHE_NAME)
-        .map((key) => caches.delete(key))))
-      .then(() => self.clients.claim())
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys
+      .filter((key) => key.startsWith("info-dock-") && key !== CACHE_NAME)
+      .map((key) => caches.delete(key)));
+    await self.clients.claim();
+  })());
 });
 
 self.addEventListener("fetch", (event) => {
-  const request = event.request;
-  if (request.method !== "GET") return;
+  const requestUrl = new URL(event.request.url);
+  const isInfoDockPage = requestUrl.pathname.endsWith("/info-dock-051904.html");
 
-  const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return;
+  if (event.request.method === "POST" && isInfoDockPage) {
+    event.respondWith((async () => {
+      const formData = await event.request.formData();
+      const redirectUrl = new URL("./info-dock-051904.html", self.registration.scope);
+      redirectUrl.searchParams.set("shareTarget", "1");
 
-  if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request).catch(() => caches.match("./info-dock-051904.html"))
-    );
+      for (const field of ["title", "text", "url"]) {
+        const value = formData.get(field);
+        if (value) redirectUrl.searchParams.set(field, String(value));
+      }
+
+      redirectUrl.searchParams.set("ts", String(Date.now()));
+      return Response.redirect(redirectUrl.href, 303);
+    })());
     return;
   }
 
-  event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
+  if (event.request.method !== "GET") return;
 
-      return fetch(request).then((response) => {
-        const copy = response.clone();
-        if (response.ok) {
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-        }
-        return response;
-      });
-    })
-  );
+  event.respondWith((async () => {
+    const cached = await caches.match(event.request);
+    if (cached) return cached;
+
+    try {
+      const response = await fetch(event.request);
+      if (response && response.status === 200 && response.type === "basic") {
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(event.request, response.clone());
+      }
+      return response;
+    } catch (error) {
+      return caches.match("./info-dock-051904.html");
+    }
+  })());
 });
