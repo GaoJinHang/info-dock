@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#2563eb" />
-  <link rel="manifest" href="manifest.webmanifest?v=061003-pwa-share-target">
+  <link rel="manifest" href="./manifest.webmanifest?v=061003-honor-install-share-fix">
   <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
   <link rel="apple-touch-icon" href="icon-192.png">
   <script src="https://cdn.jsdelivr.net/npm/minisearch@6.3.0/dist/umd/index.js"></script>
@@ -1307,7 +1307,7 @@
   <div class="card pwa-install-card hidden" id="pwaInstallPrompt" role="dialog" aria-live="polite" aria-label="安装 Info Dock PWA">
     <div>
       <strong>安装 Info Dock</strong>
-      <p>安装后可从系统分享菜单保存网页到稍后看。点击“安装”后会打开浏览器原生安装确认。</p>
+      <p>安装后可从系统分享菜单保存网页到稍后看。若浏览器已开放网页内安装入口，点击“安装”会打开原生确认；否则请按设置页提示从浏览器菜单安装。</p>
     </div>
     <div class="actions pwa-install-actions">
       <button class="primary-btn" id="pwaInstallBtn" type="button">安装</button>
@@ -1371,7 +1371,7 @@
           <h2>从外部页面一键加入</h2>
           <button class="ghost-btn" id="copyBookmarkletBtn" type="button">复制收藏脚本</button>
         </div>
-        <p class="hint"><strong>Android 推荐：</strong>用 Chrome / Edge 通过 HTTPS 打开并安装 Info Dock PWA。安装后，在网页中点系统分享按钮；只有安装浏览器支持 Web Share Target 时，Info Dock 才会出现在系统分享目标里。</p>
+        <p class="hint"><strong>Android 推荐：</strong>用 Chrome / Edge / Samsung Internet 通过 HTTPS 打开并安装 Info Dock PWA。安装后，在网页中点系统分享按钮，选择 Info Dock，即可保存到稍后看清单。</p>
         <p class="hint"><strong>通用兜底：</strong>复制链接后回到 Info Dock，点击顶部搜索框右侧的 📝 笔记；按钮会优先读取剪贴板中的 URL 并自动保存。iOS 或不支持分享目标的浏览器建议使用这个方式，或用快捷指令打开导入链接。</p>
         <p class="hint"><strong>桌面 / 高级备用：</strong>下面的书签工具更适合电脑浏览器书签栏；手机端不再推荐把它作为主方案。</p>
         <div class="actions">
@@ -1398,15 +1398,15 @@
         </div>
         <div class="settings-subpanel" aria-label="PWA 安装和分享目标">
           <h3>📲 PWA 安装 / 分享目标</h3>
-          <p class="hint">荣耀 / 华为手机上，“安装到桌面”和“注册系统分享目标”是两件事：浏览器能安装图标，不代表一定会把 Info Dock 注册进系统分享面板。新版已更换 manifest 文件路径、PWA 身份和分享目标入口，用于避开旧缓存 / 旧身份残留。</p>
+          <p class="hint">荣耀手机上的 Edge、夸克、华为浏览器对“PWA 安装”和“系统分享目标”的支持点不一样：网页内安装弹窗、添加到桌面、安装后注册分享目标是三件事。本版只在浏览器真正发出安装事件时调用原生弹窗；未发出时给出菜单安装指引，不再误报为“不支持 PWA”。</p>
           <ol class="install-steps">
-            <li>Edge 如果提示“已安装”但桌面没有图标，通常是旧 PWA 身份仍在 Edge / 系统应用记录里；新版已换用独立 manifest 路径和应用身份，请先点“刷新安装状态”，再从 Edge 菜单重新安装。</li>
-            <li>夸克若不弹出网页内安装框，请走浏览器菜单里的“添加到桌面 / 安装应用”；夸克可能支持添加桌面，但不一定开放 beforeinstallprompt 网页内原生弹窗。</li>
-            <li>华为 / 荣耀浏览器若安装后分享面板仍没有 Info Dock，说明当前浏览器可能只创建桌面图标、未注册 Web Share Target；请优先用 Edge / Chrome 重新安装，或用“复制链接后点 📝 笔记”兜底。</li>
+            <li>Edge 若提示“已安装”但桌面没有图标，通常是 Edge/系统里已有同源 PWA 记录或旧 manifest 身份缓存。本版已换用新的 manifest 路径和应用 id，并避免缓存 manifest；仍提示时需在 Edge 应用管理或系统应用列表清掉旧记录。</li>
+            <li>夸克“支持 PWA”通常指可通过菜单添加到桌面，不等于一定向网页开放 beforeinstallprompt 弹窗；请优先用菜单里的“添加到桌面 / 安装应用”。</li>
+            <li>华为浏览器能安装桌面图标不代表一定支持 Web Share Target。若安装后系统分享面板没有 Info Dock，请使用复制链接后点 📝 笔记的兜底方式；如浏览器后续支持分享目标，重装新版后才会注册。</li>
           </ol>
           <div class="actions settings-actions">
-            <button class="primary-btn" id="manualPwaInstallBtn" type="button">手动安装 PWA</button>
-            <button class="ghost-btn" id="resetPwaInstallDismissBtn" type="button">刷新安装状态</button>
+            <button class="primary-btn" id="manualPwaInstallBtn" type="button">安装 / 查看安装方式</button>
+            <button class="ghost-btn" id="resetPwaInstallDismissBtn" type="button">刷新 PWA 缓存状态</button>
           </div>
           <p class="hint proxy-status" id="pwaInstallStatus" aria-live="polite"></p>
         </div>
@@ -1787,7 +1787,7 @@
     let proxyUrl = DEFAULT_CORS_PROXY;
     let hasCustomProxyUrl = false;
     let deferredPwaInstallPrompt = null;
-    const PWA_INSTALL_DISMISSED_KEY = "infoDock.pwaInstallDismissed.v3";
+    const PWA_INSTALL_DISMISSED_KEY = "infoDock.pwaInstallDismissed.v4";
     let isSortingPlatforms = false;
     let selectedSortPlatformId = "";
 
@@ -1834,19 +1834,47 @@
     function getBrowserInstallHint() {
       const ua = navigator.userAgent || "";
       if (/Quark|QuarkPC|UCBrowser|UCWEB/i.test(ua)) {
-        return "夸克可能支持菜单安装，但不一定开放 beforeinstallprompt 网页内安装弹窗；请用浏览器菜单里的“添加到桌面 / 安装应用”。";
+        return "夸克可以尝试菜单里的“添加到桌面 / 安装应用”；它即使支持 PWA，也可能不向网页开放安装弹窗。";
       }
       if (/EdgA|Edg\//i.test(ua)) {
-        return "Edge 若仍提示已安装，通常是旧 PWA 身份或系统安装记录残留；本版已更换 manifest 文件路径和应用身份，请点“刷新安装状态”后再从菜单安装。";
+        return "Edge 若显示“已安装”但桌面没有图标，请先到 Edge 的应用管理、手机系统应用列表或桌面隐藏应用里删除旧 Info Dock；本版已更换 manifest 路径和应用 id，用于避开旧安装记录。";
       }
       if (/HuaweiBrowser|HONOR|HUAWEI/i.test(ua)) {
-        return "华为 / 荣耀浏览器能安装图标，不代表一定支持 Web Share Target；分享面板没有 Info Dock 时，请用 Edge / Chrome 安装或用 📝 笔记兜底。";
+        return "华为 / 荣耀浏览器可先用菜单“添加到桌面”；但系统分享面板是否出现 Info Dock 取决于浏览器是否实现 Web Share Target，网页代码无法强制添加。";
       }
-      return "若没有弹出原生安装框，请使用浏览器菜单中的“安装应用 / 添加到主屏幕 / 添加到桌面”。";
+      return "可使用浏览器菜单中的“安装应用 / 添加到主屏幕 / 添加到桌面”。";
+    }
+
+    function getPwaInstallStatusMessage() {
+      if (isPwaStandalone()) {
+        return "当前已在 PWA 独立窗口运行。若系统分享面板没有 Info Dock，说明安装它的浏览器可能没有注册 Web Share Target；可复制链接后用 📝 笔记兜底保存。";
+      }
+
+      if (!canUsePwaInstallFeatures()) {
+        return "PWA 安装和系统分享目标需要 HTTPS，或 localhost 本地调试环境。请不要用 file:// 或普通 http 长期使用。";
+      }
+
+      if (!("serviceWorker" in navigator)) {
+        return "当前浏览器没有 Service Worker，无法成为完整 PWA，也无法注册 PWA 分享目标。";
+      }
+
+      if (deferredPwaInstallPrompt) {
+        return `当前浏览器已开放网页内安装弹窗。点击“安装 / 查看安装方式”可调起原生安装确认。安装后若分享面板没有 Info Dock，请完全关闭浏览器后再试。${getBrowserInstallHint()}`;
+      }
+
+      return `当前页面具备 PWA 基础条件，但浏览器尚未向网页发出安装弹窗事件。请从浏览器菜单安装 / 添加到桌面；这不等于网页不支持 PWA。${getBrowserInstallHint()}`;
+    }
+
+    function showManualPwaInstallGuide() {
+      const message = getPwaInstallStatusMessage();
+      if (elements.pwaInstallStatus) elements.pwaInstallStatus.textContent = message;
+      setStatus(message);
+      toast("请按设置页提示从浏览器菜单安装 / 添加到桌面。 ");
     }
 
     function shouldShowPwaInstallPrompt() {
       if (!elements.pwaInstallPrompt) return false;
+      if (!deferredPwaInstallPrompt) return false;
       if (isPwaStandalone()) return false;
       if (!canUsePwaInstallFeatures()) return false;
       try {
@@ -1893,39 +1921,18 @@
 
       showPwaInstallPrompt();
       renderPwaInstallStatus();
-      toast("已刷新 PWA 安装状态。若 Edge 仍显示旧状态，请从浏览器菜单 / 系统应用列表清理旧记录后再装。 ");
+      toast("已刷新 PWA 缓存状态。若浏览器仍显示旧安装记录，请关闭浏览器后重新打开本页。 ");
     }
 
     function renderPwaInstallStatus() {
       if (!elements.pwaInstallStatus) return;
-
-      if (isPwaStandalone()) {
-        elements.pwaInstallStatus.textContent = "当前已在 PWA 独立窗口运行。若系统分享面板没有 Info Dock，说明安装它的浏览器可能没有注册 Web Share Target；请用 Edge / Chrome 重新安装，或用 📝 笔记兜底。";
-        return;
-      }
-
-      if (!("serviceWorker" in navigator)) {
-        elements.pwaInstallStatus.textContent = "当前浏览器不支持 Service Worker，因此不能注册 PWA 分享目标。";
-        return;
-      }
-
-      if (!canUsePwaInstallFeatures()) {
-        elements.pwaInstallStatus.textContent = "PWA 安装和系统分享目标需要 HTTPS，或 localhost 本地调试环境。";
-        return;
-      }
-
-      if (deferredPwaInstallPrompt) {
-        elements.pwaInstallStatus.textContent = `当前浏览器已开放网页内安装弹窗。安装新版后再分享网页；只有支持 Web Share Target 的浏览器才会在系统分享面板显示 Info Dock。${getBrowserInstallHint()}`;
-        return;
-      }
-
-      elements.pwaInstallStatus.textContent = `当前浏览器没有开放网页内安装弹窗；这不等于网页不支持 PWA。${getBrowserInstallHint()}`;
+      elements.pwaInstallStatus.textContent = getPwaInstallStatusMessage();
     }
 
     async function handlePwaInstallClick() {
       if (!deferredPwaInstallPrompt) {
         renderPwaInstallStatus();
-        toast("浏览器没有开放网页内安装弹窗；请从浏览器菜单手动添加到桌面 / 安装应用。 ");
+        showManualPwaInstallGuide();
         return;
       }
 
@@ -1950,7 +1957,7 @@
     async function handleManualPwaInstallClick() {
       if (isPwaStandalone()) {
         renderPwaInstallStatus();
-        toast("当前已经在 PWA 中运行。分享目标缺失时，请用支持 Web Share Target 的浏览器重新安装，或用 📝 笔记兜底。 ");
+        toast("当前已经在 PWA 中运行。分享目标缺失时，请使用 📝 笔记兜底，或换支持 Web Share Target 的浏览器重新安装。 ");
         return;
       }
 
@@ -1960,7 +1967,12 @@
         return;
       }
 
-      await handlePwaInstallClick();
+      if (deferredPwaInstallPrompt) {
+        await handlePwaInstallClick();
+        return;
+      }
+
+      showManualPwaInstallGuide();
     }
 
     function registerServiceWorker() {

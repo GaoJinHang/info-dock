@@ -1,13 +1,8 @@
-const CACHE_NAME = "info-dock-app-v061003-pwa-share-target";
+const CACHE_NAME = "info-dock-app-v061003-honor-install-share-fix";
 const APP_PAGE = "./info-dock-051904.html";
-const MANIFEST_FILE = "./manifest.webmanifest";
-const LEGACY_MANIFEST_FILE = "./manifest.json";
-const SHARE_TARGET_PATH = new URL("./share-target/", self.registration.scope).pathname.replace(/\/+$/, "");
 const APP_SHELL = [
   "./",
   APP_PAGE,
-  MANIFEST_FILE,
-  LEGACY_MANIFEST_FILE,
   "./icon-192.png",
   "./icon-512.png"
 ];
@@ -41,7 +36,8 @@ function appendShareParam(targetUrl, key, value) {
 
 function isLegacyShareTargetRequest(request, url) {
   if (url.origin !== self.location.origin) return false;
-  return url.pathname.replace(/\/+$/, "") === SHARE_TARGET_PATH && ["GET", "POST"].includes(request.method);
+  const shareTargetPath = new URL("./share-target/", self.registration.scope).pathname.replace(/\/+$/, "");
+  return url.pathname.replace(/\/+$/, "") === shareTargetPath && ["GET", "POST"].includes(request.method);
 }
 
 async function handleLegacyShareTarget(request, url) {
@@ -61,6 +57,16 @@ async function handleLegacyShareTarget(request, url) {
   }
 
   return Response.redirect(redirectUrl.href, 303);
+}
+
+function shouldBypassCache(url) {
+  return url.pathname.endsWith("/manifest.json")
+    || url.pathname.endsWith("/manifest.webmanifest")
+    || url.pathname.endsWith("/service-worker.js");
+}
+
+function fetchFresh(request) {
+  return fetch(request, { cache: "no-store" });
 }
 
 function fetchAndUpdateCache(request) {
@@ -85,8 +91,8 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   if (url.origin !== self.location.origin) return;
 
-  if (url.pathname.endsWith("/manifest.webmanifest") || url.pathname.endsWith("/manifest.json") || url.pathname.endsWith("/service-worker.js")) {
-    event.respondWith(fetchAndUpdateCache(request).catch(() => caches.match(request)));
+  if (shouldBypassCache(url)) {
+    event.respondWith(fetchFresh(request));
     return;
   }
 
