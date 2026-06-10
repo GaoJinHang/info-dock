@@ -1,21 +1,32 @@
 {
+  "id": "./info-dock-051904.html?app=info-dock-honor-share-20260609",
   "name": "Info Dock",
   "short_name": "Info Dock",
   "description": "快速保存网页到 Info Dock 稍后看清单。",
-  "start_url": "./info-dock-051904.html?source=pwa",
+  "start_url": "./info-dock-051904.html?app=info-dock-honor-share-20260609",
   "scope": "./",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "any",
   "theme_color": "#2563eb",
   "background_color": "#f6f7f9",
+  "prefer_related_applications": false,
+  "categories": [
+    "productivity",
+    "utilities"
+  ],
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -23,13 +34,12 @@
   ],
   "share_target": {
     "action": "./info-dock-051904.html?shareTarget=1",
-    "method": "POST",
-    "enctype": "multipart/form-data",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
     "params": {
       "title": "title",
       "text": "text",
       "url": "url"
     }
-  },
-  "id": "./info-dock-051904.html"
+  }
 }
