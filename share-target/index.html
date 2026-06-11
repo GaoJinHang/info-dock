@@ -20,13 +20,24 @@
     (function () {
       var target = new URL("../info-dock-051904.html", window.location.href);
       var incoming = new URL(window.location.href);
-      ["title", "text", "url", "name", "description", "link"].forEach(function (key) {
-        var value = incoming.searchParams.get(key);
-        if (value) target.searchParams.set(key, value);
+      var mappings = [
+        ["title", ["title", "name"]],
+        ["text", ["text", "description"]],
+        ["url", ["url", "link"]]
+      ];
+
+      mappings.forEach(function (mapping) {
+        var targetKey = mapping[0];
+        var aliases = mapping[1];
+        for (var i = 0; i < aliases.length; i += 1) {
+          var value = incoming.searchParams.get(aliases[i]);
+          if (value) {
+            target.searchParams.set(targetKey, value);
+            break;
+          }
+        }
       });
-      if (!target.searchParams.has("title") && incoming.searchParams.has("name")) target.searchParams.set("title", incoming.searchParams.get("name"));
-      if (!target.searchParams.has("text") && incoming.searchParams.has("description")) target.searchParams.set("text", incoming.searchParams.get("description"));
-      if (!target.searchParams.has("url") && incoming.searchParams.has("link")) target.searchParams.set("url", incoming.searchParams.get("link"));
+
       target.searchParams.set("shareTarget", "1");
       window.location.replace(target.href);
     }());

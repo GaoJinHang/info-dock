@@ -1,10 +1,11 @@
-const CACHE_NAME = "info-dock-app-v061010-share-target-post";
+const CACHE_NAME = "info-dock-app-v061010-share-target-get-index";
 const APP_PAGE = "./info-dock-051904.html";
-const SHARE_TARGET_PAGE = "./share-target/";
+const SHARE_TARGET_PAGE = "./share-target/index.html";
+const SHARE_TARGET_DIR = "./share-target/";
 const APP_SHELL = [
   "./",
   APP_PAGE,
-  "./share-target/index.html",
+  SHARE_TARGET_PAGE,
   "./icon-192.png",
   "./icon-512.png"
 ];
@@ -30,8 +31,9 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-function trimSlash(value) {
-  return String(value || "").replace(/\/+$/, "");
+function normalizePath(value) {
+  const path = String(value || "").replace(/\/+$/, "");
+  return path || "/";
 }
 
 function appendShareParam(targetUrl, key, value) {
@@ -52,9 +54,12 @@ function appendAliasedShareParam(targetUrl, canonicalKey, data, aliases) {
 
 function isShareTargetRequest(request, url) {
   if (url.origin !== self.location.origin) return false;
-  const targetPath = trimSlash(new URL(SHARE_TARGET_PAGE, self.registration.scope).pathname);
-  const requestPath = trimSlash(url.pathname);
-  return (requestPath === targetPath || requestPath === `${targetPath}/index.html`) && ["GET", "POST"].includes(request.method);
+
+  const requestPath = normalizePath(url.pathname);
+  const pagePath = normalizePath(new URL(SHARE_TARGET_PAGE, self.registration.scope).pathname);
+  const dirPath = normalizePath(new URL(SHARE_TARGET_DIR, self.registration.scope).pathname);
+
+  return (requestPath === pagePath || requestPath === dirPath) && ["GET", "POST"].includes(request.method);
 }
 
 async function handleShareTarget(request, url) {
