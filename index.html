@@ -5961,8 +5961,17 @@
         ? fillUrlTemplate(entrance.urlTemplate, keyword, entrance.domain || platform.domain)
         : "";
       const aiEntrance = isAiEntrance(platform, entrance);
+      let aiCopySucceeded = false;
       if (aiEntrance) {
-        copyText(keyword).catch(() => {});
+        aiCopySucceeded = copyTextBySelection(keyword);
+        if (!aiCopySucceeded && navigator.clipboard?.writeText) {
+          try {
+            await navigator.clipboard.writeText(keyword);
+            aiCopySucceeded = true;
+          } catch (error) {
+            aiCopySucceeded = false;
+          }
+        }
       }
 
       const item = {
@@ -6002,7 +6011,10 @@
       setStatus(`已记录：通过「${platform.name} / ${entrance.entranceType}」搜索「${keyword}」。已打开入口。`);
       toast(`已保存记录，并打开 ${entrance.label}。`);
       if (aiEntrance) {
-        setStatus(`已记录：通过「${platform.name} / AI询问」询问「${keyword}」。已打开外部 AI 页面，已通过 URL 带入问题并复制到剪贴板兜底。AI 对话页不会自动保存搜索快照。`);
+        const copyStatus = aiCopySucceeded
+          ? "已先复制问题到剪贴板兜底。"
+          : "已在打开前尝试复制问题，但浏览器阻止了剪贴板写入。";
+        setStatus(`已记录：通过「${platform.name} / AI询问」询问「${keyword}」。已打开外部 AI 页面，已通过 URL 带入问题。${copyStatus}AI 对话页不会自动保存搜索快照。`);
       } else if (isAutoSearchSnapshotEnabled()) {
         queueAutomaticSearchSnapshot(item);
       } else {
@@ -7371,17 +7383,42 @@ function fillUrlTemplate(template, query, domain = "") {
         .replace(/\/.*$/, "");
     }
 
-    async function copyText(text) {
+    function copyTextBySelection(text) {
+      const temp = document.createElement("textarea");
+      temp.value = text;
+      temp.setAttribute("readonly", "");
+      temp.style.position = "fixed";
+      temp.style.left = "-9999px";
+      temp.style.top = "0";
+      document.body.appendChild(temp);
+      temp.focus();
+      temp.select();
+      temp.setSelectionRange(0, temp.value.length);
+
+      let copied = false;
       try {
-        await navigator.clipboard.writeText(text);
+        copied = document.execCommand("copy");
       } catch (error) {
-        const temp = document.createElement("textarea");
-        temp.value = text;
-        document.body.appendChild(temp);
-        temp.select();
-        document.execCommand("copy");
-        temp.remove();
+        copied = false;
       }
+
+      temp.remove();
+      return copied;
+    }
+
+    async function copyText(text) {
+      if (copyTextBySelection(text)) return true;
+
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch (error) {
+        return false;
+      }
+
+      return false;
     }
 
     function setStatus(message) {
