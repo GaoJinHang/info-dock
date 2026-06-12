@@ -1,7 +1,7 @@
 {
   "name": "Info Dock",
   "short_name": "Info Dock",
-  "description": "快速保存网页到 Info Dock 稍后看清单。",
+  "description": "快速保存网页到 Info Dock 收件箱。",
   "start_url": "./info-dock-051904.html?source=pwa&v=061010-share-target-get-index",
   "scope": "./",
   "display": "standalone",

@@ -168,7 +168,7 @@
 
     .search-row {
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: minmax(0, 1fr) auto auto;
       gap: 10px;
       align-items: center;
     }
@@ -199,6 +199,65 @@
     .copy-search-btn:hover {
       color: var(--primary);
       border-color: var(--primary);
+    }
+
+
+    .ai-answer-modal {
+      width: min(720px, 100%);
+    }
+
+    .ai-answer-textarea {
+      min-height: 180px;
+    }
+
+    .ai-summary-block {
+      display: grid;
+      gap: 10px;
+      margin: 10px 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(248, 250, 252, 0.88);
+    }
+
+    .ai-summary-block h4 {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .ai-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+    }
+
+    .ai-summary-section {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .ai-summary-section strong {
+      font-size: 13px;
+    }
+
+    .ai-summary-section ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .ai-original-answer {
+      max-height: 360px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: 0;
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.65;
     }
 
     .field,
@@ -1601,13 +1660,24 @@
         bottom: calc(62px + env(safe-area-inset-bottom));
       }
     }
+
+    @media (max-width: 720px) {
+      .search-row {
+        grid-template-columns: 1fr;
+      }
+
+      .copy-search-btn {
+        width: 100%;
+      }
+    }
+
   </style>
 </head>
 <body>
   <div class="card pwa-install-card hidden" id="pwaInstallPrompt" role="dialog" aria-live="polite" aria-label="安装 Info Dock PWA">
     <div>
       <strong>安装 Info Dock</strong>
-      <p>安装后可从系统分享菜单保存网页到稍后看。点击“安装”后会打开浏览器原生安装确认。</p>
+      <p>安装后可从系统分享菜单保存网页到收件箱。点击“安装”后会打开浏览器原生安装确认。</p>
     </div>
     <div class="actions pwa-install-actions">
       <button class="primary-btn" id="pwaInstallBtn" type="button">安装</button>
@@ -1621,7 +1691,7 @@
           <div class="logo">ID</div>
           <div>
             <h1>Info Dock</h1>
-            <p class="subtitle">输入关键词后直接选择平台入口；搜索历史和稍后看默认只保存在本机浏览器。</p>
+            <p class="subtitle">输入关键词后直接选择平台入口；搜索历史和收件箱默认只保存在本机浏览器。</p>
           </div>
         </div>
         <div class="pill" id="storageBadge">本地保存：检测中</div>
@@ -1632,6 +1702,7 @@
           <div class="search-row">
             <input id="searchInput" class="search-input" type="search" placeholder="今天我要找什么？" autocomplete="off" enterkeyhint="search" />
             <button class="ghost-btn copy-search-btn" id="quickNoteBtn" type="button">📝 笔记</button>
+            <button class="ghost-btn copy-search-btn" id="saveAiAnswerBtn" type="button">🤖 保存 AI 回答</button>
           </div>
         </div>
         <div class="global-search-box" aria-label="全文搜索">
@@ -1648,7 +1719,8 @@
 
     <nav class="tabs" aria-label="内容切换">
       <button class="tab-btn active" type="button" data-tab="historySection">搜索历史</button>
-      <button class="tab-btn" type="button" data-tab="laterSection">稍后看清单</button>
+      <button class="tab-btn" type="button" data-tab="laterSection">收件箱</button>
+      <button class="tab-btn" type="button" data-tab="knowledgeSection">知识库</button>
       <button class="tab-btn" type="button" data-tab="settingsSection">⚙️ 设置</button>
     </nav>
 
@@ -1665,13 +1737,13 @@
       <div class="list" id="historyList"></div>
     </section>
 
-    <section id="laterSection" class="section" aria-label="稍后看清单">
+    <section id="laterSection" class="section" aria-label="收件箱">
       <div class="card later-form">
         <div class="form-title">
           <h2>从外部页面一键加入</h2>
           <button class="ghost-btn" id="copyBookmarkletBtn" type="button">复制收藏脚本</button>
         </div>
-        <p class="hint"><strong>Android 推荐：</strong>用支持 Web Share Target 的浏览器通过 HTTPS 安装 Info Dock PWA。安装后，在网页中点系统分享按钮，若系统已注册分享目标，会出现 Info Dock 并保存到稍后看清单。</p>
+        <p class="hint"><strong>Android 推荐：</strong>用支持 Web Share Target 的浏览器通过 HTTPS 安装 Info Dock PWA。安装后，在网页中点系统分享按钮，若系统已注册分享目标，会出现 Info Dock 并保存到收件箱。</p>
         <p class="hint"><strong>通用兜底：</strong>如果 Edge / 华为浏览器安装成功但分享面板仍没有 Info Dock，说明浏览器没有完成系统分享目标注册；复制链接后回到 Info Dock，点击顶部搜索框右侧的 📝 笔记保存。</p>
         <p class="hint"><strong>桌面 / 高级备用：</strong>下面的书签工具更适合电脑浏览器书签栏；手机端不再推荐把它作为主方案。</p>
         <div class="actions">
@@ -1680,10 +1752,10 @@
         <p class="hint">说明：PWA 分享目标和书签工具默认只保存页面标题、链接和来源；正文、摘要和元数据会沿用现有后台抓取能力。</p>
       </div>
 
-      <div class="card review-panel" id="reviewPanel" aria-label="稍后看待回顾">
+      <div class="card review-panel" id="reviewPanel" aria-label="收件箱待回顾">
         <div class="review-summary">
           <strong class="review-count" id="pendingReviewCount">待回顾 0 条</strong>
-          <p class="hint" id="pendingReviewHint">默认规则：状态为“未看”，且创建时间超过 3 天。</p>
+          <p class="hint" id="pendingReviewHint">默认规则：状态为收件箱/待读，且创建时间超过 3 天。</p>
         </div>
         <div class="actions review-actions">
           <button class="ghost-btn" id="viewPendingReviewBtn" type="button">查看待回顾</button>
@@ -1695,9 +1767,27 @@
       <div class="card toolbar two">
         <select id="laterSourceFilter" aria-label="来源平台"></select>
         <select id="laterStatusFilter" aria-label="状态"></select>
+        <select id="laterRelatedFilter" aria-label="关联研究"></select>
         <input id="laterTextFilter" class="field" type="search" aria-label="关键词" placeholder="搜索标题、链接、摘要、结论" />
       </div>
       <div class="list" id="laterList"></div>
+    </section>
+
+    <section id="knowledgeSection" class="section" aria-label="知识库">
+      <div class="card toolbar knowledge-toolbar">
+        <select id="knowledgeSourceFilter" aria-label="知识来源"></select>
+        <select id="knowledgeStatusFilter" aria-label="知识状态">
+          <option value="全部状态">全部状态</option>
+          <option value="已整理">已整理</option>
+          <option value="已吸收">已吸收</option>
+        </select>
+        <input id="knowledgeTextFilter" class="field" type="search" aria-label="标签或关键词" placeholder="搜索标题、标签、结论、摘要、正文" />
+        <select id="knowledgeSort" aria-label="知识排序">
+          <option value="newest">最近创建</option>
+          <option value="oldest">最早创建</option>
+        </select>
+      </div>
+      <div class="list" id="knowledgeList"></div>
     </section>
 
     <section id="settingsSection" class="section" aria-label="设置">
@@ -1724,7 +1814,7 @@
         </div>
         <div class="settings-subpanel" aria-label="数据备份与恢复">
           <h3>📦 数据备份与恢复</h3>
-          <p class="hint">导出会包含平台、搜索历史、稍后看和内容快照。导入前会先下载一份当前数据备份，避免误覆盖。</p>
+          <p class="hint">导出会包含平台、搜索历史、收件箱和内容快照。导入前会先下载一份当前数据备份，避免误覆盖。</p>
           <div class="data-health-card" id="dataBackupSummary">正在读取数据安全状态…</div>
           <div class="actions settings-actions">
             <button class="primary-btn" id="exportDataBtn" type="button">导出完整 JSON</button>
@@ -1738,7 +1828,7 @@
 
         <div class="settings-subpanel" aria-label="存储空间和快照清理">
           <h3>📱 存储空间与快照清理</h3>
-          <p class="hint">快照用于全文搜索和稍后看摘要。清理只处理内容快照，不会删除平台、搜索历史、稍后看条目、备注、结论或标签。</p>
+          <p class="hint">快照用于全文搜索和收件箱摘要。清理只处理内容快照，不会删除平台、搜索历史、收件箱条目、备注、结论或标签。</p>
           <div class="storage-stat-grid" id="storageStatsGrid">
             <div class="storage-stat"><strong>—</strong><span>正在统计</span></div>
           </div>
@@ -1763,7 +1853,7 @@
           </label>
           <label class="label setting-toggle">
             <input id="autoBasicTagsEnabled" type="checkbox" />
-            <span>自动应用基础标签（新搜索、稍后看、快速笔记和外部分享导入时写入，可手动增删）</span>
+            <span>自动应用基础标签（新搜索、收件箱、快速笔记和外部分享导入时写入，可手动增删）</span>
           </label>
           <div class="actions settings-actions">
             <button class="primary-btn" id="saveSearchAutomationSettingsBtn" type="button">保存搜索自动化设置</button>
@@ -1773,7 +1863,7 @@
 
         <div class="settings-subpanel" aria-label="回顾设置">
           <h3>🔁 回顾提醒</h3>
-          <p class="hint">待回顾默认只统计状态为“未看”且创建时间超过阈值天数的稍后看条目。应用内提醒只会在页面打开时提示，不承诺页面关闭后准时通知。</p>
+          <p class="hint">待回顾默认只统计状态为收件箱/待读，且创建时间超过阈值天数的收件箱条目。应用内提醒只会在页面打开时提示，不承诺页面关闭后准时通知。</p>
           <label class="label">待回顾阈值天数
             <input id="reviewThresholdDaysInput" class="field" type="number" min="1" max="365" step="1" placeholder="3" />
           </label>
@@ -1833,6 +1923,56 @@
     </section>
   </div>
 
+
+  <div class="modal-backdrop" id="aiAnswerModal" aria-hidden="true">
+    <section class="card modal ai-answer-modal" role="dialog" aria-modal="true" aria-labelledby="aiAnswerModalTitle">
+      <div class="modal-title-row">
+        <div>
+          <h2 id="aiAnswerModalTitle">保存 AI 回答</h2>
+          <p class="hint">从豆包 / DeepSeek / 其他 AI 手动复制回答后粘贴到这里，Info Dock 会用本地规则生成摘要并保存到收件箱。</p>
+        </div>
+        <button class="ghost-btn" type="button" id="closeAiAnswerModalBtn">关闭</button>
+      </div>
+
+      <label class="label">AI 来源
+        <select id="aiAnswerSource">
+          <option value="豆包 AI">豆包</option>
+          <option value="DeepSeek AI">DeepSeek</option>
+          <option value="其他 AI">其他 AI</option>
+        </select>
+      </label>
+
+      <label class="label">关联搜索历史
+        <select id="aiAnswerHistory"></select>
+      </label>
+
+      <label class="label">原始问题
+        <textarea id="aiAnswerQuestion" placeholder="会自动填充最近一次 AI 询问；也可以手动填写。"></textarea>
+      </label>
+
+      <label class="label">AI 原始回答
+        <textarea id="aiAnswerText" class="ai-answer-textarea" placeholder="把外部 AI 页面中的回答复制后粘贴到这里。"></textarea>
+      </label>
+
+      <div class="compact-edit-grid">
+        <label class="compact-field wide"><span>标题</span>
+          <input id="aiAnswerTitle" class="field" type="text" placeholder="自动生成，可手动修改" />
+        </label>
+        <label class="compact-field wide"><span>结论</span>
+          <textarea id="aiAnswerConclusion" placeholder="自动提取一句话结论，可手动修改"></textarea>
+        </label>
+        <label class="compact-field wide"><span>标签</span>
+          <input id="aiAnswerTags" class="field tag-edit-field" type="text" placeholder="#AI #AI回答 #豆包AI" />
+        </label>
+      </div>
+
+      <div class="actions">
+        <button class="ghost-btn" id="refreshAiAnswerSuggestionBtn" type="button">重新生成建议</button>
+        <button class="primary-btn" id="saveAiAnswerSubmitBtn" type="button">保存到收件箱</button>
+      </div>
+    </section>
+  </div>
+
   <div class="modal-backdrop" id="snapshotModal" aria-hidden="true">
     <section class="card modal" role="dialog" aria-modal="true" aria-labelledby="snapshotModalTitle">
       <div class="modal-title-row">
@@ -1857,9 +1997,25 @@
 <div class="toast" id="toast"></div>
 
   <script>
-    const SEARCH_STATUSES = ["未处理", "有用", "已解决", "没找到", "转入稍后看", "放弃"];
-    const LATER_STATUSES = ["未看", "已看", "有用", "没用", "转成项目任务", "删除"];
-    const LATER_SOURCES_BASE = ["必应", "知乎", "微博", "小红书", "B站", "抖音", "播客", "GitHub", "微信/公众号", "快速笔记", "其他"];
+    const SEARCH_STATUSES = ["未处理", "有用", "已解决", "没找到", "转入收件箱", "放弃"];
+    const SEARCH_STATUS_ALIASES = {
+      "转入稍后看": "转入收件箱"
+    };
+    const LATER_STATUSES = ["收件箱", "待读", "阅读中", "待整理", "已整理", "已吸收", "已废弃"];
+    const LATER_STATUS_ALIASES = {
+      "未看": "待读",
+      "已看": "待整理",
+      "有用": "已整理",
+      "没用": "已废弃",
+      "删除": "已废弃"
+    };
+    const PENDING_REVIEW_LATER_STATUSES = new Set(["收件箱", "待读"]);
+    const KNOWLEDGE_STATUSES = ["已整理", "已吸收"];
+    const KNOWLEDGE_STATUS_SET = new Set(KNOWLEDGE_STATUSES);
+    const RESEARCH_READ_STATUSES = new Set(["待整理", "已整理", "已吸收"]);
+    const RESEARCH_ORGANIZED_STATUSES = new Set(["已整理", "已吸收"]);
+    const LATER_SOURCES_BASE = ["必应", "知乎", "微博", "小红书", "B站", "抖音", "播客", "GitHub", "微信/公众号", "快速笔记", "豆包 AI", "DeepSeek AI", "其他 AI", "其他"];
+    const AI_ANSWER_SOURCES = ["豆包 AI", "DeepSeek AI", "其他 AI"];
 
     const DEFAULT_PLATFORMS = [
       {
@@ -1970,6 +2126,7 @@
     const elements = {
       searchInput: $("#searchInput"),
       quickNoteBtn: $("#quickNoteBtn"),
+      saveAiAnswerBtn: $("#saveAiAnswerBtn"),
       statusMsg: $("#statusMsg"),
       globalSearchInput: $("#globalSearchInput"),
       globalSearchResults: $("#globalSearchResults"),
@@ -1982,15 +2139,15 @@
       historyList: $("#historyList"),
       bookmarkletLink: $("#bookmarkletLink"),
       copyBookmarkletBtn: $("#copyBookmarkletBtn"),
-      laterForm: $("#laterForm"),
-      laterTitle: $("#laterTitle"),
-      laterUrl: $("#laterUrl"),
-      laterSource: $("#laterSource"),
-      laterEstimate: $("#laterEstimate"),
-      laterReason: $("#laterReason"),
       laterSourceFilter: $("#laterSourceFilter"),
       laterStatusFilter: $("#laterStatusFilter"),
+      laterRelatedFilter: $("#laterRelatedFilter"),
       laterTextFilter: $("#laterTextFilter"),
+      knowledgeSourceFilter: $("#knowledgeSourceFilter"),
+      knowledgeStatusFilter: $("#knowledgeStatusFilter"),
+      knowledgeTextFilter: $("#knowledgeTextFilter"),
+      knowledgeSort: $("#knowledgeSort"),
+      knowledgeList: $("#knowledgeList"),
       pendingReviewCount: $("#pendingReviewCount"),
       pendingReviewHint: $("#pendingReviewHint"),
       reviewPanel: $("#reviewPanel"),
@@ -2007,6 +2164,17 @@
       newPlatformAppUrl: $("#newPlatformAppUrl"),
       cancelPlatformBtn: $("#cancelPlatformBtn"),
       savePlatformBtn: $("#savePlatformBtn"),
+      aiAnswerModal: $("#aiAnswerModal"),
+      closeAiAnswerModalBtn: $("#closeAiAnswerModalBtn"),
+      aiAnswerSource: $("#aiAnswerSource"),
+      aiAnswerHistory: $("#aiAnswerHistory"),
+      aiAnswerQuestion: $("#aiAnswerQuestion"),
+      aiAnswerText: $("#aiAnswerText"),
+      aiAnswerTitle: $("#aiAnswerTitle"),
+      aiAnswerConclusion: $("#aiAnswerConclusion"),
+      aiAnswerTags: $("#aiAnswerTags"),
+      refreshAiAnswerSuggestionBtn: $("#refreshAiAnswerSuggestionBtn"),
+      saveAiAnswerSubmitBtn: $("#saveAiAnswerSubmitBtn"),
       snapshotModal: $("#snapshotModal"),
       snapshotText: $("#snapshotText"),
       closeSnapshotModalBtn: $("#closeSnapshotModalBtn"),
@@ -2052,7 +2220,7 @@
 
     const searchEngine = (() => {
       const fields = ["title", "source", "reason", "conclusion", "note", "keyword", "platform", "tags", "bodyText"];
-      const storeFields = ["id", "itemType", "title", "source", "reason", "conclusion", "note", "keyword", "platform", "tags", "bodyText", "url", "createdAt", "time", "autoSummary"];
+      const storeFields = ["id", "itemType", "title", "source", "reason", "conclusion", "note", "keyword", "platform", "tags", "bodyText", "url", "createdAt", "time", "autoSummary", "status", "entranceType", "category"];
       const docs = new Map();
       let miniSearch = null;
 
@@ -2108,7 +2276,10 @@
           url: doc.url || "",
           createdAt: doc.createdAt || "",
           time: doc.time || "",
-          autoSummary: doc.autoSummary || ""
+          autoSummary: doc.autoSummary || "",
+          status: doc.status || "",
+          entranceType: doc.entranceType || "",
+          category: doc.category || ""
         };
         return normalized.id ? normalized : null;
       }
@@ -2242,6 +2413,7 @@
     let searchAutomationSettings = { ...DEFAULT_SEARCH_AUTOMATION_SETTINGS };
     let reviewSettings = { ...DEFAULT_REVIEW_SETTINGS };
     let reviewFilterActive = false;
+    let currentRelatedHistoryFilter = "";
     let deferredPwaInstallPrompt = null;
     const PWA_INSTALL_DISMISSED_KEY = "infoDock.pwaInstallDismissed.v4";
     const LAST_EXPORT_KEY = "infoDock.lastExportAt.v1";
@@ -2250,6 +2422,7 @@
     let pendingImportMode = "merge";
     let isSortingPlatforms = false;
     let selectedSortPlatformId = "";
+    let aiAnswerSuggestionState = { title: "", conclusion: "", tags: "", question: "" };
     const searchSnapshotFetchQueue = new Set();
 
     async function boot() {
@@ -2454,6 +2627,19 @@
 
     function bindEvents() {
       elements.quickNoteBtn.addEventListener("click", handleQuickNoteButtonClick);
+      if (elements.saveAiAnswerBtn) elements.saveAiAnswerBtn.addEventListener("click", openAiAnswerModal);
+      if (elements.closeAiAnswerModalBtn) elements.closeAiAnswerModalBtn.addEventListener("click", closeAiAnswerModal);
+      if (elements.aiAnswerModal) elements.aiAnswerModal.addEventListener("click", (event) => {
+        if (event.target === elements.aiAnswerModal) closeAiAnswerModal();
+      });
+      if (elements.aiAnswerHistory) elements.aiAnswerHistory.addEventListener("change", handleAiAnswerHistoryChange);
+      if (elements.aiAnswerSource) elements.aiAnswerSource.addEventListener("change", () => refreshAiAnswerSuggestions(false));
+      if (elements.aiAnswerQuestion) elements.aiAnswerQuestion.addEventListener("input", () => refreshAiAnswerSuggestions(false));
+      if (elements.aiAnswerText) elements.aiAnswerText.addEventListener("input", () => refreshAiAnswerSuggestions(false));
+      if (elements.refreshAiAnswerSuggestionBtn) elements.refreshAiAnswerSuggestionBtn.addEventListener("click", () => refreshAiAnswerSuggestions(true));
+      if (elements.saveAiAnswerSubmitBtn) elements.saveAiAnswerSubmitBtn.addEventListener("click", () => {
+        void saveAiAnswerToInbox();
+      });
       if (elements.pwaInstallBtn) elements.pwaInstallBtn.addEventListener("click", handlePwaInstallClick);
       if (elements.pwaDismissBtn) elements.pwaDismissBtn.addEventListener("click", dismissPwaInstallPrompt);
       if (elements.manualPwaInstallBtn) elements.manualPwaInstallBtn.addEventListener("click", () => {
@@ -2482,6 +2668,16 @@
 
       [elements.laterSourceFilter, elements.laterStatusFilter, elements.laterTextFilter]
         .forEach((control) => control.addEventListener("input", renderLater));
+      if (elements.laterRelatedFilter) {
+        elements.laterRelatedFilter.addEventListener("input", () => {
+          currentRelatedHistoryFilter = elements.laterRelatedFilter.value === "全部研究" ? "" : elements.laterRelatedFilter.value;
+          renderLater();
+        });
+      }
+
+      [elements.knowledgeSourceFilter, elements.knowledgeStatusFilter, elements.knowledgeTextFilter, elements.knowledgeSort]
+        .filter(Boolean)
+        .forEach((control) => control.addEventListener("input", renderKnowledge));
 
       if (elements.viewPendingReviewBtn) elements.viewPendingReviewBtn.addEventListener("click", viewPendingReviewItems);
       if (elements.randomReviewBtn) elements.randomReviewBtn.addEventListener("click", randomReviewItem);
@@ -2576,6 +2772,7 @@
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
           closeAddPlatformModal();
+          closeAiAnswerModal();
           closeSnapshotModal();
           closeItemActionSheet();
         }
@@ -2588,12 +2785,262 @@
       renderBookmarklet();
       renderHistory();
       renderLater();
+      renderKnowledge();
       renderSearchAutomationSettings();
       renderReviewSettings();
       renderProxySettings();
       renderPwaInstallStatus();
       renderGlobalSearchResults();
       void renderDataManagementPanels();
+    }
+
+    function isAiHistoryItem(item = {}) {
+      const platformId = String(item.platformId || "").toLowerCase();
+      return platformId === "doubao"
+        || platformId === "deepseek"
+        || item.platformType === "ai"
+        || item.category === "ai-assistant"
+        || item.entranceType === "AI询问";
+    }
+
+    function getAiHistoryTime(item = {}) {
+      const date = new Date(item.time || item.createdAt || 0);
+      return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+    }
+
+    function getAiHistoryCandidates() {
+      const sorted = historyItems
+        .filter(isAiHistoryItem)
+        .sort((a, b) => getAiHistoryTime(b) - getAiHistoryTime(a));
+      const now = Date.now();
+      const recentWindowMs = 30 * 60 * 1000;
+      const withinThirtyMinutes = sorted.filter((item) => {
+        const time = getAiHistoryTime(item);
+        return time > 0 && now - time <= recentWindowMs;
+      });
+      const optionMap = new Map();
+      [...withinThirtyMinutes, ...sorted.slice(0, 10)].forEach((item) => {
+        if (item?.id && !optionMap.has(item.id)) optionMap.set(item.id, item);
+      });
+      return {
+        defaultItem: withinThirtyMinutes[0] || sorted[0] || null,
+        options: Array.from(optionMap.values()),
+        hasRecentMatch: withinThirtyMinutes.length > 0
+      };
+    }
+
+    function getAiSourceFromHistory(historyItem = {}) {
+      const text = `${historyItem.platformId || ""} ${historyItem.platform || ""} ${historyItem.url || ""}`.toLowerCase();
+      if (text.includes("doubao") || text.includes("豆包")) return "豆包 AI";
+      if (text.includes("deepseek")) return "DeepSeek AI";
+      return "其他 AI";
+    }
+
+    function normalizeAiAnswerSource(source) {
+      const value = String(source || "").trim();
+      if (/doubao|豆包/i.test(value)) return "豆包 AI";
+      if (/deepseek/i.test(value)) return "DeepSeek AI";
+      if (AI_ANSWER_SOURCES.includes(value)) return value;
+      return "其他 AI";
+    }
+
+    function getAiAnswerSourceTag(source) {
+      const normalizedSource = normalizeAiAnswerSource(source);
+      if (normalizedSource === "豆包 AI") return "#豆包AI";
+      if (normalizedSource === "DeepSeek AI") return "#DeepSeekAI";
+      return "#其他AI";
+    }
+
+    function generateAiAnswerTitle(question, answer) {
+      const cleanQuestion = limitText(question, 56);
+      if (cleanQuestion) return `AI 回答：${cleanQuestion}`;
+      const firstLine = String(answer || "").split(/\r?\n/).map((line) => line.trim()).find(Boolean) || "AI 回答";
+      return limitText(firstLine, 64) || "AI 回答";
+    }
+
+    function generateAiAnswerTags(source, question, answer) {
+      return normalizeTags([
+        "#AI",
+        "#AI回答",
+        getAiAnswerSourceTag(source),
+        ...suggestTags({
+          kind: "later",
+          title: question,
+          source,
+          summary: answer
+        })
+      ]);
+    }
+
+    function renderAiHistoryOptionLabel(item, hasRecentMatch) {
+      const timeLabel = formatTime(item.time || item.createdAt);
+      const windowLabel = hasRecentMatch && Date.now() - getAiHistoryTime(item) <= 30 * 60 * 1000 ? "最近30分钟" : "最近AI询问";
+      return `${windowLabel} · ${item.platform || "AI"} · ${timeLabel} · ${item.keyword || "未命名问题"}`;
+    }
+
+    function populateAiAnswerHistorySelect() {
+      if (!elements.aiAnswerHistory) return null;
+      const candidates = getAiHistoryCandidates();
+      elements.aiAnswerHistory.innerHTML = `<option value="">无关联</option>`;
+
+      candidates.options.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item.id;
+        option.textContent = renderAiHistoryOptionLabel(item, candidates.hasRecentMatch);
+        elements.aiAnswerHistory.appendChild(option);
+      });
+
+      if (candidates.defaultItem) {
+        elements.aiAnswerHistory.value = candidates.defaultItem.id;
+      } else {
+        elements.aiAnswerHistory.value = "";
+      }
+
+      return candidates.defaultItem;
+    }
+
+    function resetAiAnswerSuggestionState() {
+      aiAnswerSuggestionState = { title: "", conclusion: "", tags: "", question: "" };
+    }
+
+    function shouldReplaceAiSuggestionField(element, previousValue, force = false) {
+      if (force) return true;
+      const currentValue = String(element?.value || "").trim();
+      return !currentValue || currentValue === previousValue;
+    }
+
+    function refreshAiAnswerSuggestions(force = false) {
+      if (!elements.aiAnswerText || !elements.aiAnswerTitle || !elements.aiAnswerConclusion || !elements.aiAnswerTags) return;
+      const question = elements.aiAnswerQuestion?.value.trim() || "";
+      const answer = elements.aiAnswerText.value.trim();
+      const source = normalizeAiAnswerSource(elements.aiAnswerSource?.value || "其他 AI");
+      const structuredSummary = structureAiAnswer(answer);
+      const title = generateAiAnswerTitle(question, answer);
+      const conclusion = structuredSummary.oneSentenceConclusion || limitText(answer, 120);
+      const tags = formatTagsForEdit(generateAiAnswerTags(source, question, answer));
+
+      if (shouldReplaceAiSuggestionField(elements.aiAnswerTitle, aiAnswerSuggestionState.title, force)) {
+        elements.aiAnswerTitle.value = title;
+      }
+      if (shouldReplaceAiSuggestionField(elements.aiAnswerConclusion, aiAnswerSuggestionState.conclusion, force)) {
+        elements.aiAnswerConclusion.value = conclusion;
+      }
+      if (shouldReplaceAiSuggestionField(elements.aiAnswerTags, aiAnswerSuggestionState.tags, force)) {
+        elements.aiAnswerTags.value = tags;
+      }
+
+      aiAnswerSuggestionState = { title, conclusion, tags, question };
+    }
+
+    function handleAiAnswerHistoryChange() {
+      const selectedHistory = getHistoryById(elements.aiAnswerHistory?.value || "");
+      if (selectedHistory) {
+        if (elements.aiAnswerQuestion) elements.aiAnswerQuestion.value = selectedHistory.keyword || "";
+        if (elements.aiAnswerSource) elements.aiAnswerSource.value = getAiSourceFromHistory(selectedHistory);
+      } else if (elements.aiAnswerQuestion && !elements.aiAnswerQuestion.value.trim()) {
+        elements.aiAnswerQuestion.value = elements.searchInput?.value.trim() || "";
+      }
+      refreshAiAnswerSuggestions(true);
+    }
+
+    function openAiAnswerModal() {
+      if (!elements.aiAnswerModal) return;
+      resetAiAnswerSuggestionState();
+      const defaultHistory = populateAiAnswerHistorySelect();
+      const defaultQuestion = defaultHistory?.keyword || elements.searchInput?.value.trim() || "";
+      const defaultSource = defaultHistory ? getAiSourceFromHistory(defaultHistory) : "其他 AI";
+
+      if (elements.aiAnswerSource) elements.aiAnswerSource.value = defaultSource;
+      if (elements.aiAnswerQuestion) elements.aiAnswerQuestion.value = defaultQuestion;
+      if (elements.aiAnswerText) elements.aiAnswerText.value = "";
+      if (elements.aiAnswerTitle) elements.aiAnswerTitle.value = generateAiAnswerTitle(defaultQuestion, "");
+      if (elements.aiAnswerConclusion) elements.aiAnswerConclusion.value = "";
+      if (elements.aiAnswerTags) elements.aiAnswerTags.value = formatTagsForEdit(generateAiAnswerTags(defaultSource, defaultQuestion, ""));
+      aiAnswerSuggestionState = {
+        title: elements.aiAnswerTitle?.value || "",
+        conclusion: elements.aiAnswerConclusion?.value || "",
+        tags: elements.aiAnswerTags?.value || "",
+        question: defaultQuestion
+      };
+
+      elements.aiAnswerModal.classList.add("active");
+      elements.aiAnswerModal.setAttribute("aria-hidden", "false");
+      setTimeout(() => elements.aiAnswerText?.focus(), 0);
+      const candidates = getAiHistoryCandidates();
+      if (!candidates.options.length) {
+        toast("没有找到 AI 询问历史，也可以无关联保存。 ");
+      } else if (!candidates.hasRecentMatch) {
+        toast("未找到最近 30 分钟内的 AI 询问，已列出最近 10 条供选择。 ");
+      }
+    }
+
+    function closeAiAnswerModal() {
+      if (!elements.aiAnswerModal) return;
+      elements.aiAnswerModal.classList.remove("active");
+      elements.aiAnswerModal.setAttribute("aria-hidden", "true");
+    }
+
+    async function saveAiAnswerToInbox() {
+      const answer = elements.aiAnswerText?.value.trim() || "";
+      if (!answer) {
+        toast("请先粘贴 AI 原始回答。 ");
+        elements.aiAnswerText?.focus();
+        return;
+      }
+
+      const selectedHistoryId = elements.aiAnswerHistory?.value || "";
+      const relatedHistory = getHistoryById(selectedHistoryId);
+      const source = normalizeAiAnswerSource(elements.aiAnswerSource?.value || getAiSourceFromHistory(relatedHistory || {}));
+      const question = elements.aiAnswerQuestion?.value.trim() || relatedHistory?.keyword || "";
+      const structuredSummary = structureAiAnswer(answer);
+      const title = (elements.aiAnswerTitle?.value.trim() || generateAiAnswerTitle(question, answer)).slice(0, 120);
+      const conclusion = (elements.aiAnswerConclusion?.value.trim() || structuredSummary.oneSentenceConclusion || "").slice(0, 220);
+      const tags = normalizeTags([
+        ...generateAiAnswerTags(source, question, answer),
+        ...normalizeTags(elements.aiAnswerTags?.value || [])
+      ]);
+
+      const item = {
+        id: createId(),
+        title: title || "AI 回答",
+        url: relatedHistory?.url || "",
+        source,
+        reason: "保存的 AI 回答。",
+        autoSummary: "",
+        bodyText: "",
+        metadataFetched: false,
+        lastSummaryFetchAt: "",
+        lastSummaryFetchStatus: "",
+        lastSummaryFetchError: "",
+        lastMetadataFetchAt: "",
+        lastMetadataFetchStatus: "",
+        lastMetadataFetchError: "",
+        lastSuccessfulFetchAt: "",
+        tags,
+        estimate: estimateLaterItemTime({ title, source }),
+        status: "待整理",
+        conclusion,
+        createdAt: new Date().toISOString(),
+        relatedHistoryId: relatedHistory?.id || "",
+        aiOriginalQuestion: question,
+        aiOriginalAnswer: answer,
+        structuredSummary
+      };
+
+      const normalizedItem = normalizeLaterItems([item])[0];
+      laterItems.unshift(normalizedItem);
+      await save(STORE_NAMES.later, laterItems);
+      await rebuildSearchIndex();
+      rebuildBacklinkIndex();
+      closeAiAnswerModal();
+      renderFilters();
+      activateTab("laterSection");
+      renderLater();
+      renderKnowledge();
+      renderGlobalSearchResults();
+      void renderDataManagementPanels();
+      focusRenderedItem(normalizedItem.id, "later");
+      toast("已保存 AI 回答到收件箱。 ");
     }
 
     function activateTab(tabId) {
@@ -2603,6 +3050,17 @@
       $$(".section").forEach((section) => {
         section.classList.toggle("active", section.id === tabId);
       });
+
+      if (tabId === "historySection") renderHistory();
+      if (tabId === "laterSection") renderLater();
+      if (tabId === "knowledgeSection") renderKnowledge();
+      if (tabId === "settingsSection") {
+        renderSearchAutomationSettings();
+        renderReviewSettings();
+        renderProxySettings();
+        renderPwaInstallStatus();
+        void renderDataManagementPanels();
+      }
     }
 
     const InfoDockDB = (() => {
@@ -3035,7 +3493,7 @@
         downloadTextFile(filename, text, "application/json");
         localStorage.setItem(LAST_EXPORT_KEY, payload.exportedAt);
         if (!options.silent) {
-          setBackupStatus(`已导出 ${payload.counts.history} 条搜索、${payload.counts.later} 条稍后看、${payload.counts.contents} 个快照。`, true);
+          setBackupStatus(`已导出 ${payload.counts.history} 条搜索、${payload.counts.later} 条收件箱、${payload.counts.contents} 个快照。`, true);
           toast("已导出完整 JSON 备份。");
           await renderDataManagementPanels();
         }
@@ -3085,7 +3543,7 @@
       const lastExport = loadLastExportAt();
       const backupAgeHint = lastExport ? `上次导出：${formatDateTime(lastExport)}` : "上次导出：从未，建议先导出一份备份";
       elements.dataBackupSummary.innerHTML = `
-        <div>记录：${historyItems.length} 条搜索历史，${laterItems.length} 条稍后看，${platforms.length} 个搜索平台。</div>
+        <div>记录：${historyItems.length} 条搜索历史，${laterItems.length} 条收件箱，${platforms.length} 个搜索平台。</div>
         <div>快照：${contents.length} 个，估算 ${formatBytes(byteSize(contents))}。</div>
         <div>${backupAgeHint}。</div>
         <div>持久化存储：${persisted === true ? "已开启" : persisted === false ? "未开启或浏览器未授予" : "当前浏览器不支持检测"}。</div>
@@ -3174,7 +3632,7 @@
         const text = await readFileAsText(file);
         const parsed = parseBackupFile(JSON.parse(text));
         const modeLabel = pendingImportMode === "replace" ? "覆盖当前数据" : "合并到当前数据";
-        const summary = `将${modeLabel}：${parsed.platforms.length} 个平台、${parsed.history.length} 条搜索、${parsed.later.length} 条稍后看、${parsed.contents.length} 个快照。导入前会先下载当前数据备份。是否继续？`;
+        const summary = `将${modeLabel}：${parsed.platforms.length} 个平台、${parsed.history.length} 条搜索、${parsed.later.length} 条收件箱、${parsed.contents.length} 个快照。导入前会先下载当前数据备份。是否继续？`;
         if (!window.confirm(summary)) return;
 
         await exportDataBackup({ prefix: "info-dock-before-import", silent: true });
@@ -3249,7 +3707,7 @@
         toast("没有可清理的孤儿快照。 ");
         return;
       }
-      if (!window.confirm(`将删除 ${removed} 个已无对应条目的孤儿快照，不会删除搜索历史或稍后看条目。继续？`)) return;
+      if (!window.confirm(`将删除 ${removed} 个已无对应条目的孤儿快照，不会删除搜索历史或收件箱条目。继续？`)) return;
       await saveAllContentSnapshots(remaining);
       await rebuildSearchIndex();
       renderGlobalSearchResults();
@@ -3435,6 +3893,87 @@
       return isAiPlatform(platform) || entrance.entranceType === "AI询问" || entrance.category === "ai-assistant";
     }
 
+    function normalizeTargetSampleCount(value) {
+      const number = Number.parseInt(value, 10);
+      if (!Number.isFinite(number) || number < 0) return 0;
+      return number;
+    }
+
+    function normalizeBooleanField(value) {
+      return value === true || value === "true" || value === 1 || value === "1";
+    }
+
+    function limitText(value, maxLength = 120) {
+      const text = String(value || "").replace(/\s+/g, " ").trim();
+      if (text.length <= maxLength) return text;
+      return `${text.slice(0, maxLength)}…`;
+    }
+
+    function dedupeLimited(values, maxItems = 8, maxLength = 140) {
+      const seen = new Set();
+      const result = [];
+      values.forEach((value) => {
+        const text = limitText(value, maxLength);
+        const key = text.toLowerCase();
+        if (!text || seen.has(key)) return;
+        seen.add(key);
+        result.push(text);
+      });
+      return result.slice(0, maxItems);
+    }
+
+    function splitAiAnswerSentences(text) {
+      return String(text || "")
+        .replace(/\r/g, "\n")
+        .replace(/([。！？!?；;])/g, "$1\n")
+        .split(/\n+/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+    }
+
+    function structureAiAnswer(text) {
+      const rawText = String(text || "").trim();
+      const lines = rawText.split(/\r?\n+/).map((line) => line.trim()).filter(Boolean);
+      const firstParagraph = lines.find((line) => line && !/^(```|~~~)/.test(line)) || "";
+      const firstSentence = splitAiAnswerSentences(firstParagraph)[0] || firstParagraph;
+      const keyPointLines = lines
+        .map((line) => {
+          const match = line.match(/^\s*(?:\d+[\.、)]|[-•*])\s*(.+)$/);
+          return match ? match[1] : "";
+        })
+        .filter(Boolean);
+      const sentences = splitAiAnswerSentences(rawText);
+      const actionItems = sentences.filter((sentence) => /建议|应该|可以|下一步|推荐|需要做|should|recommend|next step/i.test(sentence));
+      const claimsToVerify = sentences.filter((sentence) => /需要验证|需验证|需确认|注意|风险|可能|不确定|但是|但|也许|verify|risk|uncertain|however|but|may|might/i.test(sentence));
+
+      return {
+        oneSentenceConclusion: limitText(firstSentence || firstParagraph, 120),
+        keyPoints: dedupeLimited(keyPointLines, 8, 140),
+        actionItems: dedupeLimited(actionItems, 8, 140),
+        claimsToVerify: dedupeLimited(claimsToVerify, 8, 140)
+      };
+    }
+
+    function normalizeStructuredSummary(value) {
+      if (!value || typeof value !== "object") return null;
+      return {
+        oneSentenceConclusion: limitText(value.oneSentenceConclusion || "", 120),
+        keyPoints: dedupeLimited(Array.isArray(value.keyPoints) ? value.keyPoints : [], 8, 140),
+        actionItems: dedupeLimited(Array.isArray(value.actionItems) ? value.actionItems : [], 8, 140),
+        claimsToVerify: dedupeLimited(Array.isArray(value.claimsToVerify) ? value.claimsToVerify : [], 8, 140)
+      };
+    }
+
+    function getStructuredSummarySearchText(summary) {
+      const normalizedSummary = normalizeStructuredSummary(summary);
+      if (!normalizedSummary) return "";
+      return [
+        normalizedSummary.oneSentenceConclusion,
+        ...(normalizedSummary.keyPoints || []),
+        ...(normalizedSummary.claimsToVerify || [])
+      ].filter(Boolean).join(" ");
+    }
+
     function normalizeHistoryItems(rawItems) {
       const raw = Array.isArray(rawItems) ? rawItems : [];
       return raw.map((item) => {
@@ -3450,6 +3989,10 @@
           status: normalizeSearchStatus(item.status || (item.solved ? "已解决" : "未处理")),
           solved: Boolean(item.solved),
           note: item.note || "",
+          researchGoal: item.researchGoal || "",
+          targetSampleCount: normalizeTargetSampleCount(item.targetSampleCount),
+          researchNote: item.researchNote || "",
+          isResearch: normalizeBooleanField(item.isResearch),
           url: item.url || "",
           category: normalizePlatformLightField(item.category || ""),
           platformType: normalizePlatformLightField(item.platformType || ""),
@@ -3462,35 +4005,64 @@
       });
     }
 
+    function normalizeLaterStatusAndTags(status, tags) {
+      const value = String(status || "").trim();
+      const normalizedTags = normalizeTags(tags || []);
+
+      if (LATER_STATUSES.includes(value)) {
+        return { status: value, tags: normalizedTags };
+      }
+
+      if (value === "转成项目任务") {
+        return {
+          status: "待整理",
+          tags: normalizeTags([...normalizedTags, "#任务"])
+        };
+      }
+
+      return {
+        status: LATER_STATUS_ALIASES[value] || "收件箱",
+        tags: normalizedTags
+      };
+    }
+
     function normalizeLaterItems(rawItems) {
       const raw = Array.isArray(rawItems) ? rawItems : [];
-      return raw.map((item) => ({
-        id: item.id || createId(),
-        title: item.title || item.url || "未命名内容",
-        url: item.url || "",
-        source: normalizeLaterSource(item.source || detectSourceFromUrl(item.url || "")),
-        reason: item.reason || "",
-        autoSummary: item.autoSummary || "",
-        bodyText: item.bodyText || "",
-        metadataFetched: Boolean(item.metadataFetched),
-        lastSummaryFetchAt: item.lastSummaryFetchAt || "",
-        lastSummaryFetchStatus: item.lastSummaryFetchStatus || "",
-        lastSummaryFetchError: item.lastSummaryFetchError || "",
-        lastMetadataFetchAt: item.lastMetadataFetchAt || "",
-        lastMetadataFetchStatus: item.lastMetadataFetchStatus || "",
-        lastMetadataFetchError: item.lastMetadataFetchError || "",
-        lastSuccessfulFetchAt: item.lastSuccessfulFetchAt || "",
-        tags: normalizeTags(item.tags || []),
-        estimate: item.estimate || "",
-        status: LATER_STATUSES.includes(item.status) ? item.status : "未看",
-        conclusion: item.conclusion || "",
-        createdAt: item.createdAt || new Date().toISOString(),
-        relatedHistoryId: item.relatedHistoryId || ""
-      }));
+      return raw.map((item) => {
+        const normalizedLaterState = normalizeLaterStatusAndTags(item.status, item.tags);
+        return {
+          id: item.id || createId(),
+          title: item.title || item.url || "未命名内容",
+          url: item.url || "",
+          source: normalizeLaterSource(item.source || detectSourceFromUrl(item.url || "")),
+          reason: item.reason || "",
+          autoSummary: item.autoSummary || "",
+          bodyText: item.bodyText || "",
+          metadataFetched: Boolean(item.metadataFetched),
+          lastSummaryFetchAt: item.lastSummaryFetchAt || "",
+          lastSummaryFetchStatus: item.lastSummaryFetchStatus || "",
+          lastSummaryFetchError: item.lastSummaryFetchError || "",
+          lastMetadataFetchAt: item.lastMetadataFetchAt || "",
+          lastMetadataFetchStatus: item.lastMetadataFetchStatus || "",
+          lastMetadataFetchError: item.lastMetadataFetchError || "",
+          lastSuccessfulFetchAt: item.lastSuccessfulFetchAt || "",
+          tags: normalizedLaterState.tags,
+          estimate: item.estimate || "",
+          status: normalizedLaterState.status,
+          conclusion: item.conclusion || "",
+          createdAt: item.createdAt || new Date().toISOString(),
+          relatedHistoryId: item.relatedHistoryId || "",
+          aiOriginalQuestion: item.aiOriginalQuestion || "",
+          aiOriginalAnswer: item.aiOriginalAnswer || "",
+          structuredSummary: normalizeStructuredSummary(item.structuredSummary)
+        };
+      });
     }
 
     function normalizeSearchStatus(status) {
-      if (SEARCH_STATUSES.includes(status)) return status;
+      const value = String(status || "").trim();
+      const normalized = SEARCH_STATUS_ALIASES[value] || value;
+      if (SEARCH_STATUSES.includes(normalized)) return normalized;
       return "未处理";
     }
 
@@ -3531,22 +4103,53 @@
       renderGlobalSearchResults();
     }
 
+    function getHistoryById(id) {
+      if (!id) return null;
+      return historyItems.find((item) => item.id === id) || null;
+    }
+
+    function getRelatedHistorySearchText(relatedHistoryId) {
+      const historyItem = getHistoryById(relatedHistoryId);
+      if (!historyItem) return "";
+      return [
+        historyItem.platform,
+        historyItem.keyword,
+        historyItem.researchGoal,
+        historyItem.researchNote
+      ].filter(Boolean).join(" ");
+    }
+
     function buildLaterSearchDoc(item, content = {}) {
       return {
         id: item.id,
         itemType: "later",
         title: item.title,
         source: item.source,
-        reason: [item.reason, item.autoSummary || content.metaDescription || ""].filter(Boolean).join(" "),
+        reason: [
+          item.reason,
+          item.autoSummary || content.metaDescription || "",
+          getRelatedHistorySearchText(item.relatedHistoryId),
+          item.aiOriginalQuestion,
+          getStructuredSummarySearchText(item.structuredSummary)
+        ].filter(Boolean).join(" "),
         conclusion: item.conclusion,
         keyword: "",
         platform: item.source,
         note: "",
         tags: normalizeTags(item.tags || []).join(" "),
-        bodyText: [item.bodyText, content.bodyText, content.snapshotText].filter(Boolean).join(" "),
+        bodyText: [
+          item.bodyText,
+          content.bodyText,
+          content.snapshotText,
+          item.aiOriginalQuestion,
+          item.aiOriginalAnswer,
+          getStructuredSummarySearchText(item.structuredSummary),
+          getRelatedHistorySearchText(item.relatedHistoryId)
+        ].filter(Boolean).join(" "),
         url: item.url,
         createdAt: item.createdAt,
-        autoSummary: item.autoSummary || content.metaDescription || ""
+        autoSummary: item.autoSummary || content.metaDescription || "",
+        status: item.status || ""
       };
     }
 
@@ -3560,11 +4163,19 @@
         conclusion: "",
         keyword: item.keyword,
         platform: item.platform,
-        note: item.note,
+        note: [item.note, item.researchGoal, item.researchNote].filter(Boolean).join(" "),
         entranceType: item.entranceType || "",
         category: item.category || "",
         tags: normalizeTags(item.tags || []).join(" "),
-        bodyText: [content.bodyText, content.snapshotText, item.entranceType, item.category, item.platformType].filter(Boolean).join(" "),
+        bodyText: [
+          content.bodyText,
+          content.snapshotText,
+          item.entranceType,
+          item.category,
+          item.platformType,
+          item.researchGoal,
+          item.researchNote
+        ].filter(Boolean).join(" "),
         url: item.url,
         time: item.time
       };
@@ -3591,7 +4202,7 @@
 
       panel.innerHTML = results.map((result) => {
         const isLater = result.itemType === "later";
-        const typeLabel = isLater ? "稍后看" : "搜索历史";
+        const typeLabel = isLater ? (KNOWLEDGE_STATUS_SET.has(result.status) ? "知识条目" : "收件箱") : "搜索历史";
         const title = result.title || result.keyword || "未命名内容";
         const source = result.source || result.platform || "其他";
         const snippet = getSearchResultSnippet(result, query);
@@ -3775,7 +4386,7 @@
           id: item.id,
           itemType: "later",
           title: getItemTitle(item, "later"),
-          sourceLabel: "稍后看",
+          sourceLabel: "收件箱",
           subtitle: item.source || ""
         }))
       ].filter((item) => item.id && item.title);
@@ -3833,7 +4444,7 @@
           id: item.id,
           itemType: "later",
           title: getItemTitle(item, "later"),
-          sourceLabel: "稍后看",
+          sourceLabel: "收件箱",
           fields: [
             { key: "conclusion", label: "看完后的结论", value: item.conclusion || "" }
           ]
@@ -4758,7 +5369,7 @@
       elements.reviewReminderEnabled.checked = Boolean(settings.reviewReminderEnabled);
 
       if (elements.reviewSettingsStatus) {
-        elements.reviewSettingsStatus.textContent = message || `当前规则：未看且超过 ${settings.reviewThresholdDays} 天的稍后看条目会进入待回顾；应用内提醒${settings.reviewReminderEnabled ? "已开启" : "已关闭"}。`;
+        elements.reviewSettingsStatus.textContent = message || `当前规则：收件箱/待读且超过 ${settings.reviewThresholdDays} 天的收件箱条目会进入待回顾；应用内提醒${settings.reviewReminderEnabled ? "已开启" : "已关闭"}。`;
         elements.reviewSettingsStatus.classList.remove("status-ok", "status-warn");
       }
     }
@@ -5825,6 +6436,10 @@
       if (elements.laterSource) fillSelect(elements.laterSource, sourceOptions, sourceOptions.includes("其他") ? "其他" : sourceOptions[0]);
       fillSelect(elements.laterSourceFilter, ["全部来源", ...sourceOptions], "全部来源");
       fillSelect(elements.laterStatusFilter, ["全部状态", ...LATER_STATUSES], "全部状态");
+      fillSelect(elements.laterRelatedFilter, getLaterRelatedFilterOptions().map((option) => option.label), "全部研究");
+      syncLaterRelatedFilterValues();
+      fillSelect(elements.knowledgeSourceFilter, ["全部来源", ...sourceOptions], "全部来源");
+      fillSelect(elements.knowledgeStatusFilter, ["全部状态", ...KNOWLEDGE_STATUSES], "全部状态");
     }
 
     function getAllLaterSources() {
@@ -5846,6 +6461,70 @@
         select.appendChild(node);
       });
       select.value = options.includes(previousValue) ? previousValue : selectedValue;
+    }
+
+    function getHistoryOptionLabel(item) {
+      return `${item.platform || "其他"} · ${item.keyword || "未命名关键词"} · ${formatTime(item.time)}`;
+    }
+
+    function getResearchHistoryOptions(includeAllHistory = false) {
+      return [...historyItems]
+        .filter((item) => includeAllHistory || item.isResearch)
+        .sort((a, b) => {
+          if (a.isResearch !== b.isResearch) return a.isResearch ? -1 : 1;
+          return new Date(b.time || 0) - new Date(a.time || 0);
+        })
+        .map((item) => ({
+          value: item.id,
+          label: getHistoryOptionLabel(item),
+          isResearch: Boolean(item.isResearch)
+        }));
+    }
+
+    function getLaterRelatedFilterOptions() {
+      const options = [
+        { value: "全部研究", label: "全部研究" },
+        { value: "未关联", label: "未关联" },
+        ...getResearchHistoryOptions(false).map((item) => ({
+          value: `history:${item.value}`,
+          label: item.label
+        }))
+      ];
+
+      if (currentRelatedHistoryFilter?.startsWith("history:") && !options.some((option) => option.value === currentRelatedHistoryFilter)) {
+        const currentHistory = getHistoryById(currentRelatedHistoryFilter.slice("history:".length));
+        if (currentHistory) {
+          options.push({
+            value: currentRelatedHistoryFilter,
+            label: getHistoryOptionLabel(currentHistory)
+          });
+        }
+      }
+
+      return options;
+    }
+
+    function syncLaterRelatedFilterValues() {
+      if (!elements.laterRelatedFilter) return;
+      const options = getLaterRelatedFilterOptions();
+      Array.from(elements.laterRelatedFilter.options).forEach((node, index) => {
+        if (options[index]) node.value = options[index].value;
+      });
+      const current = currentRelatedHistoryFilter || elements.laterRelatedFilter.value || "全部研究";
+      elements.laterRelatedFilter.value = options.some((option) => option.value === current) ? current : "全部研究";
+    }
+
+    function renderRelatedHistorySelect(selectedId = "", laterId = "") {
+      const options = [
+        { value: "", label: "无关联" },
+        ...getResearchHistoryOptions(true)
+      ];
+
+      return `
+        <select data-action="later-related-history" data-id="${escapeAttribute(laterId)}">
+          ${options.map((option) => `<option value="${escapeAttribute(option.value)}" ${option.value === selectedId ? "selected" : ""}>${escapeHtml(option.isResearch ? `⭐ ${option.label}` : option.label)}</option>`).join("")}
+        </select>
+      `;
     }
 
     function togglePlatformSort() {
@@ -6040,6 +6719,58 @@ function fillUrlTemplate(template, query, domain = "") {
       `;
     }
 
+    function getRelatedLaterItems(historyId) {
+      if (!historyId) return [];
+      return laterItems.filter((item) => item.relatedHistoryId === historyId);
+    }
+
+    function getResearchProgress(historyItem) {
+      const relatedItems = getRelatedLaterItems(historyItem.id);
+      const readCount = relatedItems.filter((item) => RESEARCH_READ_STATUSES.has(item.status)).length;
+      const organizedCount = relatedItems.filter((item) => RESEARCH_ORGANIZED_STATUSES.has(item.status)).length;
+      return {
+        total: relatedItems.length,
+        readCount,
+        organizedCount,
+        targetSampleCount: normalizeTargetSampleCount(historyItem.targetSampleCount)
+      };
+    }
+
+    function renderResearchPanel(item) {
+      const progress = getResearchProgress(item);
+      const targetLabel = progress.targetSampleCount > 0 ? String(progress.targetSampleCount) : "未设目标";
+      const progressText = progress.targetSampleCount > 0
+        ? `研究进度：已看 ${progress.readCount} / ${progress.targetSampleCount}，已整理 ${progress.organizedCount}`
+        : `研究进度：已看 ${progress.readCount}，已整理 ${progress.organizedCount}`;
+
+      return `
+        <div class="research-panel">
+          <div class="meta">
+            <span class="tag ${item.isResearch ? "ok" : ""}">${item.isResearch ? "研究主题" : "普通搜索"}</span>
+            <span class="tag">关联资料 ${progress.total} 条</span>
+            <span class="tag">目标样本 ${escapeHtml(targetLabel)}</span>
+            <span class="tag">${escapeHtml(progressText)}</span>
+          </div>
+          <div class="compact-edit-grid">
+            <label class="compact-field research-toggle"><span>研究主题</span>
+              <input type="checkbox" data-action="history-is-research" data-id="${escapeAttribute(item.id)}" ${item.isResearch ? "checked" : ""} />
+            </label>
+            <label class="compact-field wide"><span>研究目标</span>
+              <input class="field" data-action="history-research-goal" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.researchGoal || "")}" placeholder="例如：比较 10 个真实案例，判断是否值得投入" />
+            </label>
+            <label class="compact-field"><span>目标样本数</span>
+              <input class="field" type="number" min="0" step="1" data-action="history-target-sample-count" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.targetSampleCount || "")}" placeholder="0" />
+            </label>
+            <label class="compact-field wide"><span>研究备注</span>
+              <textarea data-action="history-research-note" data-id="${escapeAttribute(item.id)}" placeholder="记录采样标准、排除条件、下一步。">${escapeHtml(item.researchNote || "")}</textarea>
+            </label>
+          </div>
+          ${item.researchGoal ? `<p class="hint">目标：${escapeHtml(item.researchGoal)}</p>` : ""}
+          ${progress.total ? `<div class="actions"><button class="tiny-btn" type="button" data-action="view-related-later" data-id="${escapeAttribute(item.id)}">查看关联资料</button></div>` : ""}
+        </div>
+      `;
+    }
+
     function renderHistory() {
       const platformFilter = elements.historyPlatformFilter.value || "全部平台";
       const statusFilter = elements.historyStatusFilter.value || "全部状态";
@@ -6057,6 +6788,9 @@ function fillUrlTemplate(template, query, domain = "") {
           item.category,
           item.platformType,
           item.note,
+          item.researchGoal,
+          item.researchNote,
+          item.isResearch ? "研究主题" : "",
           normalizeTags(item.tags).join(" ")
         ].join(" "));
         const matchesText = !textFilter || haystack.includes(textFilter);
@@ -6117,6 +6851,7 @@ function fillUrlTemplate(template, query, domain = "") {
               <input class="field tag-edit-field" data-action="history-tags" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(formatTagsForEdit(item.tags))}" placeholder="#AI #教程 #观点" />
             </label>
           </div>
+          ${renderResearchPanel(item)}
           ${renderBacklinks("history", item.id)}
         </article>
       `).join("");
@@ -6151,7 +6886,7 @@ function fillUrlTemplate(template, query, domain = "") {
     }
 
     function isPendingReviewItem(item, now = Date.now()) {
-      if (!item || item.status !== "未看") return false;
+      if (!item || !PENDING_REVIEW_LATER_STATUSES.has(item.status)) return false;
       const createdAtTime = new Date(item.createdAt || "").getTime();
       if (!Number.isFinite(createdAtTime)) return false;
       return createdAtTime < getReviewCutoffTime(now);
@@ -6167,8 +6902,8 @@ function fillUrlTemplate(template, query, domain = "") {
       const thresholdDays = getReviewThresholdDays();
       elements.pendingReviewCount.textContent = `待回顾 ${pendingCount} 条`;
       elements.pendingReviewHint.textContent = reviewFilterActive
-        ? `正在查看待回顾条目。规则：状态为“未看”，且创建时间超过 ${thresholdDays} 天。`
-        : `默认规则：状态为“未看”，且创建时间超过 ${thresholdDays} 天。`;
+        ? `正在查看待回顾条目。规则：状态为收件箱/待读，且创建时间超过 ${thresholdDays} 天。`
+        : `默认规则：状态为收件箱/待读，且创建时间超过 ${thresholdDays} 天。`;
       if (elements.reviewPanel) elements.reviewPanel.classList.toggle("active", reviewFilterActive);
       if (elements.viewPendingReviewBtn) elements.viewPendingReviewBtn.disabled = pendingCount === 0;
       if (elements.randomReviewBtn) elements.randomReviewBtn.disabled = pendingCount === 0;
@@ -6178,6 +6913,8 @@ function fillUrlTemplate(template, query, domain = "") {
     function resetLaterFiltersForReview() {
       if (elements.laterSourceFilter) elements.laterSourceFilter.value = "全部来源";
       if (elements.laterStatusFilter) elements.laterStatusFilter.value = "全部状态";
+      if (elements.laterRelatedFilter) elements.laterRelatedFilter.value = "全部研究";
+      currentRelatedHistoryFilter = "";
       if (elements.laterTextFilter) elements.laterTextFilter.value = "";
     }
 
@@ -6199,7 +6936,7 @@ function fillUrlTemplate(template, query, domain = "") {
     function clearPendingReviewFilter() {
       reviewFilterActive = false;
       renderLater();
-      setStatus("已退出待回顾筛选，恢复稍后看列表。");
+      setStatus("已退出待回顾筛选，恢复收件箱列表。");
     }
 
     function randomReviewItem() {
@@ -6242,8 +6979,8 @@ function fillUrlTemplate(template, query, domain = "") {
         console.warn("记录回顾提醒日期失败：", error);
       }
 
-      const message = `有 ${pendingCount} 条稍后看内容待回顾。`;
-      setStatus(`${message} 可在“稍后看清单”点击“查看待回顾”或“随机回顾”。`);
+      const message = `有 ${pendingCount} 条收件箱内容待回顾。`;
+      setStatus(`${message} 可在“收件箱”点击“查看待回顾”或“随机回顾”。`);
       toast(message);
     }
 
@@ -6261,17 +6998,57 @@ function fillUrlTemplate(template, query, domain = "") {
       }, 0);
     }
 
+    function renderAiSummaryList(items) {
+      const normalizedItems = dedupeLimited(Array.isArray(items) ? items : [], 6, 120);
+      if (!normalizedItems.length) return `<p class="hint">暂无</p>`;
+      return `<ul>${normalizedItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+    }
+
+    function renderAiAnswerBlock(item) {
+      if (!item?.aiOriginalAnswer) return "";
+      const summary = normalizeStructuredSummary(item.structuredSummary) || structureAiAnswer(item.aiOriginalAnswer);
+      return `
+        <div class="ai-summary-block">
+          <h4>结构化摘要</h4>
+          ${item.aiOriginalQuestion ? `<p class="hint"><strong>原始问题：</strong>${escapeHtml(item.aiOriginalQuestion)}</p>` : ""}
+          <div class="ai-summary-grid">
+            <div class="ai-summary-section">
+              <strong>关键要点</strong>
+              ${renderAiSummaryList(summary.keyPoints)}
+            </div>
+            <div class="ai-summary-section">
+              <strong>待验证项</strong>
+              ${renderAiSummaryList(summary.claimsToVerify)}
+            </div>
+            <div class="ai-summary-section">
+              <strong>行动项</strong>
+              ${renderAiSummaryList(summary.actionItems)}
+            </div>
+          </div>
+        </div>
+        <details class="compact-details">
+          <summary>AI 原文</summary>
+          <pre class="ai-original-answer">${escapeHtml(item.aiOriginalAnswer)}</pre>
+        </details>
+      `;
+    }
+
     function renderLater() {
       const pendingReviewItems = getPendingReviewItems();
       renderPendingReviewPanel(pendingReviewItems.length);
       const sourceFilter = elements.laterSourceFilter.value || "全部来源";
       const statusFilter = elements.laterStatusFilter.value || "全部状态";
+      const relatedFilter = currentRelatedHistoryFilter || elements.laterRelatedFilter?.value || "全部研究";
       const textFilter = normalize(elements.laterTextFilter.value);
 
       const baseItems = reviewFilterActive ? pendingReviewItems : laterItems;
       const filtered = baseItems.filter((item) => {
         const matchesSource = sourceFilter === "全部来源" || item.source === sourceFilter;
         const matchesStatus = statusFilter === "全部状态" || item.status === statusFilter;
+        const matchesRelated = relatedFilter === "全部研究"
+          || (relatedFilter === "未关联" && !item.relatedHistoryId)
+          || (relatedFilter.startsWith("history:") && item.relatedHistoryId === relatedFilter.slice("history:".length));
+        const relatedHistoryText = getRelatedHistorySearchText(item.relatedHistoryId);
         const haystack = normalize([
           item.title,
           item.url,
@@ -6279,19 +7056,23 @@ function fillUrlTemplate(template, query, domain = "") {
           item.reason,
           item.autoSummary,
           item.bodyText,
+          item.aiOriginalQuestion,
+          item.aiOriginalAnswer,
+          getStructuredSummarySearchText(item.structuredSummary),
           normalizeTags(item.tags).join(" "),
           item.estimate,
-          item.conclusion
+          item.conclusion,
+          relatedHistoryText
         ].join(" "));
         const matchesText = !textFilter || haystack.includes(textFilter);
-        return matchesSource && matchesStatus && matchesText;
+        return matchesSource && matchesStatus && matchesRelated && matchesText;
       });
 
       if (!filtered.length) {
         const emptyState = !laterItems.length
           ? {
             icon: "📝",
-            title: "稍后看还是空的",
+            title: "收件箱还是空的",
             description: "可以在顶部输入文字后点“📝 笔记”，也可以把链接通过系统分享加入。",
             action: "open-quick-note",
             button: "写一条笔记"
@@ -6306,7 +7087,7 @@ function fillUrlTemplate(template, query, domain = "") {
             }
             : {
               icon: "🗂️",
-              title: "没有匹配的稍后看",
+              title: "没有匹配的收件箱",
               description: "可以调整来源、状态或关键词筛选，也可以回到顶部输入新内容。",
               action: "focus-search",
               button: "回到顶部搜索"
@@ -6345,6 +7126,7 @@ function fillUrlTemplate(template, query, domain = "") {
             </div>
             ${item.autoSummary ? `<details class="compact-details"><summary>自动摘要</summary><p class="auto-summary">${escapeHtml(item.autoSummary)}</p></details>` : ""}
             ${item.bodyText ? `<details class="compact-details"><summary>元数据 / 正文预览</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.bodyText, 420))}</p></details>` : ""}
+            ${renderAiAnswerBlock(item)}
             <div class="compact-edit-grid">
               <label class="compact-field"><span>状态</span>
                 <select data-action="later-status" data-id="${escapeAttribute(item.id)}">
@@ -6355,6 +7137,9 @@ function fillUrlTemplate(template, query, domain = "") {
                 <select data-action="later-source" data-id="${escapeAttribute(item.id)}">
                   ${getAllLaterSources().map((source) => `<option value="${escapeAttribute(source)}" ${source === item.source ? "selected" : ""}>${escapeHtml(source)}</option>`).join("")}
                 </select>
+              </label>
+              <label class="compact-field wide"><span>关联搜索/研究主题</span>
+                ${renderRelatedHistorySelect(item.relatedHistoryId || "", item.id)}
               </label>
               <label class="compact-field wide"><span>标题</span>
                 <input class="field" data-action="later-title" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.title || "")}" />
@@ -6376,6 +7161,120 @@ function fillUrlTemplate(template, query, domain = "") {
       }).join("");
     }
 
+
+    function getKnowledgeItems() {
+      return laterItems.filter((item) => KNOWLEDGE_STATUS_SET.has(item.status));
+    }
+
+    function getRelatedHistoryLabel(relatedHistoryId) {
+      if (!relatedHistoryId) return "";
+      const historyItem = historyItems.find((item) => item.id === relatedHistoryId);
+      if (!historyItem) return "关联搜索历史：原记录未找到";
+      return `关联搜索历史：${historyItem.platform || "其他"} · ${historyItem.keyword || "未命名关键词"}`;
+    }
+
+    function renderKnowledge() {
+      if (!elements.knowledgeList) return;
+
+      const sourceFilter = elements.knowledgeSourceFilter?.value || "全部来源";
+      const statusFilter = elements.knowledgeStatusFilter?.value || "全部状态";
+      const textFilter = normalize(elements.knowledgeTextFilter?.value || "");
+      const sort = elements.knowledgeSort?.value || "newest";
+
+      let knowledgeItems = getKnowledgeItems().filter((item) => {
+        const matchesSource = sourceFilter === "全部来源" || item.source === sourceFilter;
+        const matchesStatus = statusFilter === "全部状态" || item.status === statusFilter;
+        const relatedHistoryLabel = getRelatedHistoryLabel(item.relatedHistoryId);
+        const haystack = normalize([
+          item.title,
+          item.url,
+          item.source,
+          item.status,
+          normalizeTags(item.tags).join(" "),
+          item.conclusion,
+          item.autoSummary,
+          item.bodyText,
+          item.aiOriginalQuestion,
+          item.aiOriginalAnswer,
+          getStructuredSummarySearchText(item.structuredSummary),
+          relatedHistoryLabel
+        ].join(" "));
+        const matchesText = !textFilter || haystack.includes(textFilter);
+        return matchesSource && matchesStatus && matchesText;
+      });
+
+      knowledgeItems = knowledgeItems.sort((a, b) => {
+        const result = new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        return sort === "newest" ? result : -result;
+      });
+
+      if (!knowledgeItems.length) {
+        const hasKnowledge = getKnowledgeItems().length > 0;
+        elements.knowledgeList.innerHTML = renderEmptyState({
+          icon: hasKnowledge ? "🧠" : "📚",
+          title: hasKnowledge ? "没有匹配的知识条目" : "知识库还是空的",
+          description: hasKnowledge
+            ? "可以调整来源、状态或关键词筛选。"
+            : "把收件箱条目的状态改为“已整理”或“已吸收”后，它会自动出现在知识库。",
+          action: "focus-search",
+          button: hasKnowledge ? "回到顶部搜索" : "去添加内容"
+        });
+        return;
+      }
+
+      elements.knowledgeList.innerHTML = knowledgeItems.map((item) => {
+        const titleHtml = item.url
+          ? `<a href="${escapeAttribute(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>`
+          : escapeHtml(item.title || "未命名内容");
+        const relatedHistoryLabel = getRelatedHistoryLabel(item.relatedHistoryId);
+
+        return `
+          <article class="card item knowledge-item" data-item-type="later" data-item-id="${escapeAttribute(item.id)}">
+            <div class="item-head">
+              <div>
+                <h3 class="item-title">${titleHtml}</h3>
+                <div class="meta">
+                  <span class="tag">${escapeHtml(item.source || "其他")}</span>
+                  <span class="tag ${laterTagClass(item.status)}">${escapeHtml(item.status)}</span>
+                  <span class="tag">${formatTime(item.createdAt)}</span>
+                  ${normalizeTags(item.tags).map((tag) => `<span class="tag tag-chip">${escapeHtml(tag)}</span>`).join("")}
+                </div>
+                ${relatedHistoryLabel ? `<p class="hint">${escapeHtml(relatedHistoryLabel)}</p>` : ""}
+              </div>
+            </div>
+
+            <div class="knowledge-conclusion">
+              <strong>结论</strong>
+              ${item.conclusion ? `<p>${renderWikiText(item.conclusion)}</p>` : `<p class="hint">还没有结论。可以先补一句核心判断或下一步用法。</p>`}
+            </div>
+
+            ${item.autoSummary ? `<details class="compact-details"><summary>自动摘要</summary><p class="auto-summary">${escapeHtml(item.autoSummary)}</p></details>` : ""}
+            ${item.bodyText ? `<details class="compact-details"><summary>正文 / 元数据预览</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.bodyText, 520))}</p></details>` : ""}
+            ${renderAiAnswerBlock(item)}
+
+            <div class="compact-edit-grid">
+              <label class="compact-field"><span>状态</span>
+                <select data-action="later-status" data-id="${escapeAttribute(item.id)}">
+                  ${LATER_STATUSES.map((status) => `<option value="${escapeAttribute(status)}" ${status === item.status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
+                </select>
+              </label>
+              <label class="compact-field wide"><span>标题</span>
+                <input class="field" data-action="later-title" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.title || "")}" />
+              </label>
+              <label class="compact-field wide"><span>标签</span>
+                <input class="field tag-edit-field" data-action="later-tags" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(formatTagsForEdit(item.tags))}" placeholder="#AI #教程 #开源" />
+              </label>
+              <label class="compact-field wide"><span>结论</span>
+                <textarea data-action="later-conclusion" data-id="${escapeAttribute(item.id)}" placeholder="沉淀这条内容的核心结论。">${escapeHtml(item.conclusion || "")}</textarea>
+              </label>
+              ${renderWikiPreview(item.conclusion)}
+            </div>
+            ${renderBacklinks("later", item.id)}
+          </article>
+        `;
+      }).join("");
+    }
+
     function closeItemActionSheet() {
       if (!elements.itemActionSheet) return;
       elements.itemActionSheet.classList.remove("active");
@@ -6387,7 +7286,7 @@ function fillUrlTemplate(template, query, domain = "") {
       if (itemType === "history") {
         return [
           { action: "history-repeat", label: "🔍 再搜一次" },
-          { action: "history-to-later", label: "📥 转入稍后看" },
+          { action: "history-to-later", label: "📥 转入收件箱" },
           { action: "view-search-snapshot", label: "🧾 查看快照" },
           { action: "history-delete", label: "🗑 删除", danger: true }
         ];
@@ -6432,7 +7331,7 @@ function fillUrlTemplate(template, query, domain = "") {
 
       const title = itemType === "history"
         ? `搜索历史：${item.keyword || "未命名"}`
-        : `稍后看：${item.title || "未命名"}`;
+        : `收件箱：${item.title || "未命名"}`;
       if (elements.itemActionSheetTitle) elements.itemActionSheetTitle.textContent = title;
 
       elements.itemActionSheetActions.innerHTML = getItemActionSheetActions(itemType, item).map((action) => `
@@ -6445,6 +7344,24 @@ function fillUrlTemplate(template, query, domain = "") {
       elements.itemActionSheet.setAttribute("aria-hidden", "false");
     }
 
+
+    function viewRelatedLaterItems(historyId) {
+      const relatedItems = getRelatedLaterItems(historyId);
+      if (!relatedItems.length) {
+        toast("当前没有关联资料。");
+        return;
+      }
+
+      currentRelatedHistoryFilter = `history:${historyId}`;
+      reviewFilterActive = false;
+      activateTab("laterSection");
+      if (elements.laterSourceFilter) elements.laterSourceFilter.value = "全部来源";
+      if (elements.laterStatusFilter) elements.laterStatusFilter.value = "全部状态";
+      if (elements.laterRelatedFilter) elements.laterRelatedFilter.value = currentRelatedHistoryFilter;
+      if (elements.laterTextFilter) elements.laterTextFilter.value = "";
+      renderLater();
+      setStatus(`正在查看 ${relatedItems.length} 条关联资料。`);
+    }
 
     async function handleGlobalClick(event) {
       const node = event.target.closest("[data-action]");
@@ -6537,8 +7454,8 @@ function fillUrlTemplate(template, query, domain = "") {
         if (!item) return;
         const added = await addLaterFromHistory(item);
         if (added) {
-          await updateHistoryItem(id, { status: "转入稍后看", solved: false }, true);
-          toast("已转入稍后看清单。");
+          await updateHistoryItem(id, { status: "转入收件箱", solved: false }, true);
+          toast("已转入收件箱。");
         }
       }
 
@@ -6618,9 +7535,14 @@ function fillUrlTemplate(template, query, domain = "") {
         jumpToItem(node.dataset.targetId, node.dataset.targetType);
       }
 
+      if (action === "view-related-later") {
+        viewRelatedLaterItems(id);
+        return;
+      }
+
       if (action === "delete-later") {
         const item = laterItems.find((entry) => entry.id === id);
-        const deletedSnapshots = item ? await maybeDeleteSnapshotsForItem(id, "这条稍后看内容") : 0;
+        const deletedSnapshots = item ? await maybeDeleteSnapshotsForItem(id, "这条收件箱内容") : 0;
         laterItems = laterItems.filter((entry) => entry.id !== id);
         await save(STORE_NAMES.later, laterItems);
         searchEngine.removeFromIndex(id);
@@ -6628,8 +7550,9 @@ function fillUrlTemplate(template, query, domain = "") {
         rebuildBacklinkIndex();
         renderGlobalSearchResults();
         renderLater();
+        renderKnowledge();
         void renderDataManagementPanels();
-        toast(deletedSnapshots ? `已删除稍后看内容，并删除 ${deletedSnapshots} 个快照。` : "已删除稍后看内容。");
+        toast(deletedSnapshots ? `已删除收件箱内容，并删除 ${deletedSnapshots} 个快照。` : "已删除收件箱内容。");
       }
     }
 
@@ -6653,6 +7576,44 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (action === "history-tags") {
         await updateHistoryItem(id, { tags: normalizeTags(node.value) }, event.type === "change");
+      }
+
+      if (action === "history-is-research") {
+        await updateHistoryItem(id, { isResearch: Boolean(node.checked) }, true);
+        return;
+      }
+
+      if (action === "history-research-goal") {
+        await updateHistoryItem(id, { researchGoal: node.value }, event.type === "change");
+        return;
+      }
+
+      if (action === "history-target-sample-count") {
+        await updateHistoryItem(id, { targetSampleCount: normalizeTargetSampleCount(node.value) }, event.type === "change");
+        return;
+      }
+
+      if (action === "history-research-note") {
+        await updateHistoryItem(id, { researchNote: node.value }, event.type === "change");
+        return;
+      }
+
+      if (action === "later-related-history") {
+        const selectedHistoryId = node.value || "";
+        const item = laterItems.find((entry) => entry.id === id);
+        if (!item) return;
+        const selectedHistory = getHistoryById(selectedHistoryId);
+        const nextTags = selectedHistoryId
+          ? normalizeTags([...(item.tags || []), "#研究资料"])
+          : normalizeTags(item.tags || []);
+        await updateLaterItem(id, {
+          relatedHistoryId: selectedHistoryId,
+          tags: nextTags
+        }, true);
+        if (selectedHistory && !selectedHistory.isResearch) {
+          toast("已关联搜索历史。若这是长期研究，可在搜索历史里勾选“研究主题”。");
+        }
+        return;
       }
 
       const laterKeyMap = {
@@ -6684,22 +7645,30 @@ function fillUrlTemplate(template, query, domain = "") {
       rebuildBacklinkIndex();
 
       if (shouldRender) {
+        renderFilters();
         renderHistory();
+        renderLater();
+        renderKnowledge();
       }
     }
 
     async function addLaterItem() {
+      if (!elements.laterTitle || !elements.laterUrl || !elements.laterSource) {
+        toast("请使用顶部 📝 笔记保存链接或文字到收件箱。 ");
+        return;
+      }
+
       const title = elements.laterTitle.value.trim();
       const url = elements.laterUrl.value.trim();
       const source = elements.laterSource.value;
 
       if (!title) {
-        toast("稍后看标题不能为空。");
+        toast("收件箱标题不能为空。");
         return;
       }
 
       if (url && laterItems.some((item) => item.url === url)) {
-        toast("这条链接已经在稍后看清单里。");
+        toast("这条链接已经在收件箱里。");
         return;
       }
 
@@ -6719,7 +7688,7 @@ function fillUrlTemplate(template, query, domain = "") {
           source
         }),
         estimate: estimateLaterItemTime({ title, url, source }),
-        status: "未看",
+        status: "收件箱",
         conclusion: "",
         createdAt: new Date().toISOString(),
         relatedHistoryId: ""
@@ -6734,7 +7703,7 @@ function fillUrlTemplate(template, query, domain = "") {
       if (elements.laterForm) elements.laterForm.reset();
       if (elements.laterSource) elements.laterSource.value = "其他";
       renderLater();
-      toast("已添加到稍后看清单，正在后台抓取摘要和轻量元数据。 ");
+      toast("已添加到收件箱，正在后台抓取摘要和轻量元数据。 ");
     }
 
     async function addLaterFromExternal(title, url, source, reason = "通过系统分享添加。") {
@@ -6772,7 +7741,7 @@ function fillUrlTemplate(template, query, domain = "") {
           reason
         }),
         estimate: estimateLaterItemTime({ title: finalTitle, url: cleanUrl, source: finalSource }),
-        status: "未看",
+        status: "收件箱",
         conclusion: "",
         createdAt: new Date().toISOString(),
         relatedHistoryId: ""
@@ -6791,7 +7760,7 @@ function fillUrlTemplate(template, query, domain = "") {
     async function addLaterFromHistory(historyItem) {
       const url = historyItem.url || "";
       if (url && laterItems.some((item) => item.url === url)) {
-        toast("这条链接已经在稍后看清单里。");
+        toast("这条链接已经在收件箱里。");
         return false;
       }
 
@@ -6804,7 +7773,7 @@ function fillUrlTemplate(template, query, domain = "") {
         autoSummary: "",
         bodyText: "",
         metadataFetched: false,
-        tags: mergeAutomaticBasicTags(historyItem.tags || [], {
+        tags: mergeAutomaticBasicTags(historyItem.isResearch ? normalizeTags([...(historyItem.tags || []), "#研究资料"]) : (historyItem.tags || []), {
           kind: "later",
           keyword: historyItem.keyword,
           title: `${historyItem.platform}：${historyItem.keyword}`,
@@ -6813,7 +7782,7 @@ function fillUrlTemplate(template, query, domain = "") {
           summary: historyItem.note
         }),
         estimate: estimateLaterItemTime({ title: `${historyItem.platform}：${historyItem.keyword}`, url, source: historyItem.platform }),
-        status: "未看",
+        status: "收件箱",
         conclusion: "",
         createdAt: new Date().toISOString(),
         relatedHistoryId: historyItem.id
@@ -6825,7 +7794,9 @@ function fillUrlTemplate(template, query, domain = "") {
       rebuildBacklinkIndex();
       queueContentFetchForLaterItem(item);
       queueMetadataEnrichmentForLaterItem(item);
+      renderFilters();
       renderLater();
+      renderKnowledge();
       return true;
     }
 
@@ -6844,7 +7815,9 @@ function fillUrlTemplate(template, query, domain = "") {
       }
 
       if (shouldRender) {
+        renderFilters();
         renderLater();
+        renderKnowledge();
       }
     }
 
@@ -6913,10 +7886,10 @@ function fillUrlTemplate(template, query, domain = "") {
       renderAll();
 
       if (result.added) {
-        setStatus(`已通过手机分享加入稍后看清单：${result.item.title}`);
-        toast("已通过分享加入稍后看清单。 ");
+        setStatus(`已通过手机分享加入收件箱：${result.item.title}`);
+        toast("已通过分享加入收件箱。 ");
       } else if (result.reason === "duplicate") {
-        setStatus("这条链接已经在稍后看清单里。 ");
+        setStatus("这条链接已经在收件箱里。 ");
         toast("这条链接已存在。 ");
       } else if (!sharedUrl) {
         setStatus("已收到系统分享，但分享内容里没有可识别的链接。 ");
@@ -6938,16 +7911,16 @@ function fillUrlTemplate(template, query, domain = "") {
       );
 
       if (result.added) {
-        setStatus(`已添加到稍后看清单：${result.item.title}`);
+        setStatus(`已添加到收件箱：${result.item.title}`);
       } else if (result.reason === "duplicate") {
-        setStatus("这条链接已经在稍后看清单里。 ");
+        setStatus("这条链接已经在收件箱里。 ");
       }
 
       clearIncomingParams();
       setTimeout(() => {
         activateTab("laterSection");
         renderAll();
-        toast(result.added ? "已从外部页面加入稍后看清单。" : "这条链接已存在。 ");
+        toast(result.added ? "已从外部页面加入收件箱。" : "这条链接已存在。 ");
       }, 0);
 
       return result.added;
@@ -7240,7 +8213,7 @@ function fillUrlTemplate(template, query, domain = "") {
       const normalizedInputUrl = await normalizeUrlForQuickNote(url);
 
       if (laterItems.some((item) => hasSameNormalizedUrl(item.url, normalizedInputUrl))) {
-        toast("这条链接已经在稍后看清单里");
+        toast("这条链接已经在收件箱里");
         return false;
       }
 
@@ -7249,12 +8222,12 @@ function fillUrlTemplate(template, query, domain = "") {
       const result = await addLaterFromExternal(title || normalizedInputUrl, normalizedInputUrl, source, "通过搜索框快速保存。");
 
       if (!result.added && result.reason === "duplicate") {
-        toast("这条链接已经在稍后看清单里");
+        toast("这条链接已经在收件箱里");
         return false;
       }
 
       elements.searchInput.value = "";
-      toast("已保存到稍后看");
+      toast("已保存到收件箱");
       return true;
     }
 
@@ -7275,7 +8248,7 @@ function fillUrlTemplate(template, query, domain = "") {
           bodyText: inputText
         }),
         estimate: estimateLaterItemTime({ title: inputText, source: "快速笔记" }),
-        status: "未看",
+        status: "收件箱",
         conclusion: "",
         createdAt: new Date().toISOString(),
         relatedHistoryId: ""
@@ -7287,7 +8260,7 @@ function fillUrlTemplate(template, query, domain = "") {
       rebuildBacklinkIndex();
       renderLater();
       elements.searchInput.value = "";
-      toast("已保存到稍后看");
+      toast("已保存到收件箱");
       return true;
     }
 
@@ -7461,14 +8434,14 @@ function fillUrlTemplate(template, query, domain = "") {
     function historyTagClass(status) {
       if (status === "已解决" || status === "有用") return "ok";
       if (status === "没找到" || status === "放弃") return "danger";
-      if (status === "转入稍后看") return "warn";
+      if (status === "转入收件箱") return "warn";
       return "";
     }
 
     function laterTagClass(status) {
-      if (status === "有用" || status === "已看") return "ok";
-      if (status === "没用" || status === "删除") return "danger";
-      if (status === "转成项目任务") return "warn";
+      if (status === "已整理" || status === "已吸收") return "ok";
+      if (status === "待整理" || status === "阅读中" || status === "待读") return "warn";
+      if (status === "已废弃") return "danger";
       return "";
     }
 
