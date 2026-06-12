@@ -1872,17 +1872,16 @@
         mobileUrlTemplate: "https://www.bing.com/search?q={query}",
         appUrlTemplate: ""
       },
-      // AI 对话入口的 URL 预填能力需要人工验证；当前使用首页 / 聊天入口，确保至少能打开外部 AI 页面。
       {
         id: "doubao",
         name: "豆包",
         type: "ai",
         category: "ai-assistant",
         goodFor: "AI 问答、资料初筛、写作和总结",
-        recommendation: "把问题写完整；打开后如未自动带入，请手动粘贴搜索框内容。",
+        recommendation: "把问题写完整；AI询问 会通过 URL 带入问题，并复制问题作为兜底。",
         domain: "doubao.com",
-        urlTemplate: "https://www.doubao.com/chat/",
-        mobileUrlTemplate: "https://www.doubao.com/chat/",
+        urlTemplate: "https://www.doubao.com/?q={query}",
+        mobileUrlTemplate: "https://www.doubao.com/?q={query}",
         appUrlTemplate: ""
       },
       {
@@ -1891,10 +1890,10 @@
         type: "ai",
         category: "ai-assistant",
         goodFor: "AI 问答、推理、代码和资料分析",
-        recommendation: "把问题写完整；打开后如未自动带入，请手动粘贴搜索框内容。",
+        recommendation: "把问题写完整；AI询问 会通过 URL 带入问题，并复制问题作为兜底。",
         domain: "deepseek.com",
-        urlTemplate: "https://chat.deepseek.com/",
-        mobileUrlTemplate: "https://chat.deepseek.com/",
+        urlTemplate: "https://chat.deepseek.com/?q={query}",
+        mobileUrlTemplate: "https://chat.deepseek.com/?q={query}",
         appUrlTemplate: ""
       },
       {
@@ -3345,9 +3344,9 @@
           goodFor: saved?.goodFor || defaultPlatform.goodFor,
           recommendation: saved?.recommendation || defaultPlatform.recommendation,
           domain: saved?.domain || defaultPlatform.domain,
-          mobileUrlTemplate: saved?.mobileUrlTemplate || defaultPlatform.mobileUrlTemplate,
+          mobileUrlTemplate: getMigratedDefaultAiUrlTemplate(defaultPlatform, saved?.mobileUrlTemplate, "mobileUrlTemplate") || saved?.mobileUrlTemplate || defaultPlatform.mobileUrlTemplate,
           appUrlTemplate: saved?.appUrlTemplate || defaultPlatform.appUrlTemplate,
-          urlTemplate: saved?.urlTemplate || defaultPlatform.urlTemplate
+          urlTemplate: getMigratedDefaultAiUrlTemplate(defaultPlatform, saved?.urlTemplate, "urlTemplate") || saved?.urlTemplate || defaultPlatform.urlTemplate
         });
       });
 
@@ -3379,6 +3378,27 @@
       });
 
       return bing ? [bing, ...ordered] : ordered;
+    }
+
+    function getMigratedDefaultAiUrlTemplate(defaultPlatform, savedTemplate, fieldName = "urlTemplate") {
+      if (!defaultPlatform || !["doubao", "deepseek"].includes(defaultPlatform.id)) return "";
+      const cleanSavedTemplate = String(savedTemplate || "").trim().replace(/\/+$/, "");
+      const nextTemplate = defaultPlatform[fieldName] || defaultPlatform.urlTemplate || "";
+      const legacyTemplates = {
+        doubao: new Set([
+          "https://www.doubao.com/chat",
+          "https://www.doubao.com/chat/",
+          "https://www.doubao.com/chat?q={query}",
+          "https://www.doubao.com/chat/?q={query}"
+        ]),
+        deepseek: new Set([
+          "https://chat.deepseek.com",
+          "https://chat.deepseek.com/"
+        ])
+      };
+      return !cleanSavedTemplate || legacyTemplates[defaultPlatform.id]?.has(cleanSavedTemplate)
+        ? nextTemplate
+        : "";
     }
 
     function normalizePlatformConfig(platform) {
@@ -5885,12 +5905,11 @@
     }
 
     function getAiEntrance(platform) {
-      // AI 对话页通常不稳定支持 URL 预填；这里只负责打开外部入口并记录“AI询问”历史。
       const urlTemplate = platform.urlTemplate || platform.mobileUrlTemplate || "https://www.bing.com/search?q={query}";
       return {
         label: "AI询问",
         entranceType: "AI询问",
-        description: "打开外部 AI 助手页面。若没有自动带入问题，请手动粘贴关键词。",
+        description: "打开外部 AI 助手页面，通过 URL 带入当前问题，并复制问题作为兜底。",
         urlTemplate,
         domain: platform.domain || "",
         category: platform.category || "ai-assistant"
@@ -5941,6 +5960,10 @@
       const renderedUrl = entrance.urlTemplate
         ? fillUrlTemplate(entrance.urlTemplate, keyword, entrance.domain || platform.domain)
         : "";
+      const aiEntrance = isAiEntrance(platform, entrance);
+      if (aiEntrance) {
+        copyText(keyword).catch(() => {});
+      }
 
       const item = {
         id: createId(),
@@ -5978,8 +6001,8 @@
       window.open(renderedUrl, "_blank", "noopener,noreferrer");
       setStatus(`已记录：通过「${platform.name} / ${entrance.entranceType}」搜索「${keyword}」。已打开入口。`);
       toast(`已保存记录，并打开 ${entrance.label}。`);
-      if (isAiEntrance(platform, entrance)) {
-        setStatus(`已记录：通过「${platform.name} / AI询问」询问「${keyword}」。已打开外部 AI 页面。AI 对话页不会自动保存搜索快照。`);
+      if (aiEntrance) {
+        setStatus(`已记录：通过「${platform.name} / AI询问」询问「${keyword}」。已打开外部 AI 页面，已通过 URL 带入问题并复制到剪贴板兜底。AI 对话页不会自动保存搜索快照。`);
       } else if (isAutoSearchSnapshotEnabled()) {
         queueAutomaticSearchSnapshot(item);
       } else {
