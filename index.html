@@ -459,6 +459,96 @@
       padding: 9px 10px;
     }
 
+    .compact-details-body {
+      display: grid;
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .compact-edit-details {
+      margin-top: 8px;
+    }
+
+    .compact-preview {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.55;
+    }
+
+    .compact-relation-hint {
+      margin: 6px 0 0;
+    }
+
+    .tag-more {
+      color: var(--muted);
+      background: #eef2f7;
+    }
+
+    .status-chip-row {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      overflow-x: auto;
+      padding: 2px 1px 4px;
+      scrollbar-width: thin;
+    }
+
+    .status-chip {
+      flex: 0 0 auto;
+      min-height: 28px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.86);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .status-chip.active {
+      border-color: rgba(37, 99, 235, 0.34);
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .status-chip:focus-visible {
+      outline: 2px solid rgba(37, 99, 235, 0.38);
+      outline-offset: 2px;
+    }
+
+    .search-type-badge {
+      font-weight: 800;
+    }
+
+    .search-type-history {
+      color: var(--warning);
+      background: var(--warning-soft);
+    }
+
+    .search-type-inbox {
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .search-type-knowledge {
+      color: var(--ok);
+      background: var(--ok-soft);
+    }
+
+    .ai-answer-block {
+      margin-top: 8px;
+    }
+
+    .ai-answer-block .ai-summary-block {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+
     .compact-edit-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1701,8 +1791,7 @@
         <div class="search-main">
           <div class="search-row">
             <input id="searchInput" class="search-input" type="search" placeholder="今天我要找什么？" autocomplete="off" enterkeyhint="search" />
-            <button class="ghost-btn copy-search-btn" id="quickNoteBtn" type="button">📝 笔记</button>
-            <button class="ghost-btn copy-search-btn" id="saveAiAnswerBtn" type="button">🤖 保存 AI 回答</button>
+            <button class="ghost-btn copy-search-btn" id="quickNoteBtn" type="button">📥 存入收件箱</button>
           </div>
         </div>
         <div class="global-search-box" aria-label="全文搜索">
@@ -1744,7 +1833,7 @@
           <button class="ghost-btn" id="copyBookmarkletBtn" type="button">复制收藏脚本</button>
         </div>
         <p class="hint"><strong>Android 推荐：</strong>用支持 Web Share Target 的浏览器通过 HTTPS 安装 Info Dock PWA。安装后，在网页中点系统分享按钮，若系统已注册分享目标，会出现 Info Dock 并保存到收件箱。</p>
-        <p class="hint"><strong>通用兜底：</strong>如果 Edge / 华为浏览器安装成功但分享面板仍没有 Info Dock，说明浏览器没有完成系统分享目标注册；复制链接后回到 Info Dock，点击顶部搜索框右侧的 📝 笔记保存。</p>
+        <p class="hint"><strong>通用兜底：</strong>如果 Edge / 华为浏览器安装成功但分享面板仍没有 Info Dock，说明浏览器没有完成系统分享目标注册；复制链接后回到 Info Dock，点击顶部搜索框右侧的 📥 存入收件箱。</p>
         <p class="hint"><strong>桌面 / 高级备用：</strong>下面的书签工具更适合电脑浏览器书签栏；手机端不再推荐把它作为主方案。</p>
         <div class="actions">
           <a class="primary-btn" id="bookmarkletLink" href="#">桌面书签工具：加入 Info Dock</a>
@@ -1767,6 +1856,7 @@
       <div class="card toolbar two">
         <select id="laterSourceFilter" aria-label="来源平台"></select>
         <select id="laterStatusFilter" aria-label="状态"></select>
+        <div id="laterStatusChips" class="status-chip-row" role="group" aria-label="收件箱状态快捷筛选"></div>
         <select id="laterRelatedFilter" aria-label="关联研究"></select>
         <input id="laterTextFilter" class="field" type="search" aria-label="关键词" placeholder="搜索标题、链接、摘要、结论" />
       </div>
@@ -1781,6 +1871,7 @@
           <option value="已整理">已整理</option>
           <option value="已吸收">已吸收</option>
         </select>
+        <div id="knowledgeStatusChips" class="status-chip-row" role="group" aria-label="知识库状态快捷筛选"></div>
         <input id="knowledgeTextFilter" class="field" type="search" aria-label="标签或关键词" placeholder="搜索标题、标签、结论、摘要、正文" />
         <select id="knowledgeSort" aria-label="知识排序">
           <option value="newest">最近创建</option>
@@ -2016,6 +2107,9 @@
     const RESEARCH_ORGANIZED_STATUSES = new Set(["已整理", "已吸收"]);
     const LATER_SOURCES_BASE = ["必应", "知乎", "微博", "小红书", "B站", "抖音", "播客", "GitHub", "微信/公众号", "快速笔记", "豆包 AI", "DeepSeek AI", "其他 AI", "其他"];
     const AI_ANSWER_SOURCES = ["豆包 AI", "DeepSeek AI", "其他 AI"];
+    const AI_HISTORY_LINK_WINDOW_MS = 30 * 60 * 1000;
+    const AI_ANSWER_RECENT_MIN_LENGTH = 100;
+    const AI_ANSWER_FEATURE_MIN_LENGTH = 200;
 
     const DEFAULT_PLATFORMS = [
       {
@@ -2126,7 +2220,6 @@
     const elements = {
       searchInput: $("#searchInput"),
       quickNoteBtn: $("#quickNoteBtn"),
-      saveAiAnswerBtn: $("#saveAiAnswerBtn"),
       statusMsg: $("#statusMsg"),
       globalSearchInput: $("#globalSearchInput"),
       globalSearchResults: $("#globalSearchResults"),
@@ -2141,10 +2234,12 @@
       copyBookmarkletBtn: $("#copyBookmarkletBtn"),
       laterSourceFilter: $("#laterSourceFilter"),
       laterStatusFilter: $("#laterStatusFilter"),
+      laterStatusChips: $("#laterStatusChips"),
       laterRelatedFilter: $("#laterRelatedFilter"),
       laterTextFilter: $("#laterTextFilter"),
       knowledgeSourceFilter: $("#knowledgeSourceFilter"),
       knowledgeStatusFilter: $("#knowledgeStatusFilter"),
+      knowledgeStatusChips: $("#knowledgeStatusChips"),
       knowledgeTextFilter: $("#knowledgeTextFilter"),
       knowledgeSort: $("#knowledgeSort"),
       knowledgeList: $("#knowledgeList"),
@@ -2627,7 +2722,6 @@
 
     function bindEvents() {
       elements.quickNoteBtn.addEventListener("click", handleQuickNoteButtonClick);
-      if (elements.saveAiAnswerBtn) elements.saveAiAnswerBtn.addEventListener("click", openAiAnswerModal);
       if (elements.closeAiAnswerModalBtn) elements.closeAiAnswerModalBtn.addEventListener("click", closeAiAnswerModal);
       if (elements.aiAnswerModal) elements.aiAnswerModal.addEventListener("click", (event) => {
         if (event.target === elements.aiAnswerModal) closeAiAnswerModal();
@@ -2687,7 +2781,7 @@
         const bookmarklet = buildBookmarklet();
         elements.bookmarkletLink.href = bookmarklet;
         copyText(bookmarklet);
-        toast("已复制收藏脚本。桌面浏览器可拖到书签栏；手机端建议使用系统分享或 📝 笔记。");
+        toast("已复制收藏脚本。桌面浏览器可拖到书签栏；手机端建议使用系统分享或 📥 存入收件箱。");
       });
 
       elements.bookmarkletLink.addEventListener("click", (event) => {
@@ -2851,6 +2945,17 @@
       return "#其他AI";
     }
 
+    function isLaterAiAnswer(item = {}) {
+      const tags = normalizeTags(item.tags || []);
+      return Boolean(item.aiOriginalAnswer) || tags.some((tag) => tag.toLowerCase() === "#ai回答");
+    }
+
+    function getLaterAiAnswerText(item = {}) {
+      return [item.aiOriginalAnswer, item.bodyText, item.title, item.conclusion]
+        .map((value) => String(value || "").trim())
+        .find(Boolean) || "";
+    }
+
     function generateAiAnswerTitle(question, answer) {
       const cleanQuestion = limitText(question, 56);
       if (cleanQuestion) return `AI 回答：${cleanQuestion}`;
@@ -2870,6 +2975,32 @@
           summary: answer
         })
       ]);
+    }
+
+    function getRecentAiHistoryWithinWindow(windowMs = AI_HISTORY_LINK_WINDOW_MS) {
+      const now = Date.now();
+      return historyItems
+        .filter(isAiHistoryItem)
+        .map((item) => ({ item, time: getAiHistoryTime(item) }))
+        .filter(({ time }) => time > 0 && now - time <= windowMs)
+        .sort((a, b) => b.time - a.time)[0]?.item || null;
+    }
+
+    function isLikelyAiAnswer(text, recentAiHistory = null) {
+      const cleanText = String(text || "").trim();
+      if (!cleanText) return false;
+      const textLength = cleanText.length;
+      const recentTime = recentAiHistory ? getAiHistoryTime(recentAiHistory) : 0;
+      const hasRecentAiHistory = recentTime > 0 && Date.now() - recentTime <= AI_HISTORY_LINK_WINDOW_MS;
+
+      if (hasRecentAiHistory && textLength >= AI_ANSWER_RECENT_MIN_LENGTH) return true;
+      if (textLength < AI_ANSWER_FEATURE_MIN_LENGTH) return false;
+
+      return [
+        /```[\s\S]*?```|~~~[\s\S]*?~~~/,
+        /(^|\n)\s*(?:\d+[\.、)]|[-*•])\s+\S+/m,
+        /总结|建议|步骤|注意|风险|作为\s*AI|根据我的理解|关键要点|行动项|待验证|结论|可以这样|以下是|首先|其次|最后|综上|summary|recommend|steps?|note|risk|action items?/i
+      ].some((pattern) => pattern.test(cleanText));
     }
 
     function renderAiHistoryOptionLabel(item, hasRecentMatch) {
@@ -3018,7 +3149,7 @@
         lastSuccessfulFetchAt: "",
         tags,
         estimate: estimateLaterItemTime({ title, source }),
-        status: "待整理",
+        status: "收件箱",
         conclusion,
         createdAt: new Date().toISOString(),
         relatedHistoryId: relatedHistory?.id || "",
@@ -3970,7 +4101,8 @@
       return [
         normalizedSummary.oneSentenceConclusion,
         ...(normalizedSummary.keyPoints || []),
-        ...(normalizedSummary.claimsToVerify || [])
+        ...(normalizedSummary.claimsToVerify || []),
+        ...(normalizedSummary.actionItems || [])
       ].filter(Boolean).join(" ");
     }
 
@@ -4202,10 +4334,15 @@
 
       panel.innerHTML = results.map((result) => {
         const isLater = result.itemType === "later";
-        const typeLabel = isLater ? (KNOWLEDGE_STATUS_SET.has(result.status) ? "知识条目" : "收件箱") : "搜索历史";
+        const isKnowledgeResult = isLater && KNOWLEDGE_STATUS_SET.has(result.status);
+        const typeLabel = isLater ? (isKnowledgeResult ? "知识条目" : "收件箱") : "搜索历史";
+        const typeClass = isLater ? (isKnowledgeResult ? "knowledge" : "inbox") : "history";
         const title = result.title || result.keyword || "未命名内容";
         const source = result.source || result.platform || "其他";
         const snippet = getSearchResultSnippet(result, query);
+        const statusTag = isLater && result.status
+          ? `<span class="tag">状态：${escapeHtml(result.status)}</span>`
+          : "";
         const openButton = result.url
           ? `<button class="tiny-btn" type="button" data-action="${isLater ? "open-later" : "open-search-result-url"}" data-id="${escapeAttribute(result.id)}">打开链接</button>`
           : "";
@@ -4217,9 +4354,10 @@
           <article class="global-search-item">
             <h3>${escapeHtml(title)}</h3>
             <div class="meta">
-              <span class="tag">${escapeHtml(typeLabel)}</span>
+              <span class="tag search-type-badge search-type-${escapeAttribute(typeClass)}">${escapeHtml(typeLabel)}</span>
               <span class="tag">${escapeHtml(source)}</span>
-              ${normalizeTags(result.tags).map((tag) => `<span class="tag tag-chip">${escapeHtml(tag)}</span>`).join("")}
+              ${statusTag}
+              ${renderLimitedTagChips(result.tags, 3)}
             </div>
             ${snippet ? `<p class="global-search-snippet">${escapeHtml(snippet)}</p>` : ""}
             ${openButton || repeatButton ? `<div class="actions">${openButton}${repeatButton}</div>` : ""}
@@ -4360,6 +4498,20 @@
       const tags = normalizeTags(item.tags || []);
       if (!tags.length) return "";
       return tags.map((tag) => `<button class="tag tag-chip" type="button" data-action="remove-${itemType}-tag" data-id="${escapeAttribute(item.id)}" data-tag="${escapeAttribute(tag)}" title="点击移除 ${escapeAttribute(tag)}">${escapeHtml(tag)} ×</button>`).join("");
+    }
+
+    function renderLimitedTagChips(tags, limit = 3) {
+      const normalizedTags = normalizeTags(tags || []);
+      if (!normalizedTags.length) return "";
+      const visibleTags = normalizedTags.slice(0, limit);
+      const hiddenCount = Math.max(0, normalizedTags.length - visibleTags.length);
+      return `${visibleTags.map((tag) => `<span class="tag tag-chip">${escapeHtml(tag)}</span>`).join("")}${hiddenCount ? `<span class="tag tag-more">+${hiddenCount}</span>` : ""}`;
+    }
+
+    function renderCompactPreview(text, label = "摘要", maxLength = 140) {
+      const value = limitText(text, maxLength);
+      if (!value) return "";
+      return `<p class="compact-preview"><strong>${escapeHtml(label)}：</strong>${escapeHtml(value)}</p>`;
     }
 
     function renderSuggestedTagButtons(item, itemType) {
@@ -6436,10 +6588,12 @@
       if (elements.laterSource) fillSelect(elements.laterSource, sourceOptions, sourceOptions.includes("其他") ? "其他" : sourceOptions[0]);
       fillSelect(elements.laterSourceFilter, ["全部来源", ...sourceOptions], "全部来源");
       fillSelect(elements.laterStatusFilter, ["全部状态", ...LATER_STATUSES], "全部状态");
+      renderStatusFilterChips(elements.laterStatusChips, ["全部状态", ...LATER_STATUSES], elements.laterStatusFilter?.value || "全部状态", "later-status-chip");
       fillSelect(elements.laterRelatedFilter, getLaterRelatedFilterOptions().map((option) => option.label), "全部研究");
       syncLaterRelatedFilterValues();
       fillSelect(elements.knowledgeSourceFilter, ["全部来源", ...sourceOptions], "全部来源");
       fillSelect(elements.knowledgeStatusFilter, ["全部状态", ...KNOWLEDGE_STATUSES], "全部状态");
+      renderStatusFilterChips(elements.knowledgeStatusChips, ["全部状态", ...KNOWLEDGE_STATUSES], elements.knowledgeStatusFilter?.value || "全部状态", "knowledge-status-chip");
     }
 
     function getAllLaterSources() {
@@ -6461,6 +6615,23 @@
         select.appendChild(node);
       });
       select.value = options.includes(previousValue) ? previousValue : selectedValue;
+    }
+
+    function renderStatusFilterChips(container, options, activeValue, action) {
+      if (!container) return;
+      container.innerHTML = options.map((option) => {
+        const isActive = option === activeValue;
+        return `<button class="status-chip${isActive ? " active" : ""}" type="button" data-action="${escapeAttribute(action)}" data-value="${escapeAttribute(option)}" aria-pressed="${isActive ? "true" : "false"}">${escapeHtml(option.replace("全部状态", "全部"))}</button>`;
+      }).join("");
+    }
+
+    function syncStatusFilterChips(container, activeValue) {
+      if (!container) return;
+      container.querySelectorAll(".status-chip").forEach((button) => {
+        const isActive = button.dataset.value === activeValue;
+        button.classList.toggle("active", isActive);
+        button.setAttribute("aria-pressed", isActive ? "true" : "false");
+      });
     }
 
     function getHistoryOptionLabel(item) {
@@ -6691,9 +6862,10 @@
       toast(`已保存记录，并打开 ${entrance.label}。`);
       if (aiEntrance) {
         const copyStatus = aiCopySucceeded
-          ? "已先复制问题到剪贴板兜底。"
-          : "已在打开前尝试复制问题，但浏览器阻止了剪贴板写入。";
-        setStatus(`已记录：通过「${platform.name} / AI询问」询问「${keyword}」。已打开外部 AI 页面，已通过 URL 带入问题。${copyStatus}AI 对话页不会自动保存搜索快照。`);
+          ? "问题已复制。如果外部页面没有自动填入或自动发送，请手动粘贴并发送。"
+          : "浏览器阻止了剪贴板写入。如果外部页面没有自动填入或自动发送，请手动复制搜索框问题并发送。";
+        setStatus(`已记录：通过「${platform.name} / AI询问」询问「${keyword}」。已打开外部 AI 页面。${copyStatus}AI 对话页不会自动保存搜索快照。`);
+        toast(aiCopySucceeded ? "问题已复制，已打开外部 AI 页面。" : "已打开外部 AI 页面，请必要时手动粘贴问题。 ");
       } else if (isAutoSearchSnapshotEnabled()) {
         queueAutomaticSearchSnapshot(item);
       } else {
@@ -6740,33 +6912,37 @@ function fillUrlTemplate(template, query, domain = "") {
       const progress = getResearchProgress(item);
       const targetLabel = progress.targetSampleCount > 0 ? String(progress.targetSampleCount) : "未设目标";
       const progressText = progress.targetSampleCount > 0
-        ? `研究进度：已看 ${progress.readCount} / ${progress.targetSampleCount}，已整理 ${progress.organizedCount}`
-        : `研究进度：已看 ${progress.readCount}，已整理 ${progress.organizedCount}`;
+        ? `已看 ${progress.readCount} / ${progress.targetSampleCount}，已整理 ${progress.organizedCount}`
+        : `已看 ${progress.readCount}，已整理 ${progress.organizedCount}`;
 
       return `
         <div class="research-panel">
-          <div class="meta">
+          <div class="meta research-summary">
             <span class="tag ${item.isResearch ? "ok" : ""}">${item.isResearch ? "研究主题" : "普通搜索"}</span>
             <span class="tag">关联资料 ${progress.total} 条</span>
             <span class="tag">目标样本 ${escapeHtml(targetLabel)}</span>
-            <span class="tag">${escapeHtml(progressText)}</span>
+            <span class="tag">研究进度：${escapeHtml(progressText)}</span>
+            ${progress.total ? `<button class="tiny-btn" type="button" data-action="view-related-later" data-id="${escapeAttribute(item.id)}">查看关联资料</button>` : ""}
           </div>
-          <div class="compact-edit-grid">
-            <label class="compact-field research-toggle"><span>研究主题</span>
-              <input type="checkbox" data-action="history-is-research" data-id="${escapeAttribute(item.id)}" ${item.isResearch ? "checked" : ""} />
-            </label>
-            <label class="compact-field wide"><span>研究目标</span>
-              <input class="field" data-action="history-research-goal" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.researchGoal || "")}" placeholder="例如：比较 10 个真实案例，判断是否值得投入" />
-            </label>
-            <label class="compact-field"><span>目标样本数</span>
-              <input class="field" type="number" min="0" step="1" data-action="history-target-sample-count" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.targetSampleCount || "")}" placeholder="0" />
-            </label>
-            <label class="compact-field wide"><span>研究备注</span>
-              <textarea data-action="history-research-note" data-id="${escapeAttribute(item.id)}" placeholder="记录采样标准、排除条件、下一步。">${escapeHtml(item.researchNote || "")}</textarea>
-            </label>
-          </div>
-          ${item.researchGoal ? `<p class="hint">目标：${escapeHtml(item.researchGoal)}</p>` : ""}
-          ${progress.total ? `<div class="actions"><button class="tiny-btn" type="button" data-action="view-related-later" data-id="${escapeAttribute(item.id)}">查看关联资料</button></div>` : ""}
+          <details class="compact-details compact-edit-details">
+            <summary>研究设置</summary>
+            <div class="compact-details-body">
+              <div class="compact-edit-grid">
+                <label class="compact-field research-toggle"><span>研究主题</span>
+                  <input type="checkbox" data-action="history-is-research" data-id="${escapeAttribute(item.id)}" ${item.isResearch ? "checked" : ""} />
+                </label>
+                <label class="compact-field wide"><span>研究目标</span>
+                  <input class="field" data-action="history-research-goal" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.researchGoal || "")}" placeholder="例如：比较 10 个真实案例，判断是否值得投入" />
+                </label>
+                <label class="compact-field"><span>目标样本数</span>
+                  <input class="field" type="number" min="0" step="1" data-action="history-target-sample-count" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.targetSampleCount || "")}" placeholder="0" />
+                </label>
+                <label class="compact-field wide"><span>研究备注</span>
+                  <textarea data-action="history-research-note" data-id="${escapeAttribute(item.id)}" placeholder="记录采样标准、排除条件、下一步。">${escapeHtml(item.researchNote || "")}</textarea>
+                </label>
+              </div>
+            </div>
+          </details>
         </div>
       `;
     }
@@ -6829,33 +7005,40 @@ function fillUrlTemplate(template, query, domain = "") {
                 <span class="tag ${historyTagClass(item.status)}">${escapeHtml(item.status)}</span>
                 <span class="tag">${formatTime(item.time)}</span>
                 ${renderSearchSnapshotStatusTag(item)}
-                ${renderExistingTagButtons(item, "history")}
+                ${renderLimitedTagChips(item.tags, 3)}
               </div>
-              ${renderSuggestedTagButtons(item, "history")}
             </div>
             <div class="actions">
               <button class="tiny-btn item-more-btn" type="button" data-action="open-item-menu" data-id="${escapeAttribute(item.id)}" data-item-type="history" aria-label="更多操作">⋮</button>
             </div>
           </div>
-          <div class="compact-edit-grid">
-            <label class="compact-field"><span>状态</span>
-              <select data-action="history-status" data-id="${escapeAttribute(item.id)}">
-                ${SEARCH_STATUSES.map((status) => `<option value="${escapeAttribute(status)}" ${status === item.status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
-              </select>
-            </label>
-            <label class="compact-field wide"><span>备注</span>
-              <textarea data-action="history-note" data-id="${escapeAttribute(item.id)}" placeholder="记录搜到什么、没找到什么、下一步。">${escapeHtml(item.note || "")}</textarea>
-            </label>
-            ${renderWikiPreview(item.note)}
-            <label class="compact-field wide"><span>标签</span>
-              <input class="field tag-edit-field" data-action="history-tags" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(formatTagsForEdit(item.tags))}" placeholder="#AI #教程 #观点" />
-            </label>
-          </div>
-          ${renderResearchPanel(item)}
-          ${renderBacklinks("history", item.id)}
+          <details class="compact-details compact-edit-details">
+            <summary>编辑、研究与关联</summary>
+            <div class="compact-details-body">
+              <div class="compact-edit-grid">
+                <label class="compact-field"><span>状态</span>
+                  <select data-action="history-status" data-id="${escapeAttribute(item.id)}">
+                    ${SEARCH_STATUSES.map((status) => `<option value="${escapeAttribute(status)}" ${status === item.status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
+                  </select>
+                </label>
+                <label class="compact-field wide"><span>备注</span>
+                  <textarea data-action="history-note" data-id="${escapeAttribute(item.id)}" placeholder="记录搜到什么、没找到什么、下一步。">${escapeHtml(item.note || "")}</textarea>
+                </label>
+                ${renderWikiPreview(item.note)}
+                <label class="compact-field wide"><span>标签</span>
+                  <input class="field tag-edit-field" data-action="history-tags" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(formatTagsForEdit(item.tags))}" placeholder="#AI #教程 #观点" />
+                </label>
+              </div>
+              ${renderExistingTagButtons(item, "history") ? `<div class="tag-row">${renderExistingTagButtons(item, "history")}</div>` : ""}
+              ${renderSuggestedTagButtons(item, "history")}
+              ${renderResearchPanel(item)}
+              ${renderBacklinks("history", item.id)}
+            </div>
+          </details>
         </article>
       `).join("");
     }
+
     function estimateLaterItemTime(item = {}) {
       if (item.estimate) return item.estimate;
 
@@ -7007,28 +7190,43 @@ function fillUrlTemplate(template, query, domain = "") {
     function renderAiAnswerBlock(item) {
       if (!item?.aiOriginalAnswer) return "";
       const summary = normalizeStructuredSummary(item.structuredSummary) || structureAiAnswer(item.aiOriginalAnswer);
+      const answerLength = String(item.aiOriginalAnswer || "").length;
+      const hasStructuredSummary = Boolean(
+        summary.oneSentenceConclusion
+        || summary.keyPoints?.length
+        || summary.claimsToVerify?.length
+        || summary.actionItems?.length
+      );
+      const summaryLabel = hasStructuredSummary ? "有结构化摘要" : "待补充结构化摘要";
       return `
-        <div class="ai-summary-block">
-          <h4>结构化摘要</h4>
-          ${item.aiOriginalQuestion ? `<p class="hint"><strong>原始问题：</strong>${escapeHtml(item.aiOriginalQuestion)}</p>` : ""}
-          <div class="ai-summary-grid">
-            <div class="ai-summary-section">
-              <strong>关键要点</strong>
-              ${renderAiSummaryList(summary.keyPoints)}
-            </div>
-            <div class="ai-summary-section">
-              <strong>待验证项</strong>
-              ${renderAiSummaryList(summary.claimsToVerify)}
-            </div>
-            <div class="ai-summary-section">
-              <strong>行动项</strong>
-              ${renderAiSummaryList(summary.actionItems)}
-            </div>
+        <details class="compact-details ai-answer-block">
+          <summary>AI 回答 · ${summaryLabel} · 原文约 ${answerLength} 字</summary>
+          <div class="compact-details-body">
+            <details class="compact-details">
+              <summary>结构化摘要</summary>
+              <div class="compact-details-body ai-summary-block">
+                ${item.aiOriginalQuestion ? `<p class="hint"><strong>原始问题：</strong>${escapeHtml(item.aiOriginalQuestion)}</p>` : ""}
+                <div class="ai-summary-grid">
+                  <div class="ai-summary-section">
+                    <strong>关键要点</strong>
+                    ${renderAiSummaryList(summary.keyPoints)}
+                  </div>
+                  <div class="ai-summary-section">
+                    <strong>待验证项</strong>
+                    ${renderAiSummaryList(summary.claimsToVerify)}
+                  </div>
+                  <div class="ai-summary-section">
+                    <strong>行动项</strong>
+                    ${renderAiSummaryList(summary.actionItems)}
+                  </div>
+                </div>
+              </div>
+            </details>
+            <details class="compact-details">
+              <summary>AI 原文</summary>
+              <pre class="ai-original-answer">${escapeHtml(item.aiOriginalAnswer)}</pre>
+            </details>
           </div>
-        </div>
-        <details class="compact-details">
-          <summary>AI 原文</summary>
-          <pre class="ai-original-answer">${escapeHtml(item.aiOriginalAnswer)}</pre>
         </details>
       `;
     }
@@ -7038,6 +7236,7 @@ function fillUrlTemplate(template, query, domain = "") {
       renderPendingReviewPanel(pendingReviewItems.length);
       const sourceFilter = elements.laterSourceFilter.value || "全部来源";
       const statusFilter = elements.laterStatusFilter.value || "全部状态";
+      syncStatusFilterChips(elements.laterStatusChips, statusFilter);
       const relatedFilter = currentRelatedHistoryFilter || elements.laterRelatedFilter?.value || "全部研究";
       const textFilter = normalize(elements.laterTextFilter.value);
 
@@ -7073,9 +7272,9 @@ function fillUrlTemplate(template, query, domain = "") {
           ? {
             icon: "📝",
             title: "收件箱还是空的",
-            description: "可以在顶部输入文字后点“📝 笔记”，也可以把链接通过系统分享加入。",
+            description: "可以在顶部输入文字、链接或 AI 回答后点“📥 存入收件箱”，也可以把链接通过系统分享加入。",
             action: "open-quick-note",
-            button: "写一条笔记"
+            button: "存入收件箱"
           }
           : reviewFilterActive
             ? {
@@ -7103,6 +7302,7 @@ function fillUrlTemplate(template, query, domain = "") {
         const summaryBusy = contentRefreshQueue.has(item.id) || contentFetchQueue.has(item.id) || contentFetchProgress.has(item.id);
         const metadataBusy = metadataFetchQueue.has(item.id) || metadataFetchProgress.has(item.id);
         const estimateLabel = estimateLaterItemTime(item);
+        const relatedHistoryLabel = getRelatedHistoryLabel(item.relatedHistoryId);
 
         return `
           <article class="card item" data-item-type="later" data-item-id="${escapeAttribute(item.id)}">
@@ -7116,46 +7316,54 @@ function fillUrlTemplate(template, query, domain = "") {
                   <span class="tag">${formatTime(item.createdAt)}</span>
                   ${renderContentFetchStatusTag(item)}
                   ${renderMetadataStatusTag(item)}
-                  ${renderExistingTagButtons(item, "later")}
+                  ${renderLimitedTagChips(item.tags, 3)}
                 </div>
-                ${renderSuggestedTagButtons(item, "later")}
+                ${renderCompactPreview(item.conclusion, "结论", 130)}
+                ${relatedHistoryLabel ? `<p class="hint compact-relation-hint">${escapeHtml(relatedHistoryLabel)}</p>` : ""}
               </div>
               <div class="actions">
                 <button class="tiny-btn item-more-btn" type="button" data-action="open-item-menu" data-id="${escapeAttribute(item.id)}" data-item-type="later" aria-label="更多操作">⋮</button>
               </div>
             </div>
-            ${item.autoSummary ? `<details class="compact-details"><summary>自动摘要</summary><p class="auto-summary">${escapeHtml(item.autoSummary)}</p></details>` : ""}
-            ${item.bodyText ? `<details class="compact-details"><summary>元数据 / 正文预览</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.bodyText, 420))}</p></details>` : ""}
             ${renderAiAnswerBlock(item)}
-            <div class="compact-edit-grid">
-              <label class="compact-field"><span>状态</span>
-                <select data-action="later-status" data-id="${escapeAttribute(item.id)}">
-                  ${LATER_STATUSES.map((status) => `<option value="${escapeAttribute(status)}" ${status === item.status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
-                </select>
-              </label>
-              <label class="compact-field"><span>来源</span>
-                <select data-action="later-source" data-id="${escapeAttribute(item.id)}">
-                  ${getAllLaterSources().map((source) => `<option value="${escapeAttribute(source)}" ${source === item.source ? "selected" : ""}>${escapeHtml(source)}</option>`).join("")}
-                </select>
-              </label>
-              <label class="compact-field wide"><span>关联搜索/研究主题</span>
-                ${renderRelatedHistorySelect(item.relatedHistoryId || "", item.id)}
-              </label>
-              <label class="compact-field wide"><span>标题</span>
-                <input class="field" data-action="later-title" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.title || "")}" />
-              </label>
-              <label class="compact-field wide"><span>链接</span>
-                <input class="field" data-action="later-url" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.url || "")}" placeholder="https://..." />
-              </label>
-              <label class="compact-field wide"><span>标签</span>
-                <input class="field tag-edit-field" data-action="later-tags" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(formatTagsForEdit(item.tags))}" placeholder="#AI #教程 #开源" />
-              </label>
-              <label class="compact-field wide"><span>结论</span>
-                <textarea data-action="later-conclusion" data-id="${escapeAttribute(item.id)}" placeholder="看完后写一句结论。">${escapeHtml(item.conclusion || "")}</textarea>
-              </label>
-              ${renderWikiPreview(item.conclusion)}
-            </div>
-            ${renderBacklinks("later", item.id)}
+            <details class="compact-details compact-edit-details">
+              <summary>详情与编辑</summary>
+              <div class="compact-details-body">
+                ${item.autoSummary ? `<details class="compact-details"><summary>自动摘要</summary><p class="auto-summary">${escapeHtml(item.autoSummary)}</p></details>` : ""}
+                ${item.bodyText ? `<details class="compact-details"><summary>元数据 / 正文预览</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.bodyText, 420))}</p></details>` : ""}
+                <div class="compact-edit-grid">
+                  <label class="compact-field"><span>状态</span>
+                    <select data-action="later-status" data-id="${escapeAttribute(item.id)}">
+                      ${LATER_STATUSES.map((status) => `<option value="${escapeAttribute(status)}" ${status === item.status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
+                    </select>
+                  </label>
+                  <label class="compact-field"><span>来源</span>
+                    <select data-action="later-source" data-id="${escapeAttribute(item.id)}">
+                      ${getAllLaterSources().map((source) => `<option value="${escapeAttribute(source)}" ${source === item.source ? "selected" : ""}>${escapeHtml(source)}</option>`).join("")}
+                    </select>
+                  </label>
+                  <label class="compact-field wide"><span>关联搜索/研究主题</span>
+                    ${renderRelatedHistorySelect(item.relatedHistoryId || "", item.id)}
+                  </label>
+                  <label class="compact-field wide"><span>标题</span>
+                    <input class="field" data-action="later-title" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.title || "")}" />
+                  </label>
+                  <label class="compact-field wide"><span>链接</span>
+                    <input class="field" data-action="later-url" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.url || "")}" placeholder="https://..." />
+                  </label>
+                  <label class="compact-field wide"><span>标签</span>
+                    <input class="field tag-edit-field" data-action="later-tags" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(formatTagsForEdit(item.tags))}" placeholder="#AI #教程 #开源" />
+                  </label>
+                  ${renderExistingTagButtons(item, "later") ? `<div class="tag-row">${renderExistingTagButtons(item, "later")}</div>` : ""}
+                  <label class="compact-field wide"><span>结论</span>
+                    <textarea data-action="later-conclusion" data-id="${escapeAttribute(item.id)}" placeholder="看完后写一句结论。">${escapeHtml(item.conclusion || "")}</textarea>
+                  </label>
+                  ${renderWikiPreview(item.conclusion)}
+                </div>
+                ${renderSuggestedTagButtons(item, "later")}
+                ${renderBacklinks("later", item.id)}
+              </div>
+            </details>
           </article>
         `;
       }).join("");
@@ -7178,6 +7386,7 @@ function fillUrlTemplate(template, query, domain = "") {
 
       const sourceFilter = elements.knowledgeSourceFilter?.value || "全部来源";
       const statusFilter = elements.knowledgeStatusFilter?.value || "全部状态";
+      syncStatusFilterChips(elements.knowledgeStatusChips, statusFilter);
       const textFilter = normalize(elements.knowledgeTextFilter?.value || "");
       const sort = elements.knowledgeSort?.value || "newest";
 
@@ -7230,56 +7439,127 @@ function fillUrlTemplate(template, query, domain = "") {
 
         return `
           <article class="card item knowledge-item" data-item-type="later" data-item-id="${escapeAttribute(item.id)}">
-            <div class="item-head">
+            <div class="item-head item-menu-head">
               <div>
                 <h3 class="item-title">${titleHtml}</h3>
                 <div class="meta">
                   <span class="tag">${escapeHtml(item.source || "其他")}</span>
                   <span class="tag ${laterTagClass(item.status)}">${escapeHtml(item.status)}</span>
                   <span class="tag">${formatTime(item.createdAt)}</span>
-                  ${normalizeTags(item.tags).map((tag) => `<span class="tag tag-chip">${escapeHtml(tag)}</span>`).join("")}
+                  ${renderLimitedTagChips(item.tags, 3)}
                 </div>
-                ${relatedHistoryLabel ? `<p class="hint">${escapeHtml(relatedHistoryLabel)}</p>` : ""}
+                ${relatedHistoryLabel ? `<p class="hint compact-relation-hint">${escapeHtml(relatedHistoryLabel)}</p>` : ""}
+              </div>
+              <div class="actions">
+                <button class="tiny-btn item-more-btn" type="button" data-action="open-item-menu" data-id="${escapeAttribute(item.id)}" data-item-type="later" aria-label="更多操作">⋮</button>
               </div>
             </div>
 
             <div class="knowledge-conclusion">
               <strong>结论</strong>
-              ${item.conclusion ? `<p>${renderWikiText(item.conclusion)}</p>` : `<p class="hint">还没有结论。可以先补一句核心判断或下一步用法。</p>`}
+              ${item.conclusion ? `<p>${renderWikiText(limitText(item.conclusion, 160))}</p>` : `<p class="hint">还没有结论。可以先补一句核心判断或下一步用法。</p>`}
             </div>
 
             ${item.autoSummary ? `<details class="compact-details"><summary>自动摘要</summary><p class="auto-summary">${escapeHtml(item.autoSummary)}</p></details>` : ""}
             ${item.bodyText ? `<details class="compact-details"><summary>正文 / 元数据预览</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.bodyText, 520))}</p></details>` : ""}
             ${renderAiAnswerBlock(item)}
 
-            <div class="compact-edit-grid">
-              <label class="compact-field"><span>状态</span>
-                <select data-action="later-status" data-id="${escapeAttribute(item.id)}">
-                  ${LATER_STATUSES.map((status) => `<option value="${escapeAttribute(status)}" ${status === item.status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
-                </select>
-              </label>
-              <label class="compact-field wide"><span>标题</span>
-                <input class="field" data-action="later-title" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.title || "")}" />
-              </label>
-              <label class="compact-field wide"><span>标签</span>
-                <input class="field tag-edit-field" data-action="later-tags" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(formatTagsForEdit(item.tags))}" placeholder="#AI #教程 #开源" />
-              </label>
-              <label class="compact-field wide"><span>结论</span>
-                <textarea data-action="later-conclusion" data-id="${escapeAttribute(item.id)}" placeholder="沉淀这条内容的核心结论。">${escapeHtml(item.conclusion || "")}</textarea>
-              </label>
-              ${renderWikiPreview(item.conclusion)}
-            </div>
-            ${renderBacklinks("later", item.id)}
+            <details class="compact-details compact-edit-details">
+              <summary>编辑知识条目</summary>
+              <div class="compact-details-body">
+                <div class="compact-edit-grid">
+                  <label class="compact-field"><span>状态</span>
+                    <select data-action="later-status" data-id="${escapeAttribute(item.id)}">
+                      ${LATER_STATUSES.map((status) => `<option value="${escapeAttribute(status)}" ${status === item.status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
+                    </select>
+                  </label>
+                  <label class="compact-field wide"><span>标题</span>
+                    <input class="field" data-action="later-title" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(item.title || "")}" />
+                  </label>
+                  <label class="compact-field wide"><span>标签</span>
+                    <input class="field tag-edit-field" data-action="later-tags" data-id="${escapeAttribute(item.id)}" value="${escapeAttribute(formatTagsForEdit(item.tags))}" placeholder="#AI #教程 #开源" />
+                  </label>
+                  ${renderExistingTagButtons(item, "later") ? `<div class="tag-row">${renderExistingTagButtons(item, "later")}</div>` : ""}
+                  <label class="compact-field wide"><span>结论</span>
+                    <textarea data-action="later-conclusion" data-id="${escapeAttribute(item.id)}" placeholder="沉淀这条内容的核心结论。">${escapeHtml(item.conclusion || "")}</textarea>
+                  </label>
+                  ${renderWikiPreview(item.conclusion)}
+                </div>
+                ${renderSuggestedTagButtons(item, "later")}
+                ${renderBacklinks("later", item.id)}
+              </div>
+            </details>
           </article>
         `;
       }).join("");
     }
+
 
     function closeItemActionSheet() {
       if (!elements.itemActionSheet) return;
       elements.itemActionSheet.classList.remove("active");
       elements.itemActionSheet.setAttribute("aria-hidden", "true");
       if (elements.itemActionSheetActions) elements.itemActionSheetActions.innerHTML = "";
+    }
+
+    async function markLaterItemAsAiAnswer(id) {
+      const item = laterItems.find((entry) => entry.id === id);
+      if (!item) {
+        toast("未找到对应条目。");
+        return;
+      }
+      const text = getLaterAiAnswerText(item);
+      if (!text) {
+        toast("没有可用于生成 AI 摘要的正文。");
+        return;
+      }
+      const structuredSummary = structureAiAnswer(text);
+      const patch = {
+        tags: normalizeTags([...(item.tags || []), "#AI", "#AI回答"]),
+        aiOriginalAnswer: item.aiOriginalAnswer || text,
+        structuredSummary
+      };
+      if (!String(item.conclusion || "").trim() && structuredSummary.oneSentenceConclusion) {
+        patch.conclusion = structuredSummary.oneSentenceConclusion;
+      }
+      await updateLaterItem(id, patch);
+      toast("已标记为 AI 回答，并生成本地结构化摘要。");
+    }
+
+    async function regenerateLaterAiSummary(id) {
+      const item = laterItems.find((entry) => entry.id === id);
+      if (!item) {
+        toast("未找到对应条目。");
+        return;
+      }
+      const text = getLaterAiAnswerText(item);
+      if (!text) {
+        toast("没有可用于生成 AI 摘要的正文。");
+        return;
+      }
+      await updateLaterItem(id, { structuredSummary: structureAiAnswer(text) });
+      toast("已重新生成本地 AI 摘要。");
+    }
+
+    async function linkRecentAiHistoryToLaterItem(id) {
+      const item = laterItems.find((entry) => entry.id === id);
+      if (!item) {
+        toast("未找到对应条目。");
+        return;
+      }
+      const recentHistory = getRecentAiHistoryWithinWindow(AI_HISTORY_LINK_WINDOW_MS);
+      if (!recentHistory) {
+        toast("最近 30 分钟内没有找到 AI 询问记录。");
+        return;
+      }
+      const source = getAiSourceFromHistory(recentHistory);
+      await updateLaterItem(id, {
+        relatedHistoryId: recentHistory.id,
+        aiOriginalQuestion: recentHistory.keyword || "",
+        source,
+        tags: normalizeTags([...(item.tags || []), "#AI", "#AI回答", getAiAnswerSourceTag(source)])
+      });
+      toast("已关联最近 30 分钟内的 AI 询问。");
     }
 
     function getItemActionSheetActions(itemType, item) {
@@ -7295,6 +7575,7 @@ function fillUrlTemplate(template, query, domain = "") {
       if (itemType === "later") {
         const actions = [];
         const hasUrl = Boolean(item?.url);
+        const isAiAnswer = isLaterAiAnswer(item);
         const summaryBusy = item && (contentRefreshQueue.has(item.id) || contentFetchQueue.has(item.id) || contentFetchProgress.has(item.id));
         const metadataBusy = item && (metadataFetchQueue.has(item.id) || metadataFetchProgress.has(item.id));
 
@@ -7310,6 +7591,13 @@ function fillUrlTemplate(template, query, domain = "") {
             disabled: metadataBusy
           });
           actions.push({ action: "open-later", label: "🔗 打开链接" });
+        }
+
+        if (isAiAnswer) {
+          actions.push({ action: "regenerate-later-ai-summary", label: "🤖 重新生成 AI 摘要" });
+          actions.push({ action: "link-recent-ai-history", label: "🔗 关联最近 AI 询问" });
+        } else {
+          actions.push({ action: "mark-later-ai-answer", label: "🤖 标记为 AI 回答" });
         }
 
         actions.push({ action: "delete-later", label: "🗑 删除", danger: true });
@@ -7391,6 +7679,20 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (action === "close-item-menu") {
         closeItemActionSheet();
+        return;
+      }
+
+      if (action === "later-status-chip") {
+        const value = node.dataset.value || "全部状态";
+        if (elements.laterStatusFilter) elements.laterStatusFilter.value = value;
+        renderLater();
+        return;
+      }
+
+      if (action === "knowledge-status-chip") {
+        const value = node.dataset.value || "全部状态";
+        if (elements.knowledgeStatusFilter) elements.knowledgeStatusFilter.value = value;
+        renderKnowledge();
         return;
       }
 
@@ -7501,6 +7803,21 @@ function fillUrlTemplate(template, query, domain = "") {
           metadataFetchProgress.delete(item.id);
           renderLater();
         }
+      }
+
+      if (action === "mark-later-ai-answer") {
+        await markLaterItemAsAiAnswer(id);
+        return;
+      }
+
+      if (action === "regenerate-later-ai-summary") {
+        await regenerateLaterAiSummary(id);
+        return;
+      }
+
+      if (action === "link-recent-ai-history") {
+        await linkRecentAiHistoryToLaterItem(id);
+        return;
       }
 
       if (action === "save-search-snapshot") {
@@ -7654,7 +7971,7 @@ function fillUrlTemplate(template, query, domain = "") {
 
     async function addLaterItem() {
       if (!elements.laterTitle || !elements.laterUrl || !elements.laterSource) {
-        toast("请使用顶部 📝 笔记保存链接或文字到收件箱。 ");
+        toast("请使用顶部 📥 存入收件箱 保存链接或文字。 ");
         return;
       }
 
@@ -8174,27 +8491,26 @@ function fillUrlTemplate(template, query, domain = "") {
 
     async function handleQuickNoteButtonClick() {
       const inputText = elements.searchInput.value.trim();
-      const clipboardUrl = await readClipboardUrlForQuickNote();
 
+      if (inputText) {
+        const inputUrl = extractFirstUrl(inputText);
+        if (inputUrl) {
+          await saveUrlFromQuickNote(inputUrl);
+          return;
+        }
+
+        await saveTextQuickNote(inputText);
+        return;
+      }
+
+      const clipboardUrl = await readClipboardUrlForQuickNote();
       if (clipboardUrl) {
-        elements.searchInput.value = clipboardUrl;
         await saveUrlFromQuickNote(clipboardUrl);
         return;
       }
 
-      if (!inputText) {
-        elements.searchInput.focus();
-        toast("请输入内容或粘贴链接后点📝 笔记");
-        return;
-      }
-
-      const inputUrl = extractFirstUrl(inputText);
-      if (inputUrl) {
-        await saveUrlFromQuickNote(inputUrl);
-        return;
-      }
-
-      await saveTextQuickNote(inputText);
+      elements.searchInput.focus();
+      toast("请输入内容或粘贴链接后点 📥 存入收件箱");
     }
 
     async function readClipboardUrlForQuickNote() {
@@ -8231,34 +8547,110 @@ function fillUrlTemplate(template, query, domain = "") {
       return true;
     }
 
-    async function saveTextQuickNote(inputText) {
+    function generateQuickNoteTitle(inputText) {
+      const firstLine = String(inputText || "")
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .find(Boolean) || "快速笔记";
+      return limitText(firstLine, 100) || "快速笔记";
+    }
+
+    async function saveAiAnswerTextToInbox(answer, relatedHistory = null) {
+      const recentHistory = relatedHistory && Date.now() - getAiHistoryTime(relatedHistory) <= AI_HISTORY_LINK_WINDOW_MS
+        ? relatedHistory
+        : null;
+      const source = normalizeAiAnswerSource(recentHistory ? getAiSourceFromHistory(recentHistory) : "其他 AI");
+      const question = recentHistory?.keyword || "";
+      const structuredSummary = structureAiAnswer(answer);
+      const title = generateAiAnswerTitle(question, answer).slice(0, 120) || "AI 回答";
+      const conclusion = (structuredSummary.oneSentenceConclusion || "").slice(0, 220);
+      const tags = generateAiAnswerTags(source, question, answer);
+
       const item = {
         id: createId(),
-        title: inputText,
+        title,
+        url: recentHistory?.url || "",
+        source,
+        reason: "保存的 AI 回答。",
+        autoSummary: "",
+        bodyText: "",
+        metadataFetched: false,
+        lastSummaryFetchAt: "",
+        lastSummaryFetchStatus: "",
+        lastSummaryFetchError: "",
+        lastMetadataFetchAt: "",
+        lastMetadataFetchStatus: "",
+        lastMetadataFetchError: "",
+        lastSuccessfulFetchAt: "",
+        tags,
+        estimate: estimateLaterItemTime({ title, source, bodyText: answer }),
+        status: "收件箱",
+        conclusion,
+        createdAt: new Date().toISOString(),
+        relatedHistoryId: recentHistory?.id || "",
+        aiOriginalQuestion: question,
+        aiOriginalAnswer: answer,
+        structuredSummary
+      };
+
+      const normalizedItem = normalizeLaterItems([item])[0];
+      laterItems.unshift(normalizedItem);
+      await save(STORE_NAMES.later, laterItems);
+      await rebuildSearchIndex();
+      rebuildBacklinkIndex();
+      renderFilters();
+      activateTab("laterSection");
+      renderLater();
+      renderKnowledge();
+      renderGlobalSearchResults();
+      void renderDataManagementPanels();
+      focusRenderedItem(normalizedItem.id, "later");
+      elements.searchInput.value = "";
+      toast(recentHistory ? "已保存 AI 回答到收件箱，并关联最近 AI 询问。" : "已保存 AI 回答到收件箱。 ");
+      return true;
+    }
+
+    async function saveTextQuickNote(inputText) {
+      const recentAiHistory = getRecentAiHistoryWithinWindow();
+      if (isLikelyAiAnswer(inputText, recentAiHistory)) {
+        return saveAiAnswerTextToInbox(inputText, recentAiHistory);
+      }
+
+      const title = generateQuickNoteTitle(inputText);
+      const item = {
+        id: createId(),
+        title,
         url: "",
         source: "快速笔记",
         reason: "",
         autoSummary: "",
-        bodyText: "",
+        bodyText: inputText,
         metadataFetched: false,
         tags: mergeAutomaticBasicTags([], {
           kind: "quick-note",
-          title: inputText,
+          title,
           source: "快速笔记",
           bodyText: inputText
         }),
-        estimate: estimateLaterItemTime({ title: inputText, source: "快速笔记" }),
+        estimate: estimateLaterItemTime({ title, source: "快速笔记", bodyText: inputText }),
         status: "收件箱",
         conclusion: "",
         createdAt: new Date().toISOString(),
         relatedHistoryId: ""
       };
 
-      laterItems.unshift(item);
+      const normalizedItem = normalizeLaterItems([item])[0];
+      laterItems.unshift(normalizedItem);
       await save(STORE_NAMES.later, laterItems);
       await rebuildSearchIndex();
       rebuildBacklinkIndex();
+      renderFilters();
+      activateTab("laterSection");
       renderLater();
+      renderKnowledge();
+      renderGlobalSearchResults();
+      void renderDataManagementPanels();
+      focusRenderedItem(normalizedItem.id, "later");
       elements.searchInput.value = "";
       toast("已保存到收件箱");
       return true;
