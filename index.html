@@ -549,6 +549,44 @@
       background: transparent;
     }
 
+    .ai-quick-triage-row,
+    .conclusion-nudge-row,
+    .title-nudge-row {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .ai-quick-triage-row .tiny-btn,
+    .ai-quick-triage-row .danger-btn,
+    .conclusion-nudge-row .tiny-btn,
+    .title-nudge-row .tiny-btn {
+      flex: 0 0 auto;
+      min-height: 34px;
+      padding: 0 10px;
+      white-space: nowrap;
+      font-size: 12px;
+    }
+
+    .ai-quick-triage-label {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .conclusion-nudge-row .tiny-btn,
+    .title-nudge-row .tiny-btn {
+      color: var(--primary);
+      background: var(--primary-soft);
+      border-color: rgba(37, 99, 235, 0.18);
+    }
+
     .compact-edit-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -994,9 +1032,22 @@
 
     .item-title {
       margin: 0;
+      min-width: 0;
+      max-width: 100%;
       font-size: 14.5px;
       line-height: 1.3;
+      overflow-wrap: anywhere;
       word-break: break-word;
+    }
+
+    .item-title a {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .weak-link-title {
+      color: inherit;
     }
 
     .meta {
@@ -1243,6 +1294,213 @@
       gap: 12px;
     }
 
+
+    .creator-dashboard {
+      display: grid;
+      gap: 16px;
+      padding: 18px;
+    }
+
+    .creator-dashboard-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .creator-dashboard-head h2 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: -0.04em;
+    }
+
+    .creator-stat-grid {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .creator-stat {
+      display: grid;
+      gap: 2px;
+      min-width: 96px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(248, 250, 252, 0.9);
+    }
+
+    .creator-stat strong {
+      font-size: 20px;
+      line-height: 1.1;
+    }
+
+    .creator-stat span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .creator-feature-strip {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .creator-feature-strip .tag {
+      max-width: min(100%, 320px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .creator-filter-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(120px, 1fr)) minmax(180px, 1.5fr) auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .creator-filter-row select,
+    .creator-filter-row input {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0 12px;
+      background: white;
+      color: var(--text);
+      outline: none;
+    }
+
+    .creator-filter-chip.active {
+      color: var(--primary);
+      background: var(--primary-soft);
+      border-color: rgba(37, 99, 235, 0.32);
+    }
+
+    .creator-card {
+      display: grid;
+      gap: 12px;
+    }
+
+    .creator-card .item-title {
+      word-break: break-word;
+    }
+
+    .creator-card-body {
+      display: grid;
+      gap: 10px;
+    }
+
+    .creator-card-body p {
+      margin: 0;
+      line-height: 1.65;
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+
+    .creator-source-line {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .creator-source-line strong {
+      color: var(--text);
+    }
+
+    .creator-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .creator-actions .primary-btn,
+    .creator-actions .ghost-btn,
+    .creator-actions .danger-btn,
+    .creator-actions .tiny-btn {
+      min-height: 38px;
+    }
+
+    .creator-actions .ghost-btn.secondary,
+    .creator-actions .tiny-btn.secondary {
+      color: var(--muted);
+      background: rgba(248, 250, 252, 0.88);
+    }
+
+    .creator-content-save {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .creator-content-save input {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0 12px;
+      background: white;
+      min-width: 0;
+    }
+
+    .creator-template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+    }
+
+    .creator-template-card {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border: 1px dashed rgba(105, 117, 134, 0.36);
+      border-radius: 18px;
+      background: rgba(248, 250, 252, 0.78);
+    }
+
+    .creator-template-card strong {
+      font-size: 16px;
+    }
+
+    .creator-template-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 13px;
+    }
+
+    .creator-source-modal {
+      width: min(760px, 100%);
+    }
+
+    .creator-form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .creator-form-grid .wide {
+      grid-column: 1 / -1;
+    }
+
+    .creator-form-grid textarea {
+      min-height: 84px;
+    }
+
+    .creator-rss-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
     .review-panel {
       padding: 14px 16px;
       display: grid;
@@ -1270,6 +1528,162 @@
     .review-actions {
       justify-content: flex-end;
       flex-wrap: wrap;
+    }
+
+    .review-summary-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 10px;
+    }
+
+    .review-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .review-stat {
+      min-width: 64px;
+      padding: 5px 8px;
+      display: inline-grid;
+      gap: 1px;
+      justify-items: start;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(248, 250, 252, 0.86);
+      line-height: 1.1;
+    }
+
+    .review-stat b {
+      font-size: 15px;
+      letter-spacing: -0.03em;
+    }
+
+    .review-stat em {
+      color: var(--muted);
+      font-size: 11px;
+      font-style: normal;
+      white-space: nowrap;
+    }
+
+    .triage-backdrop {
+      z-index: 100;
+    }
+
+    .triage-modal {
+      width: min(640px, 100%);
+    }
+
+    .triage-body {
+      display: grid;
+      gap: 12px;
+    }
+
+    .triage-card {
+      display: grid;
+      gap: 12px;
+    }
+
+    .triage-item-title {
+      margin: 0;
+      font-size: clamp(20px, 3vw, 26px);
+      line-height: 1.25;
+      letter-spacing: -0.045em;
+    }
+
+    .triage-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .triage-preview {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(248, 250, 252, 0.9);
+    }
+
+    .triage-preview-label {
+      margin: 0 0 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .triage-preview-text {
+      margin: 0;
+      max-height: 8.4em;
+      overflow: auto;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .triage-actions-grid,
+    .triage-primary-actions,
+    .triage-secondary-actions {
+      display: grid;
+      gap: 8px;
+    }
+
+    .triage-primary-actions {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .triage-secondary-actions {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .triage-primary-actions button,
+    .triage-secondary-actions button,
+    .triage-actions-grid button,
+    .triage-link-row a,
+    .triage-link-row button {
+      width: 100%;
+    }
+
+    .triage-link-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .triage-note-details summary {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .triage-note-field {
+      width: 100%;
+      min-height: 72px;
+      resize: vertical;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      outline: none;
+      background: white;
+      line-height: 1.55;
+    }
+
+    .triage-note-field:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .triage-empty {
+      padding: 26px 12px;
+      display: grid;
+      justify-items: center;
+      gap: 10px;
+      text-align: center;
+    }
+
+    .triage-empty h3 {
+      margin: 0;
+      font-size: 20px;
     }
 
     .form-title {
@@ -1620,10 +2034,64 @@
       .review-panel {
         grid-template-columns: 1fr;
         align-items: stretch;
+        padding: 12px;
+      }
+
+      .review-summary-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .review-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
+        gap: 5px;
+      }
+
+      .review-stat {
+        min-width: 0;
+        padding: 5px 4px;
+        justify-items: center;
+      }
+
+      .review-stat b {
+        font-size: 14px;
+      }
+
+      .review-stat em {
+        font-size: 10px;
       }
 
       .review-actions {
         justify-content: stretch;
+      }
+
+      .triage-backdrop.active {
+        align-items: flex-end;
+        padding: 0;
+      }
+
+      .triage-modal {
+        width: 100%;
+        max-height: min(88vh, 720px);
+        border-radius: 26px 26px 0 0;
+        padding-bottom: calc(18px + env(safe-area-inset-bottom));
+      }
+
+      .triage-title-row {
+        align-items: center;
+      }
+
+      .triage-actions-grid,
+      .triage-primary-actions,
+      .triage-secondary-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .ai-quick-triage-row .tiny-btn,
+      .ai-quick-triage-row .danger-btn,
+      .conclusion-nudge-row .tiny-btn {
+        min-height: 40px;
       }
 
       .item {
@@ -1761,6 +2229,53 @@
       }
     }
 
+
+    @media (max-width: 760px) {
+      .creator-dashboard-head {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .creator-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .creator-stat {
+        min-width: 0;
+      }
+
+      .creator-filter-row {
+        grid-template-columns: 1fr;
+      }
+
+      .creator-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .creator-actions .primary-btn,
+      .creator-actions .ghost-btn,
+      .creator-actions .danger-btn,
+      .creator-actions .tiny-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .creator-content-save {
+        grid-template-columns: 1fr;
+      }
+
+      .creator-form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .creator-source-modal {
+        max-height: min(88vh, 720px);
+        overflow: auto;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1810,6 +2325,7 @@
       <button class="tab-btn active" type="button" data-tab="historySection">搜索历史</button>
       <button class="tab-btn" type="button" data-tab="laterSection">收件箱</button>
       <button class="tab-btn" type="button" data-tab="knowledgeSection">知识库</button>
+      <button class="tab-btn" type="button" data-tab="creatorSourcesSection">信息源</button>
       <button class="tab-btn" type="button" data-tab="settingsSection">⚙️ 设置</button>
     </nav>
 
@@ -1841,14 +2357,27 @@
         <p class="hint">说明：PWA 分享目标和书签工具默认只保存页面标题、链接和来源；正文、摘要和元数据会沿用现有后台抓取能力。</p>
       </div>
 
-      <div class="card review-panel" id="reviewPanel" aria-label="收件箱待回顾">
+      <div class="card review-panel" id="reviewPanel" aria-label="收件箱整理与待回顾">
         <div class="review-summary">
-          <strong class="review-count" id="pendingReviewCount">待回顾 0 条</strong>
+          <div class="review-summary-row">
+            <strong class="review-count" id="pendingReviewCount">待回顾 0 条</strong>
+            <div class="review-stats" id="inboxTriageStats" aria-label="收件箱整理统计">
+              <span class="review-stat"><b id="inboxTotalCount">0</b><em>总数</em></span>
+              <span class="review-stat"><b id="inboxStatusCount">0</b><em>收件箱</em></span>
+              <span class="review-stat"><b id="readLaterStatusCount">0</b><em>待读</em></span>
+              <span class="review-stat"><b id="organizeStatusCount">0</b><em>待整理</em></span>
+              <span class="review-stat"><b id="absorbedStatusCount">0</b><em>已吸收</em></span>
+              <span class="review-stat"><b id="discardedStatusCount">0</b><em>已废弃</em></span>
+              <span class="review-stat"><b id="overdueReviewCount">0</b><em>超期回顾</em></span>
+            </div>
+          </div>
           <p class="hint" id="pendingReviewHint">默认规则：状态为收件箱/待读，且创建时间超过 3 天。</p>
         </div>
         <div class="actions review-actions">
+          <button class="primary-btn" type="button" data-action="start-later-triage" id="startTriageBtn">开始整理</button>
+          <button class="ghost-btn" type="button" data-action="start-review-triage" id="startReviewTriageBtn">开始整理待回顾</button>
           <button class="ghost-btn" id="viewPendingReviewBtn" type="button">查看待回顾</button>
-          <button class="primary-btn" id="randomReviewBtn" type="button">随机回顾</button>
+          <button class="ghost-btn" id="randomReviewBtn" type="button">随机回顾</button>
           <button class="ghost-btn hidden" id="clearReviewFilterBtn" type="button">退出待回顾筛选</button>
         </div>
       </div>
@@ -1868,7 +2397,6 @@
         <select id="knowledgeSourceFilter" aria-label="知识来源"></select>
         <select id="knowledgeStatusFilter" aria-label="知识状态">
           <option value="全部状态">全部状态</option>
-          <option value="已整理">已整理</option>
           <option value="已吸收">已吸收</option>
         </select>
         <div id="knowledgeStatusChips" class="status-chip-row" role="group" aria-label="知识库状态快捷筛选"></div>
@@ -1879,6 +2407,37 @@
         </select>
       </div>
       <div class="list" id="knowledgeList"></div>
+    </section>
+
+
+    <section id="creatorSourcesSection" class="section" aria-label="信息源关注台">
+      <div class="card creator-dashboard">
+        <div class="creator-dashboard-head">
+          <div>
+            <h2>信息源关注台</h2>
+            <p class="hint">只管理“我想关注谁 / 何时去看看”，不自动抓取平台内容，也不做未读信息流。</p>
+          </div>
+          <button class="primary-btn" type="button" data-action="open-add-creator-source" id="addCreatorSourceBtn">添加信息源</button>
+        </div>
+
+        <div class="creator-stat-grid" aria-label="信息源统计">
+          <div class="creator-stat"><strong id="creatorSourceTotalCount">0</strong><span>总关注数</span></div>
+          <div class="creator-stat"><strong id="creatorSourceDueCount">0</strong><span>建议查看</span></div>
+          <div class="creator-stat"><strong id="creatorSourceRecentCount">0</strong><span>最近查看</span></div>
+          <div class="creator-stat"><strong id="creatorSourcePinnedCount">0</strong><span>置顶信息源</span></div>
+        </div>
+        <div class="creator-feature-strip" id="creatorSourceFeatureStrip" aria-live="polite"></div>
+
+        <div class="creator-filter-row" aria-label="信息源筛选">
+          <select id="creatorPlatformFilter" aria-label="平台筛选"></select>
+          <select id="creatorCategoryFilter" aria-label="分类筛选"></select>
+          <select id="creatorStatusFilter" aria-label="状态筛选"></select>
+          <input id="creatorTextFilter" type="search" placeholder="搜索名称、平台、简介、理由、标签" aria-label="关键词搜索" />
+          <button class="ghost-btn creator-filter-chip" type="button" data-action="creator-filter-due" id="creatorDueChip" aria-pressed="false">建议查看</button>
+          <button class="ghost-btn" type="button" data-action="open-add-creator-source">添加</button>
+        </div>
+      </div>
+      <div class="list" id="creatorSourceList"></div>
     </section>
 
     <section id="settingsSection" class="section" aria-label="设置">
@@ -1980,6 +2539,99 @@
       </div>
     </section>
   </main>
+
+
+  <div class="modal-backdrop" id="creatorSourceModal" aria-hidden="true">
+    <section class="card modal creator-source-modal" role="dialog" aria-modal="true" aria-labelledby="creatorSourceModalTitle">
+      <div class="modal-title-row">
+        <div>
+          <h2 id="creatorSourceModalTitle">添加信息源</h2>
+          <p class="hint">只保存主页、关注理由、查看频率和 RSS/RSSHub 地址；不会自动抓取内容。</p>
+        </div>
+        <button class="ghost-btn" type="button" data-action="close-creator-source-modal" id="closeCreatorSourceModalBtn">关闭</button>
+      </div>
+      <input type="hidden" id="creatorSourceEditingId" />
+      <div class="creator-form-grid">
+        <label class="label">名称 *
+          <input id="creatorSourceName" class="field" type="text" placeholder="例如：某个 UP 主 / 博客 / 公众号" />
+        </label>
+        <label class="label">平台 *
+          <select id="creatorSourcePlatform">
+            <option value="B站">B站</option>
+            <option value="小红书">小红书</option>
+            <option value="知乎">知乎</option>
+            <option value="微信公众号">微信公众号</option>
+            <option value="网站">网站</option>
+            <option value="RSS">RSS</option>
+            <option value="其他">其他</option>
+          </select>
+        </label>
+        <label class="label wide">主页链接 *
+          <input id="creatorSourceProfileUrl" class="field" type="url" placeholder="https://..." />
+        </label>
+        <label class="label">移动端链接，可选
+          <input id="creatorSourceMobileUrl" class="field" type="text" placeholder="https://m.example.com/..." />
+        </label>
+        <label class="label">App 链接，可选
+          <input id="creatorSourceAppUrl" class="field" type="text" placeholder="app://..." />
+        </label>
+        <label class="label">类型
+          <select id="creatorSourceType">
+            <option value="creator">creator</option>
+            <option value="website">website</option>
+            <option value="newsletter">newsletter</option>
+            <option value="rss">rss</option>
+            <option value="keyword">keyword</option>
+            <option value="other">other</option>
+          </select>
+        </label>
+        <label class="label">分类
+          <input id="creatorSourceCategory" class="field" type="text" placeholder="例如：AI / 设计 / 投资 / 生活方式" />
+        </label>
+        <label class="label wide">简介
+          <textarea id="creatorSourceDescription" placeholder="这个信息源主要提供什么内容？"></textarea>
+        </label>
+        <label class="label wide">为什么关注
+          <textarea id="creatorSourceReason" placeholder="为什么值得长期关注？"></textarea>
+        </label>
+        <label class="label wide">标签
+          <input id="creatorSourceTags" class="field tag-edit-field" type="text" placeholder="#AI #教程 #独立博客" />
+        </label>
+        <label class="label">查看频率
+          <select id="creatorSourceCheckFrequency">
+            <option value="daily">daily</option>
+            <option value="weekly">weekly</option>
+            <option value="monthly">monthly</option>
+            <option value="occasional">occasional</option>
+          </select>
+        </label>
+        <label class="label">状态
+          <select id="creatorSourceStatus">
+            <option value="following">following</option>
+            <option value="watching">watching</option>
+            <option value="paused">paused</option>
+          </select>
+        </label>
+        <label class="label wide">RSS 地址，可选
+          <input id="creatorSourceRssUrl" class="field" type="text" placeholder="https://example.com/feed.xml" />
+        </label>
+        <label class="label wide">RSSHub 地址，可选
+          <input id="creatorSourceRsshubUrl" class="field" type="text" placeholder="https://rsshub.app/..." />
+        </label>
+        <label class="label wide">站内搜索模板，可选
+          <input id="creatorSourceSearchTemplate" class="field" type="text" placeholder="https://example.com/search?q={query}" />
+        </label>
+        <label class="label setting-toggle wide">
+          <input id="creatorSourcePinned" type="checkbox" />
+          <span>置顶这个信息源</span>
+        </label>
+      </div>
+      <div class="actions">
+        <button class="ghost-btn" type="button" data-action="close-creator-source-modal">取消</button>
+        <button class="primary-btn" type="button" data-action="save-creator-source" id="saveCreatorSourceBtn">保存信息源</button>
+      </div>
+    </section>
+  </div>
 
   <div class="modal-backdrop" id="addPlatformModal" aria-hidden="true">
     <section class="card modal" role="dialog" aria-modal="true" aria-labelledby="addPlatformModalTitle">
@@ -2085,31 +2737,79 @@
       <button class="ghost-btn item-action-sheet-cancel" type="button" data-action="close-item-menu">取消</button>
     </section>
   </div>
-<div class="toast" id="toast"></div>
+  <div class="modal-backdrop triage-backdrop" id="triageModal" aria-hidden="true">
+    <section class="card modal triage-modal" role="dialog" aria-modal="true" aria-labelledby="triageModalTitle">
+      <div class="modal-title-row triage-title-row">
+        <div>
+          <h2 id="triageModalTitle">整理收件箱</h2>
+          <p class="hint" id="triageProgress">已处理 0 / 0</p>
+        </div>
+        <button class="ghost-btn" type="button" data-action="close-later-triage" id="closeTriageBtn">关闭</button>
+      </div>
+      <div class="triage-body" id="triageContent"></div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"></div>
 
   <script>
     const SEARCH_STATUSES = ["未处理", "有用", "已解决", "没找到", "转入收件箱", "放弃"];
     const SEARCH_STATUS_ALIASES = {
       "转入稍后看": "转入收件箱"
     };
-    const LATER_STATUSES = ["收件箱", "待读", "阅读中", "待整理", "已整理", "已吸收", "已废弃"];
+    const LATER_STATUSES = ["收件箱", "待读", "待整理", "已吸收", "已废弃"];
     const LATER_STATUS_ALIASES = {
+      "阅读中": "待读",
+      "已整理": "已吸收",
       "未看": "待读",
       "已看": "待整理",
-      "有用": "已整理",
+      "有用": "已吸收",
       "没用": "已废弃",
       "删除": "已废弃"
     };
     const PENDING_REVIEW_LATER_STATUSES = new Set(["收件箱", "待读"]);
-    const KNOWLEDGE_STATUSES = ["已整理", "已吸收"];
+    const KNOWLEDGE_STATUSES = ["已吸收"];
     const KNOWLEDGE_STATUS_SET = new Set(KNOWLEDGE_STATUSES);
-    const RESEARCH_READ_STATUSES = new Set(["待整理", "已整理", "已吸收"]);
-    const RESEARCH_ORGANIZED_STATUSES = new Set(["已整理", "已吸收"]);
+    const RESEARCH_READ_STATUSES = new Set(["待整理", "已吸收"]);
+    const RESEARCH_ORGANIZED_STATUSES = new Set(["已吸收"]);
     const LATER_SOURCES_BASE = ["必应", "知乎", "微博", "小红书", "B站", "抖音", "播客", "GitHub", "微信/公众号", "快速笔记", "豆包 AI", "DeepSeek AI", "其他 AI", "其他"];
     const AI_ANSWER_SOURCES = ["豆包 AI", "DeepSeek AI", "其他 AI"];
     const AI_HISTORY_LINK_WINDOW_MS = 30 * 60 * 1000;
     const AI_ANSWER_RECENT_MIN_LENGTH = 100;
     const AI_ANSWER_FEATURE_MIN_LENGTH = 200;
+
+    const CREATOR_SOURCE_PLATFORMS = ["B站", "小红书", "知乎", "微信公众号", "网站", "RSS", "其他"];
+    const CREATOR_SOURCE_TYPES = ["creator", "website", "newsletter", "rss", "keyword", "other"];
+    const CREATOR_SOURCE_STATUSES = ["following", "watching", "paused"];
+    const CREATOR_SOURCE_CHECK_FREQUENCIES = ["daily", "weekly", "monthly", "occasional"];
+    const CREATOR_SOURCE_STATUS_LABELS = {
+      following: "关注中",
+      watching: "观察中",
+      paused: "已暂停"
+    };
+    const CREATOR_SOURCE_TYPE_LABELS = {
+      creator: "创作者",
+      website: "网站",
+      newsletter: "Newsletter",
+      rss: "RSS",
+      keyword: "关键词",
+      other: "其他"
+    };
+    const CREATOR_SOURCE_FREQUENCY_LABELS = {
+      daily: "每天",
+      weekly: "每周",
+      monthly: "每月",
+      occasional: "偶尔"
+    };
+    const CREATOR_SOURCE_TEMPLATES = [
+      { label: "B 站 UP 主", platform: "B站", type: "creator", category: "视频", checkFrequency: "weekly", description: "长期输出视频、教程、测评或观点内容。" },
+      { label: "小红书创作者", platform: "小红书", type: "creator", category: "生活方式", checkFrequency: "weekly", description: "适合记录消费体验、攻略、清单和真实反馈。" },
+      { label: "知乎创作者", platform: "知乎", type: "creator", category: "观点", checkFrequency: "weekly", description: "适合沉淀长回答、经验判断和观点交叉验证。" },
+      { label: "微信公众号", platform: "微信公众号", type: "newsletter", category: "公众号", checkFrequency: "weekly", description: "适合定期查看深度文章、专栏和行业观察。" },
+      { label: "独立博客", platform: "网站", type: "website", category: "博客", checkFrequency: "monthly", description: "适合长期关注作者的系统化输出。" },
+      { label: "RSS 源", platform: "RSS", type: "rss", category: "订阅", checkFrequency: "weekly", description: "本阶段只保存 RSS/RSSHub 地址，不自动抓取文章流。" },
+      { label: "关键词主题", platform: "其他", type: "keyword", category: "主题", checkFrequency: "occasional", description: "适合记录一个需要定期主动搜索的主题。" }
+    ];
 
     const DEFAULT_PLATFORMS = [
       {
@@ -2201,7 +2901,8 @@
     const STORAGE_KEYS = {
       platforms: "infoDock.platforms.v1",
       history: "infoDock.history.v1",
-      later: "infoDock.later.v1"
+      later: "infoDock.later.v1",
+      creatorSources: "infoDock.creatorSources.v1"
     };
 
     const STORE_NAMES = {
@@ -2243,12 +2944,59 @@
       knowledgeTextFilter: $("#knowledgeTextFilter"),
       knowledgeSort: $("#knowledgeSort"),
       knowledgeList: $("#knowledgeList"),
+      creatorPlatformFilter: $("#creatorPlatformFilter"),
+      creatorCategoryFilter: $("#creatorCategoryFilter"),
+      creatorStatusFilter: $("#creatorStatusFilter"),
+      creatorTextFilter: $("#creatorTextFilter"),
+      creatorDueChip: $("#creatorDueChip"),
+      addCreatorSourceBtn: $("#addCreatorSourceBtn"),
+      creatorSourceTotalCount: $("#creatorSourceTotalCount"),
+      creatorSourceDueCount: $("#creatorSourceDueCount"),
+      creatorSourceRecentCount: $("#creatorSourceRecentCount"),
+      creatorSourcePinnedCount: $("#creatorSourcePinnedCount"),
+      creatorSourceFeatureStrip: $("#creatorSourceFeatureStrip"),
+      creatorSourceList: $("#creatorSourceList"),
+      creatorSourceModal: $("#creatorSourceModal"),
+      creatorSourceModalTitle: $("#creatorSourceModalTitle"),
+      creatorSourceEditingId: $("#creatorSourceEditingId"),
+      creatorSourceName: $("#creatorSourceName"),
+      creatorSourcePlatform: $("#creatorSourcePlatform"),
+      creatorSourceProfileUrl: $("#creatorSourceProfileUrl"),
+      creatorSourceMobileUrl: $("#creatorSourceMobileUrl"),
+      creatorSourceAppUrl: $("#creatorSourceAppUrl"),
+      creatorSourceType: $("#creatorSourceType"),
+      creatorSourceCategory: $("#creatorSourceCategory"),
+      creatorSourceDescription: $("#creatorSourceDescription"),
+      creatorSourceReason: $("#creatorSourceReason"),
+      creatorSourceTags: $("#creatorSourceTags"),
+      creatorSourceCheckFrequency: $("#creatorSourceCheckFrequency"),
+      creatorSourceStatus: $("#creatorSourceStatus"),
+      creatorSourceRssUrl: $("#creatorSourceRssUrl"),
+      creatorSourceRsshubUrl: $("#creatorSourceRsshubUrl"),
+      creatorSourceSearchTemplate: $("#creatorSourceSearchTemplate"),
+      creatorSourcePinned: $("#creatorSourcePinned"),
+      closeCreatorSourceModalBtn: $("#closeCreatorSourceModalBtn"),
+      saveCreatorSourceBtn: $("#saveCreatorSourceBtn"),
       pendingReviewCount: $("#pendingReviewCount"),
       pendingReviewHint: $("#pendingReviewHint"),
+      inboxTotalCount: $("#inboxTotalCount"),
+      inboxStatusCount: $("#inboxStatusCount"),
+      readLaterStatusCount: $("#readLaterStatusCount"),
+      organizeStatusCount: $("#organizeStatusCount"),
+      absorbedStatusCount: $("#absorbedStatusCount"),
+      discardedStatusCount: $("#discardedStatusCount"),
+      overdueReviewCount: $("#overdueReviewCount"),
       reviewPanel: $("#reviewPanel"),
       viewPendingReviewBtn: $("#viewPendingReviewBtn"),
       randomReviewBtn: $("#randomReviewBtn"),
       clearReviewFilterBtn: $("#clearReviewFilterBtn"),
+      startTriageBtn: $("#startTriageBtn"),
+      startReviewTriageBtn: $("#startReviewTriageBtn"),
+      triageModal: $("#triageModal"),
+      triageModalTitle: $("#triageModalTitle"),
+      triageProgress: $("#triageProgress"),
+      triageContent: $("#triageContent"),
+      closeTriageBtn: $("#closeTriageBtn"),
       laterList: $("#laterList"),
       addPlatformModal: $("#addPlatformModal"),
       newPlatformName: $("#newPlatformName"),
@@ -2469,6 +3217,9 @@
     let platforms = [];
     let historyItems = [];
     let laterItems = [];
+    let creatorSources = [];
+    let creatorDueFilterActive = false;
+    let triageSessionState = createEmptyTriageSessionState();
     let backlinkIndex = new Map();
     const contentFetchQueue = new Set();
     const contentRefreshQueue = new Set();
@@ -2529,6 +3280,8 @@
       platforms = normalizePlatforms(await load(STORE_NAMES.platforms, DEFAULT_PLATFORMS));
       historyItems = normalizeHistoryItems(await load(STORE_NAMES.history, []));
       laterItems = normalizeLaterItems(await load(STORE_NAMES.later, []));
+      creatorSources = normalizeCreatorSources(loadCreatorSourcesFromLocalStorage());
+      saveCreatorSourcesToLocalStorage();
       await persistCoreData();
       await rebuildSearchIndex();
       rebuildBacklinkIndex();
@@ -2726,6 +3479,9 @@
       if (elements.aiAnswerModal) elements.aiAnswerModal.addEventListener("click", (event) => {
         if (event.target === elements.aiAnswerModal) closeAiAnswerModal();
       });
+      if (elements.creatorSourceModal) elements.creatorSourceModal.addEventListener("click", (event) => {
+        if (event.target === elements.creatorSourceModal) closeCreatorSourceModal();
+      });
       if (elements.aiAnswerHistory) elements.aiAnswerHistory.addEventListener("change", handleAiAnswerHistoryChange);
       if (elements.aiAnswerSource) elements.aiAnswerSource.addEventListener("change", () => refreshAiAnswerSuggestions(false));
       if (elements.aiAnswerQuestion) elements.aiAnswerQuestion.addEventListener("input", () => refreshAiAnswerSuggestions(false));
@@ -2772,6 +3528,10 @@
       [elements.knowledgeSourceFilter, elements.knowledgeStatusFilter, elements.knowledgeTextFilter, elements.knowledgeSort]
         .filter(Boolean)
         .forEach((control) => control.addEventListener("input", renderKnowledge));
+
+      [elements.creatorPlatformFilter, elements.creatorCategoryFilter, elements.creatorStatusFilter, elements.creatorTextFilter]
+        .filter(Boolean)
+        .forEach((control) => control.addEventListener("input", renderCreatorSources));
 
       if (elements.viewPendingReviewBtn) elements.viewPendingReviewBtn.addEventListener("click", viewPendingReviewItems);
       if (elements.randomReviewBtn) elements.randomReviewBtn.addEventListener("click", randomReviewItem);
@@ -2868,10 +3628,587 @@
           closeAddPlatformModal();
           closeAiAnswerModal();
           closeSnapshotModal();
+          closeCreatorSourceModal();
           closeItemActionSheet();
+          closeLaterTriageModal();
         }
       });
     }
+
+
+    function normalizeCreatorSourcePlatform(platform) {
+      const value = String(platform || "").trim();
+      if (["B 站", "哔哩哔哩", "bilibili", "Bilibili"].includes(value)) return "B站";
+      if (["微信", "公众号", "微信/公众号"].includes(value)) return "微信公众号";
+      if (CREATOR_SOURCE_PLATFORMS.includes(value)) return value;
+      return value || "其他";
+    }
+
+    function normalizeCreatorSourceType(type) {
+      const value = String(type || "").trim();
+      return CREATOR_SOURCE_TYPES.includes(value) ? value : "creator";
+    }
+
+    function normalizeCreatorSourceStatus(status) {
+      const value = String(status || "").trim();
+      return CREATOR_SOURCE_STATUSES.includes(value) ? value : "following";
+    }
+
+    function normalizeCreatorSourceFrequency(value) {
+      const frequency = String(value || "").trim();
+      return CREATOR_SOURCE_CHECK_FREQUENCIES.includes(frequency) ? frequency : "weekly";
+    }
+
+    function normalizeCreatorSource(source = {}) {
+      const now = new Date().toISOString();
+      return {
+        id: source.id || createId(),
+        name: String(source.name || "").trim(),
+        platform: normalizeCreatorSourcePlatform(source.platform),
+        type: normalizeCreatorSourceType(source.type),
+        profileUrl: String(source.profileUrl || source.url || "").trim(),
+        mobileUrl: String(source.mobileUrl || "").trim(),
+        appUrl: String(source.appUrl || "").trim(),
+        category: String(source.category || "").trim().slice(0, 60),
+        description: String(source.description || "").trim().slice(0, 1200),
+        reason: String(source.reason || source.saveContext || "").trim().slice(0, 1200),
+        tags: normalizeTags(source.tags || []),
+        checkFrequency: normalizeCreatorSourceFrequency(source.checkFrequency),
+        lastCheckedAt: source.lastCheckedAt || "",
+        lastOpenedAt: source.lastOpenedAt || "",
+        status: normalizeCreatorSourceStatus(source.status),
+        isPinned: Boolean(source.isPinned),
+        rssUrl: String(source.rssUrl || "").trim(),
+        rsshubUrl: String(source.rsshubUrl || source.rssHubUrl || "").trim(),
+        searchUrlTemplate: String(source.searchUrlTemplate || "").trim(),
+        createdAt: source.createdAt || now,
+        updatedAt: source.updatedAt || source.createdAt || now
+      };
+    }
+
+    function normalizeCreatorSources(rawSources) {
+      const raw = Array.isArray(rawSources) ? rawSources : [];
+      const seen = new Map();
+      raw.map(normalizeCreatorSource)
+        .filter((source) => source.name || source.profileUrl)
+        .forEach((source) => {
+          if (!source.name) source.name = source.profileUrl || "未命名信息源";
+          seen.set(source.id, source);
+        });
+      return Array.from(seen.values()).sort((a, b) => {
+        if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+        return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0);
+      });
+    }
+
+    function loadCreatorSourcesFromLocalStorage() {
+      try {
+        return loadFromLocalStorage(STORAGE_KEYS.creatorSources, []);
+      } catch (error) {
+        console.warn("读取信息源失败：", error);
+        return [];
+      }
+    }
+
+    function saveCreatorSourcesToLocalStorage() {
+      try {
+        saveToLocalStorage(STORAGE_KEYS.creatorSources, creatorSources);
+      } catch (error) {
+        console.warn("保存信息源失败：", error);
+        toast("信息源保存失败，请检查浏览器本地存储权限。 ");
+      }
+    }
+
+    function getCreatorSourceById(id) {
+      return creatorSources.find((source) => source.id === id) || null;
+    }
+
+    function isMobileViewport() {
+      return window.matchMedia?.("(max-width: 760px)")?.matches || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
+    }
+
+    function getCreatorOpenUrl(source = {}) {
+      if (isMobileViewport()) return source.appUrl || source.mobileUrl || source.profileUrl || "";
+      return source.profileUrl || source.mobileUrl || source.appUrl || "";
+    }
+
+    function parseTimeValue(value) {
+      const time = new Date(value || 0).getTime();
+      return Number.isNaN(time) ? 0 : time;
+    }
+
+    function isCreatorSourceDue(source = {}, now = Date.now()) {
+      if (source.status === "paused") return false;
+      const frequency = normalizeCreatorSourceFrequency(source.checkFrequency);
+      if (frequency === "occasional") return false;
+      const last = parseTimeValue(source.lastCheckedAt);
+      if (!last) return true;
+      const days = { daily: 1, weekly: 7, monthly: 30 }[frequency] || 7;
+      return now - last >= days * 24 * 60 * 60 * 1000;
+    }
+
+    function getDueCreatorSources() {
+      const now = Date.now();
+      return creatorSources.filter((source) => isCreatorSourceDue(source, now));
+    }
+
+    function getRecentCreatorSources(limit = 3) {
+      return creatorSources
+        .filter((source) => source.lastOpenedAt)
+        .sort((a, b) => parseTimeValue(b.lastOpenedAt) - parseTimeValue(a.lastOpenedAt))
+        .slice(0, limit);
+    }
+
+    function getPinnedCreatorSources(limit = 5) {
+      return creatorSources.filter((source) => source.isPinned).slice(0, limit);
+    }
+
+    function getCreatorSourceCategories() {
+      return Array.from(new Set(creatorSources.map((source) => source.category).filter(Boolean))).sort((a, b) => a.localeCompare(b, "zh-CN"));
+    }
+
+    function fillSelectOptions(select, options, selectedValue) {
+      if (!select) return;
+      const previous = selectedValue ?? select.value;
+      select.innerHTML = options.map((option) => `<option value="${escapeAttribute(option.value)}">${escapeHtml(option.label)}</option>`).join("");
+      if (options.some((option) => option.value === previous)) select.value = previous;
+    }
+
+    function renderCreatorSourceFilters() {
+      fillSelectOptions(elements.creatorPlatformFilter, [
+        { value: "全部平台", label: "全部平台" },
+        ...CREATOR_SOURCE_PLATFORMS.map((platform) => ({ value: platform, label: platform }))
+      ]);
+
+      fillSelectOptions(elements.creatorCategoryFilter, [
+        { value: "全部分类", label: "全部分类" },
+        ...getCreatorSourceCategories().map((category) => ({ value: category, label: category }))
+      ]);
+
+      fillSelectOptions(elements.creatorStatusFilter, [
+        { value: "全部状态", label: "全部状态" },
+        ...CREATOR_SOURCE_STATUSES.map((status) => ({ value: status, label: CREATOR_SOURCE_STATUS_LABELS[status] || status }))
+      ]);
+
+      if (elements.creatorDueChip) {
+        elements.creatorDueChip.classList.toggle("active", creatorDueFilterActive);
+        elements.creatorDueChip.setAttribute("aria-pressed", creatorDueFilterActive ? "true" : "false");
+      }
+    }
+
+    function renderCreatorSourceStats() {
+      const due = getDueCreatorSources();
+      const recent = getRecentCreatorSources();
+      const pinned = getPinnedCreatorSources();
+      if (elements.creatorSourceTotalCount) elements.creatorSourceTotalCount.textContent = creatorSources.length;
+      if (elements.creatorSourceDueCount) elements.creatorSourceDueCount.textContent = due.length;
+      if (elements.creatorSourceRecentCount) elements.creatorSourceRecentCount.textContent = recent.length;
+      if (elements.creatorSourcePinnedCount) elements.creatorSourcePinnedCount.textContent = pinned.length;
+      if (elements.creatorSourceFeatureStrip) {
+        const parts = [];
+        parts.push(`<span class="tag">建议查看 ${due.length} 个</span>`);
+        if (recent.length) parts.push(`<span class="tag">最近查看：${escapeHtml(recent.map((item) => item.name).join(" / "))}</span>`);
+        if (pinned.length) parts.push(`<span class="tag">置顶：${escapeHtml(pinned.map((item) => item.name).join(" / "))}</span>`);
+        elements.creatorSourceFeatureStrip.innerHTML = parts.join("");
+      }
+    }
+
+    function renderCreatorSourceTemplates() {
+      return `
+        <div class="card item">
+          <div class="item-head">
+            <div>
+              <h3 class="item-title">还没有信息源</h3>
+              <p class="hint">可以先按类型添加一个空模板；Info Dock 不会自动抓取这些平台内容，只提醒你何时去看。</p>
+            </div>
+          </div>
+          <div class="creator-template-grid">
+            ${CREATOR_SOURCE_TEMPLATES.map((template, index) => `
+              <div class="creator-template-card">
+                <strong>${escapeHtml(template.label)}</strong>
+                <p>${escapeHtml(template.description)}</p>
+                <button class="ghost-btn" type="button" data-action="use-creator-template" data-template-index="${index}">按这个模板添加</button>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function creatorSourceMatchesSearch(source, textFilter) {
+      if (!textFilter) return true;
+      const haystack = normalize([
+        source.name,
+        source.platform,
+        source.type,
+        source.category,
+        source.description,
+        source.reason,
+        source.profileUrl,
+        source.rssUrl,
+        source.rsshubUrl,
+        normalizeTags(source.tags).join(" ")
+      ].join(" "));
+      return haystack.includes(textFilter);
+    }
+
+    function getFilteredCreatorSources() {
+      const platformFilter = elements.creatorPlatformFilter?.value || "全部平台";
+      const categoryFilter = elements.creatorCategoryFilter?.value || "全部分类";
+      const statusFilter = elements.creatorStatusFilter?.value || "全部状态";
+      const textFilter = normalize(elements.creatorTextFilter?.value || "");
+      const now = Date.now();
+      return creatorSources
+        .filter((source) => platformFilter === "全部平台" || source.platform === platformFilter)
+        .filter((source) => categoryFilter === "全部分类" || source.category === categoryFilter)
+        .filter((source) => statusFilter === "全部状态" || source.status === statusFilter)
+        .filter((source) => !creatorDueFilterActive || isCreatorSourceDue(source, now))
+        .filter((source) => creatorSourceMatchesSearch(source, textFilter))
+        .sort((a, b) => {
+          const dueDiff = Number(isCreatorSourceDue(b, now)) - Number(isCreatorSourceDue(a, now));
+          if (creatorDueFilterActive && dueDiff) return dueDiff;
+          if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+          const openedDiff = parseTimeValue(b.lastOpenedAt || b.lastCheckedAt) - parseTimeValue(a.lastOpenedAt || a.lastCheckedAt);
+          if (openedDiff) return openedDiff;
+          return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0);
+        });
+    }
+
+    function renderCreatorSourceCard(source) {
+      const due = isCreatorSourceDue(source);
+      const tagsHtml = renderLimitedTagChips(source.tags, 6);
+      const statusLabel = CREATOR_SOURCE_STATUS_LABELS[source.status] || source.status || "关注中";
+      const typeLabel = CREATOR_SOURCE_TYPE_LABELS[source.type] || source.type || "创作者";
+      const frequencyLabel = CREATOR_SOURCE_FREQUENCY_LABELS[source.checkFrequency] || source.checkFrequency || "每周";
+      return `
+        <article class="card item creator-card" data-source-id="${escapeAttribute(source.id)}">
+          <div class="item-head item-menu-head">
+            <div>
+              <h3 class="item-title">${source.isPinned ? "📌 " : ""}${escapeHtml(source.name || "未命名信息源")}</h3>
+              <div class="meta">
+                <span class="tag">${escapeHtml(source.platform || "其他")}</span>
+                <span class="tag">${escapeHtml(typeLabel)}</span>
+                ${source.category ? `<span class="tag">${escapeHtml(source.category)}</span>` : ""}
+                <span class="tag ${source.status === "paused" ? "status-warn" : "status-ok"}">${escapeHtml(statusLabel)}</span>
+                <span class="tag">${escapeHtml(frequencyLabel)}</span>
+                ${due ? `<span class="tag status-warn">建议查看</span>` : ""}
+                ${tagsHtml}
+              </div>
+            </div>
+          </div>
+          <div class="creator-card-body">
+            ${source.description ? `<p>${escapeHtml(limitText(source.description, 180))}</p>` : `<p class="hint">还没有简介。</p>`}
+            ${source.reason ? `<p class="creator-source-line"><strong>为什么关注：</strong>${escapeHtml(limitText(source.reason, 220))}</p>` : ""}
+            <p class="creator-source-line"><strong>主页：</strong>${escapeHtml(limitText(source.profileUrl || "未填写", 120))}</p>
+            <p class="creator-source-line"><strong>最近查看：</strong>${formatDateTime(source.lastOpenedAt)}　<strong>最近检查：</strong>${formatDateTime(source.lastCheckedAt)}</p>
+            ${(source.rssUrl || source.rsshubUrl) ? `<p class="creator-rss-hint">RSS 预览后续支持；本阶段只保存和复制地址。</p>` : ""}
+          </div>
+          <div class="creator-actions">
+            <button class="primary-btn" type="button" data-action="open-creator-home" data-id="${escapeAttribute(source.id)}">打开主页</button>
+            <button class="primary-btn" type="button" data-action="mark-creator-checked" data-id="${escapeAttribute(source.id)}">标记已查看</button>
+            <button class="ghost-btn" type="button" data-action="save-creator-to-inbox" data-id="${escapeAttribute(source.id)}">保存到收件箱</button>
+            <button class="ghost-btn" type="button" data-action="creator-site-search" data-id="${escapeAttribute(source.id)}">站内搜索</button>
+            <button class="ghost-btn secondary" type="button" data-action="copy-creator-profile" data-id="${escapeAttribute(source.id)}">复制主页链接</button>
+            <button class="ghost-btn secondary" type="button" data-action="copy-creator-rss" data-id="${escapeAttribute(source.id)}" ${source.rssUrl ? "" : "disabled"}>复制 RSS</button>
+            <button class="ghost-btn secondary" type="button" data-action="copy-creator-rsshub" data-id="${escapeAttribute(source.id)}" ${source.rsshubUrl ? "" : "disabled"}>复制 RSSHub</button>
+            <button class="ghost-btn" type="button" data-action="edit-creator-source" data-id="${escapeAttribute(source.id)}">编辑</button>
+            <button class="ghost-btn" type="button" data-action="toggle-creator-pause" data-id="${escapeAttribute(source.id)}">${source.status === "paused" ? "恢复关注" : "暂停关注"}</button>
+            <button class="danger-btn" type="button" data-action="delete-creator-source" data-id="${escapeAttribute(source.id)}">删除</button>
+          </div>
+          <details class="compact-details">
+            <summary>粘贴内容链接并保存</summary>
+            <div class="creator-content-save">
+              <input class="field" id="creatorContentUrl-${escapeAttribute(source.id)}" type="url" placeholder="粘贴这个创作者的某条内容链接" />
+              <button class="primary-btn" type="button" data-action="save-creator-content-link" data-id="${escapeAttribute(source.id)}">保存内容链接</button>
+            </div>
+          </details>
+        </article>
+      `;
+    }
+
+    function renderCreatorSources() {
+      if (!elements.creatorSourceList) return;
+      renderCreatorSourceFilters();
+      renderCreatorSourceStats();
+      if (!creatorSources.length) {
+        elements.creatorSourceList.innerHTML = renderCreatorSourceTemplates();
+        return;
+      }
+      const filtered = getFilteredCreatorSources();
+      if (!filtered.length) {
+        elements.creatorSourceList.innerHTML = renderEmptyState({
+          icon: "📡",
+          title: "没有匹配的信息源",
+          description: "可以调整平台、分类、状态、建议查看或关键词筛选。",
+          action: "open-add-creator-source",
+          button: "添加信息源"
+        });
+        return;
+      }
+      elements.creatorSourceList.innerHTML = filtered.map(renderCreatorSourceCard).join("");
+    }
+
+    function isValidHttpUrl(url) {
+      const value = String(url || "").trim();
+      if (!value) return false;
+      try {
+        const parsed = new URL(value);
+        return /^https?:$/i.test(parsed.protocol);
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function isValidOptionalUrlLike(url) {
+      const value = String(url || "").trim();
+      if (!value) return true;
+      try {
+        const parsed = new URL(value);
+        return Boolean(parsed.protocol && parsed.href);
+      } catch (error) {
+        return /^[a-z][a-z0-9+.-]*:\/\//i.test(value) || /^[a-z][a-z0-9+.-]*:/i.test(value);
+      }
+    }
+
+    function setCreatorModalValues(source = {}) {
+      if (elements.creatorSourceEditingId) elements.creatorSourceEditingId.value = source.id || "";
+      if (elements.creatorSourceName) elements.creatorSourceName.value = source.name || "";
+      if (elements.creatorSourcePlatform) elements.creatorSourcePlatform.value = normalizeCreatorSourcePlatform(source.platform || "B站");
+      if (elements.creatorSourceProfileUrl) elements.creatorSourceProfileUrl.value = source.profileUrl || "";
+      if (elements.creatorSourceMobileUrl) elements.creatorSourceMobileUrl.value = source.mobileUrl || "";
+      if (elements.creatorSourceAppUrl) elements.creatorSourceAppUrl.value = source.appUrl || "";
+      if (elements.creatorSourceType) elements.creatorSourceType.value = normalizeCreatorSourceType(source.type || "creator");
+      if (elements.creatorSourceCategory) elements.creatorSourceCategory.value = source.category || "";
+      if (elements.creatorSourceDescription) elements.creatorSourceDescription.value = source.description || "";
+      if (elements.creatorSourceReason) elements.creatorSourceReason.value = source.reason || "";
+      if (elements.creatorSourceTags) elements.creatorSourceTags.value = formatTagsForEdit(source.tags || []);
+      if (elements.creatorSourceCheckFrequency) elements.creatorSourceCheckFrequency.value = normalizeCreatorSourceFrequency(source.checkFrequency || "weekly");
+      if (elements.creatorSourceStatus) elements.creatorSourceStatus.value = normalizeCreatorSourceStatus(source.status || "following");
+      if (elements.creatorSourceRssUrl) elements.creatorSourceRssUrl.value = source.rssUrl || "";
+      if (elements.creatorSourceRsshubUrl) elements.creatorSourceRsshubUrl.value = source.rsshubUrl || "";
+      if (elements.creatorSourceSearchTemplate) elements.creatorSourceSearchTemplate.value = source.searchUrlTemplate || "";
+      if (elements.creatorSourcePinned) elements.creatorSourcePinned.checked = Boolean(source.isPinned);
+    }
+
+    function openCreatorSourceModal(source = null) {
+      if (!elements.creatorSourceModal) return;
+      const editing = Boolean(source?.id);
+      if (elements.creatorSourceModalTitle) elements.creatorSourceModalTitle.textContent = editing ? "编辑信息源" : "添加信息源";
+      setCreatorModalValues(source || { platform: "B站", type: "creator", status: "following", checkFrequency: "weekly" });
+      elements.creatorSourceModal.classList.add("active");
+      elements.creatorSourceModal.setAttribute("aria-hidden", "false");
+      setTimeout(() => elements.creatorSourceName?.focus(), 60);
+    }
+
+    function closeCreatorSourceModal() {
+      if (!elements.creatorSourceModal) return;
+      elements.creatorSourceModal.classList.remove("active");
+      elements.creatorSourceModal.setAttribute("aria-hidden", "true");
+    }
+
+    function getCreatorSourceFormData() {
+      const now = new Date().toISOString();
+      const id = elements.creatorSourceEditingId?.value || "";
+      const previous = id ? getCreatorSourceById(id) : null;
+      return normalizeCreatorSource({
+        ...(previous || {}),
+        id: id || createId(),
+        name: elements.creatorSourceName?.value || "",
+        platform: elements.creatorSourcePlatform?.value || "其他",
+        type: elements.creatorSourceType?.value || "creator",
+        profileUrl: elements.creatorSourceProfileUrl?.value || "",
+        mobileUrl: elements.creatorSourceMobileUrl?.value || "",
+        appUrl: elements.creatorSourceAppUrl?.value || "",
+        category: elements.creatorSourceCategory?.value || "",
+        description: elements.creatorSourceDescription?.value || "",
+        reason: elements.creatorSourceReason?.value || "",
+        tags: normalizeTags(elements.creatorSourceTags?.value || []),
+        checkFrequency: elements.creatorSourceCheckFrequency?.value || "weekly",
+        status: elements.creatorSourceStatus?.value || "following",
+        isPinned: Boolean(elements.creatorSourcePinned?.checked),
+        rssUrl: elements.creatorSourceRssUrl?.value || "",
+        rsshubUrl: elements.creatorSourceRsshubUrl?.value || "",
+        searchUrlTemplate: elements.creatorSourceSearchTemplate?.value || "",
+        createdAt: previous?.createdAt || now,
+        updatedAt: now
+      });
+    }
+
+    async function saveCreatorSourceFromModal() {
+      const source = getCreatorSourceFormData();
+      if (!source.name) {
+        toast("请填写信息源名称。 ");
+        elements.creatorSourceName?.focus();
+        return;
+      }
+      if (!source.profileUrl || !isValidHttpUrl(source.profileUrl)) {
+        toast("请填写有效的主页链接，需以 http:// 或 https:// 开头。 ");
+        elements.creatorSourceProfileUrl?.focus();
+        return;
+      }
+      const optionalUrlError = [source.mobileUrl, source.rssUrl, source.rsshubUrl, source.searchUrlTemplate.replace("{query}", "test")]
+        .some((url) => !isValidOptionalUrlLike(url));
+      if (optionalUrlError) {
+        toast("请检查移动端、RSS、RSSHub 或搜索模板链接格式。 ");
+        return;
+      }
+      const index = creatorSources.findIndex((item) => item.id === source.id);
+      if (index >= 0) creatorSources[index] = source;
+      else creatorSources.unshift(source);
+      creatorSources = normalizeCreatorSources(creatorSources);
+      saveCreatorSourcesToLocalStorage();
+      closeCreatorSourceModal();
+      renderCreatorSources();
+      await renderDataManagementPanels();
+      toast(index >= 0 ? "信息源已更新。" : "信息源已添加。");
+    }
+
+    function openCreatorTemplate(index) {
+      const template = CREATOR_SOURCE_TEMPLATES[Number(index)] || CREATOR_SOURCE_TEMPLATES[0];
+      openCreatorSourceModal({
+        name: "",
+        platform: template.platform,
+        type: template.type,
+        category: template.category,
+        description: template.description,
+        checkFrequency: template.checkFrequency,
+        status: "following",
+        isPinned: false
+      });
+    }
+
+    async function updateCreatorSource(id, patch, shouldRender = true) {
+      const now = new Date().toISOString();
+      creatorSources = normalizeCreatorSources(creatorSources.map((source) => source.id === id ? { ...source, ...patch, updatedAt: now } : source));
+      saveCreatorSourcesToLocalStorage();
+      if (shouldRender) renderCreatorSources();
+      await renderDataManagementPanels();
+    }
+
+    async function openCreatorHome(id) {
+      const source = getCreatorSourceById(id);
+      if (!source) return;
+      const url = getCreatorOpenUrl(source);
+      if (!url) {
+        toast("这个信息源还没有主页链接。 ");
+        return;
+      }
+      window.open(url, "_blank", "noopener,noreferrer");
+      await updateCreatorSource(id, { lastOpenedAt: new Date().toISOString() });
+    }
+
+    async function markCreatorChecked(id) {
+      if (!getCreatorSourceById(id)) return;
+      await updateCreatorSource(id, { lastCheckedAt: new Date().toISOString() });
+      toast("已标记为刚刚查看。 ");
+    }
+
+    async function saveCreatorToInbox(id) {
+      const source = getCreatorSourceById(id);
+      if (!source) return;
+      const result = await addLaterFromExternal(
+        source.name,
+        source.profileUrl,
+        source.platform,
+        source.reason || `长期关注的信息源：${source.name}`,
+        {
+          saveContext: source.reason || `来自信息源关注台：${source.name}`,
+          autoSummary: source.description,
+          tags: normalizeTags(source.tags || [])
+        }
+      );
+      renderLater();
+      toast(result.added ? "已把信息源保存到收件箱。" : "收件箱中已有这个主页链接。 ");
+    }
+
+    function buildCreatorSearchUrl(source, query) {
+      const cleanQuery = String(query || "").trim();
+      if (!cleanQuery) return "";
+      const encoded = encodeURIComponent(cleanQuery);
+      if (source.searchUrlTemplate) {
+        return source.searchUrlTemplate.includes("{query}")
+          ? source.searchUrlTemplate.replace(/\{query\}/g, encoded)
+          : `${source.searchUrlTemplate}${source.searchUrlTemplate.includes("?") ? "&" : "?"}q=${encoded}`;
+      }
+      const profileHost = (() => {
+        try { return new URL(source.profileUrl).hostname.replace(/^www\./i, ""); } catch (error) { return ""; }
+      })();
+      if (source.platform === "B站") return `https://search.bilibili.com/all?keyword=${encoded}`;
+      if (source.platform === "小红书") return `https://www.xiaohongshu.com/search_result?keyword=${encoded}`;
+      if (source.platform === "知乎") return `https://www.zhihu.com/search?type=content&q=${encoded}`;
+      if (source.platform === "微信公众号") return `https://weixin.sogou.com/weixin?type=2&query=${encoded}`;
+      if ((source.platform === "网站" || source.type === "website") && profileHost) return `https://www.bing.com/search?q=${encodeURIComponent(`site:${profileHost} ${cleanQuery}`)}`;
+      return `https://www.bing.com/search?q=${encoded}`;
+    }
+
+    function openCreatorSiteSearch(id) {
+      const source = getCreatorSourceById(id);
+      if (!source) return;
+      const query = window.prompt(`在 ${source.name} 里搜索什么？`, "");
+      if (query === null) return;
+      const url = buildCreatorSearchUrl(source, query);
+      if (!url) {
+        toast("请输入要搜索的关键词。 ");
+        return;
+      }
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    async function copyCreatorField(id, field, label) {
+      const source = getCreatorSourceById(id);
+      const value = source?.[field] || "";
+      if (!value) {
+        toast(`${label} 为空。`);
+        return;
+      }
+      await copyText(value);
+      toast(`已复制${label}。`);
+    }
+
+    async function toggleCreatorPause(id) {
+      const source = getCreatorSourceById(id);
+      if (!source) return;
+      const nextStatus = source.status === "paused" ? "following" : "paused";
+      await updateCreatorSource(id, { status: nextStatus });
+      toast(nextStatus === "paused" ? "已暂停关注。" : "已恢复关注。 ");
+    }
+
+    async function deleteCreatorSource(id) {
+      const source = getCreatorSourceById(id);
+      if (!source) return;
+      if (!window.confirm(`删除信息源「${source.name}」？已保存到收件箱的内容不会受影响。`)) return;
+      creatorSources = creatorSources.filter((item) => item.id !== id);
+      saveCreatorSourcesToLocalStorage();
+      renderCreatorSources();
+      await renderDataManagementPanels();
+      toast("信息源已删除。 ");
+    }
+
+    async function saveCreatorContentLink(id) {
+      const source = getCreatorSourceById(id);
+      if (!source) return;
+      const input = document.getElementById(`creatorContentUrl-${id}`);
+      const url = String(input?.value || "").trim();
+      if (!url || !isValidHttpUrl(url)) {
+        toast("请粘贴有效的内容链接。 ");
+        input?.focus();
+        return;
+      }
+      const result = await addLaterFromExternal(
+        url,
+        url,
+        source.platform,
+        `来自信息源：${source.name}`,
+        {
+          saveContext: `来自信息源「${source.name}」：${source.reason || "用户手动粘贴内容链接"}`,
+          tags: normalizeTags(source.tags || [])
+        }
+      );
+      if (input) input.value = "";
+      renderLater();
+      toast(result.added ? "已保存内容链接到收件箱。" : "收件箱中已有这条链接。 ");
+    }
+
 
     function renderAll() {
       renderPlatformCards();
@@ -2880,6 +4217,7 @@
       renderHistory();
       renderLater();
       renderKnowledge();
+      renderCreatorSources();
       renderSearchAutomationSettings();
       renderReviewSettings();
       renderProxySettings();
@@ -3139,6 +4477,8 @@
         reason: "保存的 AI 回答。",
         autoSummary: "",
         bodyText: "",
+        captureText: question,
+        saveContext: `手动保存 AI 回答${question ? `：${question}` : ""}`,
         metadataFetched: false,
         lastSummaryFetchAt: "",
         lastSummaryFetchStatus: "",
@@ -3148,7 +4488,7 @@
         lastMetadataFetchError: "",
         lastSuccessfulFetchAt: "",
         tags,
-        estimate: estimateLaterItemTime({ title, source }),
+        estimate: estimateLaterItemTime({ title, source, bodyText: answer }),
         status: "收件箱",
         conclusion,
         createdAt: new Date().toISOString(),
@@ -3168,6 +4508,7 @@
       activateTab("laterSection");
       renderLater();
       renderKnowledge();
+      renderCreatorSources();
       renderGlobalSearchResults();
       void renderDataManagementPanels();
       focusRenderedItem(normalizedItem.id, "later");
@@ -3185,6 +4526,7 @@
       if (tabId === "historySection") renderHistory();
       if (tabId === "laterSection") renderLater();
       if (tabId === "knowledgeSection") renderKnowledge();
+      if (tabId === "creatorSourcesSection") renderCreatorSources();
       if (tabId === "settingsSection") {
         renderSearchAutomationSettings();
         renderReviewSettings();
@@ -3603,12 +4945,14 @@
           platforms: platforms.length,
           history: historyItems.length,
           later: laterItems.length,
+          sources: creatorSources.length,
           contents: contents.length
         },
         data: {
           platforms: clone(platforms),
           history: clone(historyItems),
           later: clone(laterItems),
+          creatorSources: clone(creatorSources),
           contents: clone(contents)
         }
       };
@@ -3624,7 +4968,7 @@
         downloadTextFile(filename, text, "application/json");
         localStorage.setItem(LAST_EXPORT_KEY, payload.exportedAt);
         if (!options.silent) {
-          setBackupStatus(`已导出 ${payload.counts.history} 条搜索、${payload.counts.later} 条收件箱、${payload.counts.contents} 个快照。`, true);
+          setBackupStatus(`已导出 ${payload.counts.history} 条搜索、${payload.counts.later} 条收件箱、${payload.counts.sources || 0} 个信息源、${payload.counts.contents} 个快照。`, true);
           toast("已导出完整 JSON 备份。");
           await renderDataManagementPanels();
         }
@@ -3674,7 +5018,7 @@
       const lastExport = loadLastExportAt();
       const backupAgeHint = lastExport ? `上次导出：${formatDateTime(lastExport)}` : "上次导出：从未，建议先导出一份备份";
       elements.dataBackupSummary.innerHTML = `
-        <div>记录：${historyItems.length} 条搜索历史，${laterItems.length} 条收件箱，${platforms.length} 个搜索平台。</div>
+        <div>记录：${historyItems.length} 条搜索历史，${laterItems.length} 条收件箱，${platforms.length} 个搜索平台，${creatorSources.length} 个信息源。</div>
         <div>快照：${contents.length} 个，估算 ${formatBytes(byteSize(contents))}。</div>
         <div>${backupAgeHint}。</div>
         <div>持久化存储：${persisted === true ? "已开启" : persisted === false ? "未开启或浏览器未授予" : "当前浏览器不支持检测"}。</div>
@@ -3686,7 +5030,7 @@
       const contents = await loadAllContentSnapshots();
       const validIds = getValidContentIds();
       const contentsBytes = byteSize(contents);
-      const coreBytes = byteSize({ platforms, history: historyItems, later: laterItems });
+      const coreBytes = byteSize({ platforms, history: historyItems, later: laterItems, creatorSources });
       const orphanCount = contents.filter((item) => !validIds.has(item.id)).length;
       const bodyCount = contents.filter((item) => SNAPSHOT_BODY_TYPES.has(item.type)).length;
       const oldest = contents
@@ -3763,7 +5107,7 @@
         const text = await readFileAsText(file);
         const parsed = parseBackupFile(JSON.parse(text));
         const modeLabel = pendingImportMode === "replace" ? "覆盖当前数据" : "合并到当前数据";
-        const summary = `将${modeLabel}：${parsed.platforms.length} 个平台、${parsed.history.length} 条搜索、${parsed.later.length} 条收件箱、${parsed.contents.length} 个快照。导入前会先下载当前数据备份。是否继续？`;
+        const summary = `将${modeLabel}：${parsed.platforms.length} 个平台、${parsed.history.length} 条搜索、${parsed.later.length} 条收件箱、${parsed.creatorSources.length} 个信息源、${parsed.contents.length} 个快照。导入前会先下载当前数据备份。是否继续？`;
         if (!window.confirm(summary)) return;
 
         await exportDataBackup({ prefix: "info-dock-before-import", silent: true });
@@ -3794,6 +5138,7 @@
       const historyData = Array.isArray(source?.history) ? source.history : null;
       const laterData = Array.isArray(source?.later) ? source.later : null;
       const contentsData = Array.isArray(source?.contents) ? source.contents : [];
+      const creatorSourcesData = Array.isArray(source?.creatorSources) ? source.creatorSources : (Array.isArray(source?.sources) ? source.sources : []);
 
       if (!platformsData || !historyData || !laterData) {
         throw new Error("备份格式不完整，需要包含 platforms/history/later。 ");
@@ -3803,6 +5148,7 @@
         platforms: normalizePlatforms(platformsData),
         history: normalizeHistoryItems(historyData),
         later: normalizeLaterItems(laterData),
+        creatorSources: normalizeCreatorSources(creatorSourcesData),
         contents: sanitizeContentSnapshots(contentsData)
       };
     }
@@ -3812,13 +5158,17 @@
         platforms = imported.platforms;
         historyItems = imported.history;
         laterItems = imported.later;
+        creatorSources = imported.creatorSources || [];
         await persistCoreData();
+        saveCreatorSourcesToLocalStorage();
         await saveAllContentSnapshots(imported.contents);
       } else {
         platforms = normalizePlatforms(mergeById(platforms, imported.platforms));
         historyItems = normalizeHistoryItems(mergeById(historyItems, imported.history));
         laterItems = normalizeLaterItems(mergeById(laterItems, imported.later));
+        creatorSources = normalizeCreatorSources(mergeById(creatorSources, imported.creatorSources || []));
         await persistCoreData();
+        saveCreatorSourcesToLocalStorage();
         const currentContents = await loadAllContentSnapshots();
         await saveAllContentSnapshots(mergeSnapshots(currentContents, imported.contents));
       }
@@ -4162,14 +5512,17 @@
       const raw = Array.isArray(rawItems) ? rawItems : [];
       return raw.map((item) => {
         const normalizedLaterState = normalizeLaterStatusAndTags(item.status, item.tags);
+        const normalizedUrl = item.url || "";
         return {
           id: item.id || createId(),
-          title: item.title || item.url || "未命名内容",
-          url: item.url || "",
+          title: item.title || normalizedUrl || "未命名内容",
+          url: normalizedUrl,
           source: normalizeLaterSource(item.source || detectSourceFromUrl(item.url || "")),
           reason: item.reason || "",
           autoSummary: item.autoSummary || "",
           bodyText: item.bodyText || "",
+          captureText: String(item.captureText || "").slice(0, 2000),
+          saveContext: String(item.saveContext || "").slice(0, 2000),
           metadataFetched: Boolean(item.metadataFetched),
           lastSummaryFetchAt: item.lastSummaryFetchAt || "",
           lastSummaryFetchStatus: item.lastSummaryFetchStatus || "",
@@ -4183,6 +5536,10 @@
           status: normalizedLaterState.status,
           conclusion: item.conclusion || "",
           createdAt: item.createdAt || new Date().toISOString(),
+          postponeUntil: item.postponeUntil || "",
+          lastTriagedAt: item.lastTriagedAt || "",
+          lastOpenedAt: item.lastOpenedAt || "",
+          titleEditedAt: item.titleEditedAt || "",
           relatedHistoryId: item.relatedHistoryId || "",
           aiOriginalQuestion: item.aiOriginalQuestion || "",
           aiOriginalAnswer: item.aiOriginalAnswer || "",
@@ -4259,6 +5616,8 @@
         source: item.source,
         reason: [
           item.reason,
+          item.saveContext,
+          item.captureText,
           item.autoSummary || content.metaDescription || "",
           getRelatedHistorySearchText(item.relatedHistoryId),
           item.aiOriginalQuestion,
@@ -4271,6 +5630,8 @@
         tags: normalizeTags(item.tags || []).join(" "),
         bodyText: [
           item.bodyText,
+          item.captureText,
+          item.saveContext,
           content.bodyText,
           content.snapshotText,
           item.aiOriginalQuestion,
@@ -4512,6 +5873,47 @@
       const value = limitText(text, maxLength);
       if (!value) return "";
       return `<p class="compact-preview"><strong>${escapeHtml(label)}：</strong>${escapeHtml(value)}</p>`;
+    }
+
+    function getLaterMemoryAnchor(item) {
+      if (!item) return null;
+      const summary = normalizeStructuredSummary(item.structuredSummary);
+      const candidates = [
+        { label: "结论", text: item.conclusion },
+        { label: "摘要", text: item.autoSummary },
+        { label: "一句话", text: summary?.oneSentenceConclusion },
+        { label: "保存选文", text: item.captureText },
+        { label: "保存上下文", text: item.saveContext },
+        { label: "正文", text: item.bodyText }
+      ];
+      const picked = candidates.find((entry) => normalizePageText(entry.text));
+      return picked ? { label: picked.label, text: normalizePageText(picked.text) } : null;
+    }
+
+    function renderLaterMemoryAnchor(item) {
+      const anchor = getLaterMemoryAnchor(item);
+      if (!anchor) return "";
+      return renderCompactPreview(anchor.text, anchor.label, 150);
+    }
+
+    function getLaterDisplayTitle(item) {
+      const rawTitle = String(item?.title || "").trim();
+      const url = item?.url || "";
+      if (isWeakLaterTitle(rawTitle, url)) {
+        const host = getDisplayHostname(url);
+        if (host) return `未命名链接 · ${host}`;
+        return rawTitle || "未命名内容";
+      }
+      return rawTitle || "未命名内容";
+    }
+
+    function renderLaterTitleHtml(item) {
+      const displayTitle = getLaterDisplayTitle(item);
+      const weakClass = isWeakLaterTitle(item?.title, item?.url) ? " weak-link-title" : "";
+      if (item?.url) {
+        return `<a class="${weakClass.trim()}" href="${escapeAttribute(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(displayTitle)}</a>`;
+      }
+      return escapeHtml(displayTitle);
     }
 
     function renderSuggestedTagButtons(item, itemType) {
@@ -5076,7 +6478,7 @@
         if (mergedTags.length) patch.tags = mergedTags;
       }
 
-      if (pageTitle && (!latest.title || latest.title === latest.url)) {
+      if (pageTitle && !latest.titleEditedAt && isWeakLaterTitle(latest.title, latest.url) && !isWeakLaterTitle(pageTitle, latest.url)) {
         patch.title = pageTitle;
       }
 
@@ -6306,7 +7708,7 @@
 
     function queueMetadataEnrichmentForLaterItem(item, options = {}) {
       if (!item || !item.id || !item.url) return;
-      if (!options.force && (item.metadataFetched || normalizePageText(item.bodyText))) return;
+      if (!options.force && !isWeakLaterTitle(item.title, item.url) && (item.metadataFetched || normalizePageText(item.bodyText))) return;
       if (metadataFetchQueue.has(item.id)) return;
 
       if (!options.force && (contentFetchQueue.has(item.id) || contentRefreshQueue.has(item.id))) {
@@ -6315,7 +7717,7 @@
         window.setTimeout(() => {
           metadataDeferredQueue.delete(item.id);
           const latest = laterItems.find((entry) => entry.id === item.id);
-          if (latest && !latest.metadataFetched && !normalizePageText(latest.bodyText)) {
+          if (latest && (isWeakLaterTitle(latest.title, latest.url) || (!latest.metadataFetched && !normalizePageText(latest.bodyText)))) {
             queueMetadataEnrichmentForLaterItem(latest, { ...options, delayMs: 0 });
           }
         }, Math.max(1200, Number.isFinite(options.delayMs) ? options.delayMs : 1800));
@@ -6447,12 +7849,13 @@
           };
 
           const stableMetadataSummary = pickStableAutoSummary(metadata.description, latest.autoSummary);
-          if (stableMetadataSummary && (options.force || !latest.autoSummary)) {
+          if (stableMetadataSummary && !latest.autoSummary) {
             patch.autoSummary = stableMetadataSummary;
           }
 
-          if (metadata.title && (!latest.title || latest.title === latest.url)) {
-            patch.title = metadata.title;
+          const metadataTitle = String(metadata.title || "").trim();
+          if (metadataTitle && !latest.titleEditedAt && isWeakLaterTitle(latest.title, latest.url) && !isWeakLaterTitle(metadataTitle, latest.url)) {
+            patch.title = metadataTitle;
           }
 
           if (mergedTags.length) {
@@ -6912,8 +8315,8 @@ function fillUrlTemplate(template, query, domain = "") {
       const progress = getResearchProgress(item);
       const targetLabel = progress.targetSampleCount > 0 ? String(progress.targetSampleCount) : "未设目标";
       const progressText = progress.targetSampleCount > 0
-        ? `已看 ${progress.readCount} / ${progress.targetSampleCount}，已整理 ${progress.organizedCount}`
-        : `已看 ${progress.readCount}，已整理 ${progress.organizedCount}`;
+        ? `可研究 ${progress.readCount} / ${progress.targetSampleCount}，已吸收 ${progress.organizedCount}`
+        : `可研究 ${progress.readCount}，已吸收 ${progress.organizedCount}`;
 
       return `
         <div class="research-panel">
@@ -7042,7 +8445,7 @@ function fillUrlTemplate(template, query, domain = "") {
     function estimateLaterItemTime(item = {}) {
       if (item.estimate) return item.estimate;
 
-      const text = [item.title, item.autoSummary, item.bodyText, item.conclusion]
+      const text = [item.title, item.autoSummary, item.captureText, item.saveContext, item.bodyText, item.conclusion]
         .filter(Boolean)
         .join(" ")
         .replace(/\s+/g, " ")
@@ -7080,16 +8483,56 @@ function fillUrlTemplate(template, query, domain = "") {
       return (Array.isArray(items) ? items : []).filter((item) => isPendingReviewItem(item, now));
     }
 
+    function getLaterInboxStats(pendingCount = getPendingReviewItems().length) {
+      const counts = laterItems.reduce((acc, item) => {
+        if (item.status === "收件箱") acc.inbox += 1;
+        if (item.status === "待读") acc.readLater += 1;
+        if (item.status === "待整理") acc.organize += 1;
+        if (item.status === "已吸收") acc.absorbed += 1;
+        if (item.status === "已废弃") acc.discarded += 1;
+        return acc;
+      }, { inbox: 0, readLater: 0, organize: 0, absorbed: 0, discarded: 0 });
+      return {
+        total: laterItems.length,
+        inbox: counts.inbox,
+        readLater: counts.readLater,
+        organize: counts.organize,
+        absorbed: counts.absorbed,
+        discarded: counts.discarded,
+        overdueReview: pendingCount
+      };
+    }
+
+    function renderInboxTriageStats(pendingCount = getPendingReviewItems().length) {
+      const stats = getLaterInboxStats(pendingCount);
+      if (elements.inboxTotalCount) elements.inboxTotalCount.textContent = String(stats.total);
+      if (elements.inboxStatusCount) elements.inboxStatusCount.textContent = String(stats.inbox);
+      if (elements.readLaterStatusCount) elements.readLaterStatusCount.textContent = String(stats.readLater);
+      if (elements.organizeStatusCount) elements.organizeStatusCount.textContent = String(stats.organize);
+      if (elements.absorbedStatusCount) elements.absorbedStatusCount.textContent = String(stats.absorbed);
+      if (elements.discardedStatusCount) elements.discardedStatusCount.textContent = String(stats.discarded);
+      if (elements.overdueReviewCount) elements.overdueReviewCount.textContent = String(stats.overdueReview);
+    }
+
     function renderPendingReviewPanel(pendingCount = getPendingReviewItems().length) {
+      renderInboxTriageStats(pendingCount);
       if (!elements.pendingReviewCount || !elements.pendingReviewHint) return;
       const thresholdDays = getReviewThresholdDays();
+      const queueCount = getLaterTriageQueue({ mode: "all", skippedIds: new Set(), sourceIds: null }).length;
+      const reviewQueueCount = getLaterTriageQueue({ mode: "review", skippedIds: new Set(), sourceIds: null }).length;
       elements.pendingReviewCount.textContent = `待回顾 ${pendingCount} 条`;
       elements.pendingReviewHint.textContent = reviewFilterActive
-        ? `正在查看待回顾条目。规则：状态为收件箱/待读，且创建时间超过 ${thresholdDays} 天。`
-        : `默认规则：状态为收件箱/待读，且创建时间超过 ${thresholdDays} 天。`;
-      if (elements.reviewPanel) elements.reviewPanel.classList.toggle("active", reviewFilterActive);
+        ? `正在查看待回顾条目。规则：状态为收件箱/待读，且创建时间超过 ${thresholdDays} 天。可整理待回顾 ${reviewQueueCount} 条。`
+        : `默认规则：状态为收件箱/待读，且创建时间超过 ${thresholdDays} 天。上方统计实时覆盖 5 个状态；当前可整理 ${queueCount} 条，待回顾可整理 ${reviewQueueCount} 条。`;
+      if (elements.reviewPanel) elements.reviewPanel.classList.toggle("active", reviewFilterActive || pendingCount > 0);
       if (elements.viewPendingReviewBtn) elements.viewPendingReviewBtn.disabled = pendingCount === 0;
       if (elements.randomReviewBtn) elements.randomReviewBtn.disabled = pendingCount === 0;
+      if (elements.startTriageBtn) elements.startTriageBtn.disabled = queueCount === 0;
+      if (elements.startReviewTriageBtn) {
+        elements.startReviewTriageBtn.disabled = pendingCount === 0 || reviewQueueCount === 0;
+        elements.startReviewTriageBtn.classList.toggle("hidden", pendingCount === 0);
+        elements.startReviewTriageBtn.title = pendingCount && reviewQueueCount === 0 ? "待回顾条目已被稍后处理，到期后可整理。" : "";
+      }
       if (elements.clearReviewFilterBtn) elements.clearReviewFilterBtn.classList.toggle("hidden", !reviewFilterActive);
     }
 
@@ -7144,6 +8587,262 @@ function fillUrlTemplate(template, query, domain = "") {
       focusRenderedItem(item.id, "later");
     }
 
+    function createEmptyTriageSessionState() {
+      return {
+        active: false,
+        mode: "all",
+        title: "开始整理",
+        skippedIds: new Set(),
+        sourceIds: null,
+        processedCount: 0,
+        initialTotal: 0
+      };
+    }
+
+    function isLaterItemPostponed(item, now = Date.now()) {
+      const postponeTime = new Date(item?.postponeUntil || "").getTime();
+      return Number.isFinite(postponeTime) && postponeTime > now;
+    }
+
+    function getTriageModeTitle(mode = "all") {
+      return mode === "review" ? "整理待回顾" : "开始整理";
+    }
+
+    function sortLaterTriageItems(items, now = Date.now()) {
+      return [...items].sort((a, b) => {
+        const aReview = isPendingReviewItem(a, now) ? 0 : 1;
+        const bReview = isPendingReviewItem(b, now) ? 0 : 1;
+        if (aReview !== bReview) return aReview - bReview;
+
+        const aStatus = a.status === "收件箱" ? 0 : 1;
+        const bStatus = b.status === "收件箱" ? 0 : 1;
+        if (aStatus !== bStatus) return aStatus - bStatus;
+
+        const aCreated = new Date(a.createdAt || 0).getTime();
+        const bCreated = new Date(b.createdAt || 0).getTime();
+        return (Number.isFinite(aCreated) ? aCreated : 0) - (Number.isFinite(bCreated) ? bCreated : 0);
+      });
+    }
+
+    function getLaterTriageQueue(options = {}) {
+      const now = Date.now();
+      const hasOwn = (key) => Object.prototype.hasOwnProperty.call(options, key);
+      const mode = options.mode || (triageSessionState.active ? triageSessionState.mode : "all") || "all";
+      const skippedIds = hasOwn("skippedIds")
+        ? options.skippedIds
+        : (triageSessionState.active ? triageSessionState.skippedIds : new Set());
+      const sourceIds = hasOwn("sourceIds")
+        ? options.sourceIds
+        : (triageSessionState.active ? triageSessionState.sourceIds : null);
+      const baseItems = mode === "review"
+        ? laterItems.filter((item) => isPendingReviewItem(item, now))
+        : laterItems.filter((item) => ["收件箱", "待读"].includes(item.status));
+
+      return sortLaterTriageItems(
+        baseItems
+          .filter((item) => !sourceIds || sourceIds.has(item.id))
+          .filter((item) => !isLaterItemPostponed(item, now))
+          .filter((item) => !skippedIds.has(item.id)),
+        now
+      );
+    }
+
+    function getTriagePreview(item) {
+      const summary = normalizeStructuredSummary(item.structuredSummary);
+      const candidates = [
+        { label: "结论", text: item.conclusion },
+        { label: "自动摘要", text: item.autoSummary },
+        { label: "结构化摘要", text: summary?.oneSentenceConclusion },
+        { label: "保存选文", text: item.captureText },
+        { label: "保存上下文", text: item.saveContext },
+        { label: "正文预览", text: item.bodyText }
+      ];
+      const picked = candidates.find((entry) => String(entry.text || "").trim());
+      if (!picked) return { label: "记忆锚点", text: "暂无摘要，建议打开链接后再决定。" };
+      return {
+        label: picked.label,
+        text: limitText(String(picked.text || "").replace(/\s+/g, " ").trim(), 420)
+      };
+    }
+
+    function openLaterTriageModal(mode = "all") {
+      const normalizedMode = mode === "review" ? "review" : "all";
+      const skippedIds = new Set();
+      const sourceIds = normalizedMode === "review"
+        ? new Set(getPendingReviewItems().map((item) => item.id))
+        : null;
+      const queue = getLaterTriageQueue({ mode: normalizedMode, skippedIds, sourceIds });
+      triageSessionState = {
+        active: true,
+        mode: normalizedMode,
+        title: getTriageModeTitle(normalizedMode),
+        skippedIds,
+        sourceIds,
+        processedCount: 0,
+        initialTotal: queue.length
+      };
+      if (elements.triageModal) {
+        elements.triageModal.classList.add("active");
+        elements.triageModal.setAttribute("aria-hidden", "false");
+      }
+      renderLaterTriageModal();
+      if (!queue.length) {
+        const message = normalizedMode === "review"
+          ? "当前没有可整理的待回顾条目。稍后处理中的内容到期后会重新进入队列。"
+          : "当前没有可整理条目。稍后处理中的内容到期后会重新进入队列。";
+        toast(message);
+        setStatus(message);
+      }
+    }
+
+    function closeLaterTriageModal() {
+      triageSessionState.active = false;
+      if (elements.triageModal) {
+        elements.triageModal.classList.remove("active");
+        elements.triageModal.setAttribute("aria-hidden", "true");
+      }
+    }
+
+    function renderLaterTriageModal() {
+      if (!elements.triageContent) return;
+      const queue = getLaterTriageQueue();
+      const total = Math.max(triageSessionState.initialTotal, triageSessionState.processedCount + queue.length);
+      const processed = Math.min(triageSessionState.processedCount, total);
+      const title = triageSessionState.title || getTriageModeTitle(triageSessionState.mode);
+      if (elements.triageModalTitle) {
+        elements.triageModalTitle.textContent = title;
+      }
+      if (elements.triageProgress) {
+        elements.triageProgress.textContent = `已处理 ${processed} / ${total}`;
+      }
+
+      if (!queue.length) {
+        elements.triageContent.innerHTML = `
+          <div class="triage-empty">
+            <div class="empty-visual">✅</div>
+            <h3>本轮整理完成</h3>
+            <p class="hint">${triageSessionState.mode === "review" ? "当前没有可整理的待回顾条目。" : "当前没有可整理条目。"}被“稍后处理”的内容会在到期后重新进入整理队列。</p>
+            <button class="primary-btn" type="button" data-action="close-later-triage">关闭弹层</button>
+          </div>
+        `;
+        return;
+      }
+
+      const item = queue[0];
+      const preview = getTriagePreview(item);
+      const displayTitle = getLaterDisplayTitle(item);
+      const currentNote = String(item.reason || "").trim();
+      elements.triageContent.innerHTML = `
+        <article class="triage-card" data-item-id="${escapeAttribute(item.id)}">
+          <div>
+            <h3 class="triage-item-title">${escapeHtml(displayTitle)}</h3>
+            <div class="triage-meta">
+              <span class="tag">来源：${escapeHtml(item.source || "其他")}</span>
+              <span class="tag ${laterTagClass(item.status)}">${escapeHtml(item.status || "收件箱")}</span>
+              <span class="tag">创建：${escapeHtml(formatTime(item.createdAt))}</span>
+            </div>
+          </div>
+          <div class="triage-link-row">
+            ${item.url ? `<button class="ghost-btn triage-open-btn" type="button" data-action="later-triage-open" data-id="${escapeAttribute(item.id)}">打开链接</button>` : `<span class="hint">这条内容没有链接，可直接按记忆锚点判断。</span>`}
+          </div>
+          <div class="triage-preview">
+            <p class="triage-preview-label">${escapeHtml(preview.label)}</p>
+            <p class="triage-preview-text">${escapeHtml(preview.text)}</p>
+          </div>
+          <details class="compact-details triage-note-details">
+            <summary>顺手记一句为什么值得看</summary>
+            <div class="compact-details-body">
+              <textarea class="triage-note-field" data-action="triage-reason" data-id="${escapeAttribute(item.id)}" placeholder="可选，不填也能直接分拣。">${escapeHtml(currentNote)}</textarea>
+            </div>
+          </details>
+          <div class="triage-primary-actions" role="group" aria-label="整理主要动作">
+            <button class="primary-btn" type="button" data-action="later-triage-status" data-id="${escapeAttribute(item.id)}" data-status="收件箱">留</button>
+            <button class="primary-btn" type="button" data-action="later-triage-status" data-id="${escapeAttribute(item.id)}" data-status="待读">读</button>
+            <button class="primary-btn" type="button" data-action="later-triage-status" data-id="${escapeAttribute(item.id)}" data-status="待整理">整</button>
+            <button class="danger-btn" type="button" data-action="later-triage-status" data-id="${escapeAttribute(item.id)}" data-status="已废弃">废</button>
+          </div>
+          <div class="triage-secondary-actions" role="group" aria-label="整理辅助动作">
+            <button class="ghost-btn" type="button" data-action="later-triage-skip" data-id="${escapeAttribute(item.id)}">跳过本次</button>
+            <button class="ghost-btn" type="button" data-action="later-triage-postpone" data-id="${escapeAttribute(item.id)}">稍后处理</button>
+            ${item.url ? `<button class="ghost-btn" type="button" data-action="later-triage-open" data-id="${escapeAttribute(item.id)}">打开链接</button>` : `<button class="ghost-btn" type="button" data-action="close-later-triage">关闭</button>`}
+          </div>
+        </article>
+      `;
+    }
+
+    function getCurrentTriageNote(id) {
+      const field = document.querySelector(`textarea[data-action="triage-reason"][data-id="${escapeCssSelectorValue(id)}"]`);
+      return String(field?.value || "").replace(/\s+/g, " ").trim().slice(0, 500);
+    }
+
+    async function applyLaterTriageStatus(id, status) {
+      if (!["收件箱", "待读", "待整理", "已废弃"].includes(status)) return;
+      const item = laterItems.find((entry) => entry.id === id);
+      if (!item) {
+        renderLaterTriageModal();
+        return;
+      }
+      const now = new Date();
+      const patch = {
+        status,
+        lastTriagedAt: now.toISOString()
+      };
+      if (status === "收件箱") {
+        patch.postponeUntil = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString();
+      }
+      const note = getCurrentTriageNote(id);
+      if (note) patch.reason = note;
+      await updateLaterItem(id, patch, true);
+      triageSessionState.skippedIds.add(id);
+      triageSessionState.processedCount += 1;
+      renderLaterTriageModal();
+      const actionLabel = status === "收件箱" ? "留在收件箱，并延后 3 天再出现" : `标记为「${status}」`;
+      setStatus(`已将“${item.title || "未命名内容"}”${actionLabel}。`);
+    }
+
+    function skipCurrentTriageItem(id) {
+      const item = laterItems.find((entry) => entry.id === id);
+      triageSessionState.skippedIds.add(id);
+      triageSessionState.processedCount += 1;
+      renderLaterTriageModal();
+      setStatus(item ? `本轮已跳过“${item.title || "未命名内容"}”，不会写入存储。` : "本轮已跳过该条目。");
+    }
+
+    async function postponeCurrentTriageItem(id) {
+      const item = laterItems.find((entry) => entry.id === id);
+      if (!item) {
+        renderLaterTriageModal();
+        return;
+      }
+      const now = new Date();
+      const postponeUntil = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
+      const note = getCurrentTriageNote(id);
+      const patch = {
+        postponeUntil,
+        lastTriagedAt: now.toISOString()
+      };
+      if (note) patch.reason = note;
+      await updateLaterItem(id, patch, true);
+      triageSessionState.skippedIds.add(id);
+      triageSessionState.processedCount += 1;
+      renderGlobalSearchResults();
+      renderLaterTriageModal();
+      toast("已推迟到明天。");
+      setStatus(`已将“${item.title || "未命名内容"}”推迟到明天，${formatTime(postponeUntil)} 后会重新进入整理队列。`);
+    }
+
+    async function openCurrentTriageLink(id) {
+      const item = laterItems.find((entry) => entry.id === id);
+      if (!item || !item.url) {
+        toast("这条内容没有可打开的链接。");
+        return;
+      }
+      window.open(item.url, "_blank", "noopener,noreferrer");
+      await updateLaterItem(id, { lastOpenedAt: new Date().toISOString() }, true);
+      renderLaterTriageModal();
+      setStatus(`已打开“${item.title || item.url}”，未自动修改状态。`);
+    }
+
     function getTodayReviewReminderKey() {
       const now = new Date();
       return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
@@ -7163,7 +8862,7 @@ function fillUrlTemplate(template, query, domain = "") {
       }
 
       const message = `有 ${pendingCount} 条收件箱内容待回顾。`;
-      setStatus(`${message} 可在“收件箱”点击“查看待回顾”或“随机回顾”。`);
+      setStatus(`${message} 可在“收件箱”点击“开始整理待回顾”，也可以“查看待回顾”或“随机回顾”。`);
       toast(message);
     }
 
@@ -7231,9 +8930,86 @@ function fillUrlTemplate(template, query, domain = "") {
       `;
     }
 
+
+    function renderAiAnswerQuickActions(item) {
+      if (!isLaterAiAnswer(item)) return "";
+      return `
+        <div class="ai-quick-triage-row" role="group" aria-label="AI 回答快捷处理">
+          <span class="ai-quick-triage-label">AI 快捷处理</span>
+          <button class="tiny-btn" type="button" data-action="later-ai-quick-status" data-id="${escapeAttribute(item.id)}" data-status="待整理">待整理</button>
+          <button class="tiny-btn" type="button" data-action="later-ai-quick-status" data-id="${escapeAttribute(item.id)}" data-status="已吸收">已吸收</button>
+          <button class="danger-btn" type="button" data-action="later-ai-quick-status" data-id="${escapeAttribute(item.id)}" data-status="已废弃">已废弃</button>
+        </div>
+      `;
+    }
+
+    function renderTitleNudge(item) {
+      if (!item || !item.url || !isWeakLaterTitle(item.title, item.url)) return "";
+      return `
+        <div class="title-nudge-row">
+          <button class="tiny-btn" type="button" data-action="focus-later-title" data-id="${escapeAttribute(item.id)}">补一个标题</button>
+        </div>
+      `;
+    }
+
+    function renderConclusionNudge(item) {
+      if (!item || item.status !== "待整理" || String(item.conclusion || "").trim()) return "";
+      return `
+        <div class="conclusion-nudge-row">
+          <button class="tiny-btn" type="button" data-action="focus-later-conclusion" data-id="${escapeAttribute(item.id)}">需要写一句结论吗？</button>
+        </div>
+      `;
+    }
+
+    function focusLaterConclusionEditor(id) {
+      const card = document.querySelector(`[data-item-type="later"][data-item-id="${escapeCssSelectorValue(id)}"]`);
+      if (!card) {
+        toast("未找到这条内容，可能被当前筛选隐藏。");
+        return;
+      }
+      const details = card.querySelector(".compact-edit-details");
+      if (details) details.open = true;
+      const textarea = card.querySelector(`textarea[data-action="later-conclusion"][data-id="${escapeCssSelectorValue(id)}"]`);
+      if (!textarea) return;
+      requestAnimationFrame(() => {
+        textarea.scrollIntoView({ behavior: "smooth", block: "center" });
+        textarea.focus();
+      });
+    }
+
+    function focusLaterTitleEditor(id) {
+      const card = document.querySelector(`[data-item-type="later"][data-item-id="${escapeCssSelectorValue(id)}"]`);
+      if (!card) {
+        toast("未找到这条内容，可能被当前筛选隐藏。");
+        return;
+      }
+      const details = card.querySelector(".compact-edit-details");
+      if (details) details.open = true;
+      const input = card.querySelector(`input[data-action="later-title"][data-id="${escapeCssSelectorValue(id)}"]`);
+      if (!input) return;
+      requestAnimationFrame(() => {
+        input.scrollIntoView({ behavior: "smooth", block: "center" });
+        input.focus();
+        input.select?.();
+      });
+    }
+
+    async function applyAiAnswerQuickStatus(id, status) {
+      if (!["待整理", "已吸收", "已废弃"].includes(status)) return;
+      const item = laterItems.find((entry) => entry.id === id);
+      if (!item || !isLaterAiAnswer(item)) return;
+      await updateLaterItem(id, {
+        status,
+        lastTriagedAt: new Date().toISOString()
+      }, true);
+      renderGlobalSearchResults();
+      setStatus(`已将 AI 回答“${item.title || "未命名内容"}”标记为「${status}」。`);
+    }
+
     function renderLater() {
       const pendingReviewItems = getPendingReviewItems();
       renderPendingReviewPanel(pendingReviewItems.length);
+      if (triageSessionState.active) renderLaterTriageModal();
       const sourceFilter = elements.laterSourceFilter.value || "全部来源";
       const statusFilter = elements.laterStatusFilter.value || "全部状态";
       syncStatusFilterChips(elements.laterStatusChips, statusFilter);
@@ -7254,6 +9030,8 @@ function fillUrlTemplate(template, query, domain = "") {
           item.source,
           item.reason,
           item.autoSummary,
+          item.captureText,
+          item.saveContext,
           item.bodyText,
           item.aiOriginalQuestion,
           item.aiOriginalAnswer,
@@ -7296,13 +9074,12 @@ function fillUrlTemplate(template, query, domain = "") {
       }
 
       elements.laterList.innerHTML = filtered.map((item) => {
-        const titleHtml = item.url
-          ? `<a href="${escapeAttribute(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>`
-          : escapeHtml(item.title);
+        const titleHtml = renderLaterTitleHtml(item);
         const summaryBusy = contentRefreshQueue.has(item.id) || contentFetchQueue.has(item.id) || contentFetchProgress.has(item.id);
         const metadataBusy = metadataFetchQueue.has(item.id) || metadataFetchProgress.has(item.id);
         const estimateLabel = estimateLaterItemTime(item);
         const relatedHistoryLabel = getRelatedHistoryLabel(item.relatedHistoryId);
+        const isAiAnswer = isLaterAiAnswer(item);
 
         return `
           <article class="card item" data-item-type="later" data-item-id="${escapeAttribute(item.id)}">
@@ -7318,7 +9095,7 @@ function fillUrlTemplate(template, query, domain = "") {
                   ${renderMetadataStatusTag(item)}
                   ${renderLimitedTagChips(item.tags, 3)}
                 </div>
-                ${renderCompactPreview(item.conclusion, "结论", 130)}
+                ${renderLaterMemoryAnchor(item)}
                 ${relatedHistoryLabel ? `<p class="hint compact-relation-hint">${escapeHtml(relatedHistoryLabel)}</p>` : ""}
               </div>
               <div class="actions">
@@ -7326,10 +9103,15 @@ function fillUrlTemplate(template, query, domain = "") {
               </div>
             </div>
             ${renderAiAnswerBlock(item)}
+            ${isAiAnswer ? renderAiAnswerQuickActions(item) : ""}
+            ${renderTitleNudge(item)}
+            ${renderConclusionNudge(item)}
             <details class="compact-details compact-edit-details">
               <summary>详情与编辑</summary>
               <div class="compact-details-body">
                 ${item.autoSummary ? `<details class="compact-details"><summary>自动摘要</summary><p class="auto-summary">${escapeHtml(item.autoSummary)}</p></details>` : ""}
+                ${item.captureText ? `<details class="compact-details"><summary>保存选文</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.captureText, 420))}</p></details>` : ""}
+                ${item.saveContext ? `<details class="compact-details"><summary>保存上下文</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.saveContext, 420))}</p></details>` : ""}
                 ${item.bodyText ? `<details class="compact-details"><summary>元数据 / 正文预览</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.bodyText, 420))}</p></details>` : ""}
                 <div class="compact-edit-grid">
                   <label class="compact-field"><span>状态</span>
@@ -7402,6 +9184,8 @@ function fillUrlTemplate(template, query, domain = "") {
           normalizeTags(item.tags).join(" "),
           item.conclusion,
           item.autoSummary,
+          item.captureText,
+          item.saveContext,
           item.bodyText,
           item.aiOriginalQuestion,
           item.aiOriginalAnswer,
@@ -7424,7 +9208,7 @@ function fillUrlTemplate(template, query, domain = "") {
           title: hasKnowledge ? "没有匹配的知识条目" : "知识库还是空的",
           description: hasKnowledge
             ? "可以调整来源、状态或关键词筛选。"
-            : "把收件箱条目的状态改为“已整理”或“已吸收”后，它会自动出现在知识库。",
+            : "把收件箱条目的状态改为“已吸收”后，它会自动出现在知识库。",
           action: "focus-search",
           button: hasKnowledge ? "回到顶部搜索" : "去添加内容"
         });
@@ -7432,9 +9216,7 @@ function fillUrlTemplate(template, query, domain = "") {
       }
 
       elements.knowledgeList.innerHTML = knowledgeItems.map((item) => {
-        const titleHtml = item.url
-          ? `<a href="${escapeAttribute(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>`
-          : escapeHtml(item.title || "未命名内容");
+        const titleHtml = renderLaterTitleHtml(item);
         const relatedHistoryLabel = getRelatedHistoryLabel(item.relatedHistoryId);
 
         return `
@@ -7461,6 +9243,8 @@ function fillUrlTemplate(template, query, domain = "") {
             </div>
 
             ${item.autoSummary ? `<details class="compact-details"><summary>自动摘要</summary><p class="auto-summary">${escapeHtml(item.autoSummary)}</p></details>` : ""}
+            ${item.captureText ? `<details class="compact-details"><summary>保存选文</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.captureText, 520))}</p></details>` : ""}
+            ${item.saveContext ? `<details class="compact-details"><summary>保存上下文</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.saveContext, 520))}</p></details>` : ""}
             ${item.bodyText ? `<details class="compact-details"><summary>正文 / 元数据预览</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.bodyText, 520))}</p></details>` : ""}
             ${renderAiAnswerBlock(item)}
 
@@ -7652,6 +9436,11 @@ function fillUrlTemplate(template, query, domain = "") {
     }
 
     async function handleGlobalClick(event) {
+      if (elements.triageModal && event.target === elements.triageModal) {
+        closeLaterTriageModal();
+        return;
+      }
+
       const node = event.target.closest("[data-action]");
       if (!node) return;
 
@@ -7672,6 +9461,89 @@ function fillUrlTemplate(template, query, domain = "") {
         return;
       }
 
+
+      if (action === "open-add-creator-source") {
+        openCreatorSourceModal();
+        return;
+      }
+
+      if (action === "close-creator-source-modal") {
+        closeCreatorSourceModal();
+        return;
+      }
+
+      if (action === "save-creator-source") {
+        await saveCreatorSourceFromModal();
+        return;
+      }
+
+      if (action === "use-creator-template") {
+        openCreatorTemplate(node.dataset.templateIndex || 0);
+        return;
+      }
+
+      if (action === "creator-filter-due") {
+        creatorDueFilterActive = !creatorDueFilterActive;
+        renderCreatorSources();
+        return;
+      }
+
+      if (action === "edit-creator-source") {
+        const source = getCreatorSourceById(id);
+        if (source) openCreatorSourceModal(source);
+        return;
+      }
+
+      if (action === "open-creator-home") {
+        await openCreatorHome(id);
+        return;
+      }
+
+      if (action === "mark-creator-checked") {
+        await markCreatorChecked(id);
+        return;
+      }
+
+      if (action === "save-creator-to-inbox") {
+        await saveCreatorToInbox(id);
+        return;
+      }
+
+      if (action === "creator-site-search") {
+        openCreatorSiteSearch(id);
+        return;
+      }
+
+      if (action === "copy-creator-profile") {
+        await copyCreatorField(id, "profileUrl", "主页链接");
+        return;
+      }
+
+      if (action === "copy-creator-rss") {
+        await copyCreatorField(id, "rssUrl", "RSS");
+        return;
+      }
+
+      if (action === "copy-creator-rsshub") {
+        await copyCreatorField(id, "rsshubUrl", "RSSHub");
+        return;
+      }
+
+      if (action === "toggle-creator-pause") {
+        await toggleCreatorPause(id);
+        return;
+      }
+
+      if (action === "delete-creator-source") {
+        await deleteCreatorSource(id);
+        return;
+      }
+
+      if (action === "save-creator-content-link") {
+        await saveCreatorContentLink(id);
+        return;
+      }
+
       if (action === "open-item-menu") {
         openItemActionSheet(node.dataset.itemType, id);
         return;
@@ -7679,6 +9551,56 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (action === "close-item-menu") {
         closeItemActionSheet();
+        return;
+      }
+
+      if (action === "start-later-triage") {
+        openLaterTriageModal("all");
+        return;
+      }
+
+      if (action === "start-review-triage") {
+        openLaterTriageModal("review");
+        return;
+      }
+
+      if (action === "close-later-triage") {
+        closeLaterTriageModal();
+        return;
+      }
+
+      if (action === "later-triage-status") {
+        await applyLaterTriageStatus(id, node.dataset.status || "");
+        return;
+      }
+
+      if (action === "later-triage-skip") {
+        skipCurrentTriageItem(id);
+        return;
+      }
+
+      if (action === "later-triage-postpone") {
+        await postponeCurrentTriageItem(id);
+        return;
+      }
+
+      if (action === "later-triage-open") {
+        await openCurrentTriageLink(id);
+        return;
+      }
+
+      if (action === "later-ai-quick-status") {
+        await applyAiAnswerQuickStatus(id, node.dataset.status || "");
+        return;
+      }
+
+      if (action === "focus-later-conclusion") {
+        focusLaterConclusionEditor(id);
+        return;
+      }
+
+      if (action === "focus-later-title") {
+        focusLaterTitleEditor(id);
         return;
       }
 
@@ -7763,7 +9685,10 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (action === "open-later") {
         const item = laterItems.find((entry) => entry.id === id);
-        if (item && item.url) window.open(item.url, "_blank", "noopener,noreferrer");
+        if (item && item.url) {
+          window.open(item.url, "_blank", "noopener,noreferrer");
+          await updateLaterItem(id, { lastOpenedAt: new Date().toISOString() }, false);
+        }
       }
 
       if (action === "open-search-result-url") {
@@ -7949,9 +9874,11 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (laterKeyMap[action]) {
         const shouldRender = action === "later-status" || action === "later-source" || (
-          event.type === "change" && action === "later-conclusion"
+          event.type === "change" && (action === "later-conclusion" || action === "later-title")
         );
-        await updateLaterItem(id, { [laterKeyMap[action]]: node.value }, shouldRender);
+        const patch = { [laterKeyMap[action]]: node.value };
+        if (action === "later-title" && event.type === "change") patch.titleEditedAt = new Date().toISOString();
+        await updateLaterItem(id, patch, shouldRender);
       }
     }
 
@@ -7997,8 +9924,10 @@ function fillUrlTemplate(template, query, domain = "") {
         reason: "",
         autoSummary: "",
         bodyText: "",
+        captureText: "",
+        saveContext: "通过手动表单添加。",
         metadataFetched: false,
-        tags: mergeAutomaticBasicTags([], {
+        tags: mergeAutomaticBasicTags(providedTags, {
           kind: "later",
           title,
           url,
@@ -8023,12 +9952,17 @@ function fillUrlTemplate(template, query, domain = "") {
       toast("已添加到收件箱，正在后台抓取摘要和轻量元数据。 ");
     }
 
-    async function addLaterFromExternal(title, url, source, reason = "通过系统分享添加。") {
-      const cleanTitle = String(title || "").trim();
+    async function addLaterFromExternal(title, url, source, reason = "通过系统分享添加。", options = {}) {
+      const cleanTitle = limitIncomingText(title || "", 220);
       const rawCleanUrl = String(url || extractFirstUrl(cleanTitle) || "").trim();
       const cleanUrl = rawCleanUrl ? await normalizeUrlForQuickNote(rawCleanUrl) : "";
       const finalTitle = cleanTitle || cleanUrl || "未命名内容";
       const finalSource = normalizeLaterSource(source || detectSourceFromUrl(cleanUrl));
+      const captureText = limitIncomingText(options.captureText || "", 500);
+      const explicitContext = limitIncomingText(options.saveContext || "", 1000);
+      const saveContext = explicitContext || limitIncomingText(reason || "", 1000);
+      const initialSummary = limitIncomingText(options.autoSummary || options.description || "", 600);
+      const providedTags = normalizeTags(options.tags || []);
 
       if (cleanUrl) {
         const duplicateItem = laterItems.find((item) => hasSameNormalizedUrl(item.url, cleanUrl));
@@ -8047,31 +9981,38 @@ function fillUrlTemplate(template, query, domain = "") {
         url: cleanUrl,
         source: finalSource,
         reason,
-        autoSummary: "",
+        autoSummary: initialSummary,
         bodyText: "",
+        captureText,
+        saveContext,
         metadataFetched: false,
-        tags: mergeAutomaticBasicTags([], {
+        tags: mergeAutomaticBasicTags(providedTags, {
           kind: "later",
           title: finalTitle,
           url: cleanUrl,
           source: finalSource,
-          reason
+          reason,
+          summary: initialSummary || captureText || saveContext
         }),
-        estimate: estimateLaterItemTime({ title: finalTitle, url: cleanUrl, source: finalSource }),
+        estimate: estimateLaterItemTime({ title: finalTitle, url: cleanUrl, source: finalSource, bodyText: [initialSummary, captureText, saveContext].filter(Boolean).join(" ") }),
         status: "收件箱",
         conclusion: "",
         createdAt: new Date().toISOString(),
+        postponeUntil: "",
+        lastTriagedAt: "",
+        lastOpenedAt: "",
         relatedHistoryId: ""
       };
 
-      laterItems.unshift(item);
+      const normalizedItem = normalizeLaterItems([item])[0];
+      laterItems.unshift(normalizedItem);
       await save(STORE_NAMES.later, laterItems);
       await rebuildSearchIndex();
       rebuildBacklinkIndex();
-      queueContentFetchForLaterItem(item);
-      queueMetadataEnrichmentForLaterItem(item);
+      queueContentFetchForLaterItem(normalizedItem);
+      queueMetadataEnrichmentForLaterItem(normalizedItem);
       renderLater();
-      return { added: true, reason: "created", item };
+      return { added: true, reason: "created", item: normalizedItem };
     }
 
     async function addLaterFromHistory(historyItem) {
@@ -8087,8 +10028,10 @@ function fillUrlTemplate(template, query, domain = "") {
         url,
         source: normalizeLaterSource(historyItem.platform),
         reason: "来自搜索历史。",
-        autoSummary: "",
+        autoSummary: historyItem.note || "",
         bodyText: "",
+        captureText: historyItem.note || historyItem.researchNote || "",
+        saveContext: limitIncomingText(`来自搜索历史：${historyItem.platform || "其他"} · ${historyItem.keyword || "未命名关键词"}${historyItem.researchGoal ? `；研究目标：${historyItem.researchGoal}` : ""}`, 1000),
         metadataFetched: false,
         tags: mergeAutomaticBasicTags(historyItem.isResearch ? normalizeTags([...(historyItem.tags || []), "#研究资料"]) : (historyItem.tags || []), {
           kind: "later",
@@ -8096,9 +10039,9 @@ function fillUrlTemplate(template, query, domain = "") {
           title: `${historyItem.platform}：${historyItem.keyword}`,
           url,
           source: historyItem.platform,
-          summary: historyItem.note
+          summary: historyItem.note || historyItem.researchNote || historyItem.researchGoal
         }),
-        estimate: estimateLaterItemTime({ title: `${historyItem.platform}：${historyItem.keyword}`, url, source: historyItem.platform }),
+        estimate: estimateLaterItemTime({ title: `${historyItem.platform}：${historyItem.keyword}`, url, source: historyItem.platform, bodyText: [historyItem.note, historyItem.researchNote, historyItem.researchGoal].filter(Boolean).join(" ") }),
         status: "收件箱",
         conclusion: "",
         createdAt: new Date().toISOString(),
@@ -8114,6 +10057,7 @@ function fillUrlTemplate(template, query, domain = "") {
       renderFilters();
       renderLater();
       renderKnowledge();
+      renderCreatorSources();
       return true;
     }
 
@@ -8131,10 +10075,15 @@ function fillUrlTemplate(template, query, domain = "") {
         queueMetadataEnrichmentForLaterItem(nextItem, { force: true });
       }
 
+      if (nextItem && Object.prototype.hasOwnProperty.call(patch, "title") && !isWeakLaterTitle(nextItem.title, nextItem.url)) {
+        metadataFetchProgress.delete(nextItem.id);
+      }
+
       if (shouldRender) {
         renderFilters();
         renderLater();
         renderKnowledge();
+        renderGlobalSearchResults();
       }
     }
 
@@ -8158,7 +10107,7 @@ function fillUrlTemplate(template, query, domain = "") {
         "else if(/podcast|xiaoyuzhou|spotify|apple\\.com/i.test(location.href))s='播客';"
       ].join("");
 
-      return `javascript:(async()=>{const d=${JSON.stringify(cleanUrl)},u=location.href,t=document.title||u;${sourceDetector}const p={title:t,url:u,source:s};const target=d+'#addLater='+encodeURIComponent(JSON.stringify(p))+'&ts='+Date.now();const w=window.open(target,'_blank');if(w){try{w.opener=null}catch(e){}return;}try{await navigator.clipboard.writeText(target);alert('Info Dock 没能自动打开，已复制导入链接。请打开该链接完成添加。');}catch(e){prompt('Info Dock 没能自动打开。请复制下面的导入链接：',target);}})();`;
+      return `javascript:(async()=>{const d=${JSON.stringify(cleanUrl)},u=location.href,t=document.title||u;${sourceDetector}const cut=(v,n)=>String(v||'').replace(/\s+/g,' ').trim().slice(0,n);const m=document.querySelector('meta[name="description"],meta[property="og:description"]');const desc=cut(m&&m.content,700);const sel=cut(window.getSelection?window.getSelection().toString():'',500);const p={title:cut(t,220),url:u,source:s,captureText:sel,description:desc,saveContext:cut(desc||('来自收藏夹小工具：'+t),1000)};const target=d+'#addLater='+encodeURIComponent(JSON.stringify(p))+'&ts='+Date.now();const w=window.open(target,'_blank');if(w){try{w.opener=null}catch(e){}return;}try{await navigator.clipboard.writeText(target);alert('Info Dock 没能自动打开，已复制导入链接。请打开该链接完成添加。');}catch(e){prompt('Info Dock 没能自动打开。请复制下面的导入链接：',target);}})();`;
     }
 
     function getCleanDockUrl() {
@@ -8184,19 +10133,40 @@ function fillUrlTemplate(template, query, domain = "") {
         .trim();
     }
 
+    function limitIncomingText(value, maxLength = 1000) {
+      const normalized = String(value || "").replace(/\s+/g, " ").trim();
+      if (!normalized) return "";
+      return normalized.length > maxLength ? `${normalized.slice(0, maxLength)}…` : normalized;
+    }
+
+    function buildSaveContextFromParts(parts, maxLength = 1000) {
+      return limitIncomingText((Array.isArray(parts) ? parts : []).filter(Boolean).join("；"), maxLength);
+    }
+
     async function handleSharedData() {
       const params = new URLSearchParams(window.location.search);
-      const sharedTitle = params.get("title") || params.get("name") || "";
-      const sharedText = params.get("text") || params.get("description") || "";
-      const rawSharedUrl = params.get("url") || params.get("link") || "";
+      const sharedTitle = limitIncomingText(params.get("title") || params.get("name") || "", 220);
+      const sharedDescription = limitIncomingText(params.get("description") || "", 700);
+      const sharedText = limitIncomingText(params.get("text") || sharedDescription || "", 1200);
+      const rawSharedUrl = limitIncomingText(params.get("url") || params.get("link") || "", 2048);
       const hasShareParams = params.get("shareTarget") === "1" || [sharedTitle, sharedText, rawSharedUrl].some(Boolean);
 
       if (!hasShareParams || params.get("addLater") === "1") return false;
 
       const sharedUrl = pickBestSharedUrl(rawSharedUrl, sharedText, sharedTitle);
       const sharedTitleFallback = stripUrlFromSharedText(sharedTitle || sharedText || rawSharedUrl);
+      const captureText = limitIncomingText(stripUrlFromSharedText(sharedText), 500);
       const source = inferSourceFromSharedData(params, sharedUrl, `${sharedTitle} ${sharedText} ${rawSharedUrl}`);
-      const result = await addLaterFromExternal(sharedTitleFallback || sharedUrl || "手机分享内容", sharedUrl, source);
+      const result = await addLaterFromExternal(sharedTitleFallback || sharedUrl || "手机分享内容", sharedUrl, source, "通过系统分享添加。", {
+        captureText,
+        description: sharedDescription || sharedText,
+        saveContext: buildSaveContextFromParts([
+          "通过系统分享添加",
+          sharedTitle ? `分享标题：${sharedTitle}` : "",
+          captureText ? `分享文本：${captureText}` : "",
+          sharedDescription ? `页面描述：${sharedDescription}` : ""
+        ])
+      });
 
       clearIncomingParams();
       activateTab("laterSection");
@@ -8224,7 +10194,16 @@ function fillUrlTemplate(template, query, domain = "") {
         incoming.title || incoming.url || "未命名内容",
         incoming.url || "",
         incoming.source || detectSourceFromUrl(incoming.url),
-        "通过 Info Dock 收藏夹小工具添加。"
+        incoming.reason || "通过 Info Dock 收藏夹小工具添加。",
+        {
+          captureText: incoming.captureText || incoming.text || "",
+          description: incoming.description || "",
+          saveContext: incoming.saveContext || buildSaveContextFromParts([
+            incoming.reason || "通过 Info Dock 收藏夹小工具添加",
+            incoming.description ? `页面描述：${incoming.description}` : "",
+            incoming.captureText ? `选中文本：${incoming.captureText}` : ""
+          ])
+        }
       );
 
       if (result.added) {
@@ -8247,9 +10226,14 @@ function fillUrlTemplate(template, query, domain = "") {
       const params = new URLSearchParams(window.location.search);
       if (params.get("addLater") === "1") {
         return {
-          title: params.get("title") || "",
-          url: params.get("url") || "",
-          source: params.get("source") || ""
+          title: limitIncomingText(params.get("title") || "", 220),
+          url: limitIncomingText(params.get("url") || "", 2048),
+          source: limitIncomingText(params.get("source") || "", 80),
+          text: limitIncomingText(params.get("text") || "", 1200),
+          description: limitIncomingText(params.get("description") || "", 700),
+          captureText: limitIncomingText(params.get("captureText") || "", 500),
+          saveContext: limitIncomingText(params.get("saveContext") || "", 1000),
+          reason: limitIncomingText(params.get("reason") || "", 200)
         };
       }
 
@@ -8260,9 +10244,14 @@ function fillUrlTemplate(template, query, domain = "") {
       try {
         const payload = JSON.parse(encodedPayload);
         return {
-          title: payload.title || "",
-          url: payload.url || "",
-          source: payload.source || ""
+          title: limitIncomingText(payload.title || "", 220),
+          url: limitIncomingText(payload.url || "", 2048),
+          source: limitIncomingText(payload.source || "", 80),
+          text: limitIncomingText(payload.text || "", 1200),
+          description: limitIncomingText(payload.description || "", 700),
+          captureText: limitIncomingText(payload.captureText || "", 500),
+          saveContext: limitIncomingText(payload.saveContext || "", 1000),
+          reason: limitIncomingText(payload.reason || "", 200)
         };
       } catch (error) {
         console.warn("解析收藏脚本传入数据失败：", error);
@@ -8489,13 +10478,64 @@ function fillUrlTemplate(template, query, domain = "") {
       return existing === next || normalizeUrl(existing) === normalizeUrl(next);
     }
 
+    function getDisplayHostname(url) {
+      try {
+        return new URL(String(url || "").trim()).hostname.replace(/^www\./i, "");
+      } catch (error) {
+        return "";
+      }
+    }
+
+    function normalizeTitleLikeUrl(value) {
+      return String(value || "")
+        .trim()
+        .replace(/^https?:\/\//i, "")
+        .replace(/^www\./i, "")
+        .replace(/\/+$/, "")
+        .toLowerCase();
+    }
+
+    function isPureDomainTitle(value) {
+      const title = String(value || "").trim();
+      if (!title || /\s/.test(title) || /[\/\?#]/.test(title)) return false;
+      if (!/^[a-z0-9-]+(?:\.[a-z0-9-]+)+$/i.test(title.replace(/^www\./i, ""))) return false;
+      try {
+        const parsed = new URL(`https://${title.replace(/^www\./i, "")}`);
+        return Boolean(parsed.hostname && parsed.hostname.includes("."));
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function looksLikeFullUrlTitle(value) {
+      const title = String(value || "").trim();
+      if (/^https?:\/\//i.test(title)) return true;
+      return /^[\w.-]+\.[a-z]{2,}(?:[\/?#:]|$)/i.test(title) && title.length > 20;
+    }
+
+    function isWeakLaterTitle(title, url = "") {
+      const value = String(title || "").trim();
+      if (!value) return true;
+      if (/^未命名(?:内容|链接|网页|条目)?$/i.test(value) || /^(?:无标题|untitled)$/i.test(value) || value === "手机分享内容") return true;
+
+      const normalizedTitle = normalizeTitleLikeUrl(value);
+      const normalizedUrl = normalizeTitleLikeUrl(url);
+      if (normalizedUrl && normalizedTitle === normalizedUrl) return true;
+
+      const host = getDisplayHostname(url);
+      if (host && normalizedTitle === normalizeTitleLikeUrl(host)) return true;
+      if (isPureDomainTitle(value)) return true;
+      if (looksLikeFullUrlTitle(value)) return true;
+      return false;
+    }
+
     async function handleQuickNoteButtonClick() {
       const inputText = elements.searchInput.value.trim();
 
       if (inputText) {
         const inputUrl = extractFirstUrl(inputText);
         if (inputUrl) {
-          await saveUrlFromQuickNote(inputUrl);
+          await saveUrlFromQuickNote(inputUrl, inputText);
           return;
         }
 
@@ -8525,7 +10565,7 @@ function fillUrlTemplate(template, query, domain = "") {
       }
     }
 
-    async function saveUrlFromQuickNote(url) {
+    async function saveUrlFromQuickNote(url, rawInputText = "") {
       const normalizedInputUrl = await normalizeUrlForQuickNote(url);
 
       if (laterItems.some((item) => hasSameNormalizedUrl(item.url, normalizedInputUrl))) {
@@ -8535,7 +10575,14 @@ function fillUrlTemplate(template, query, domain = "") {
 
       const source = typeof detectSourceFromUrl === "function" ? detectSourceFromUrl(normalizedInputUrl) : "其他";
       const title = await fetchTitleForQuickNote(normalizedInputUrl);
-      const result = await addLaterFromExternal(title || normalizedInputUrl, normalizedInputUrl, source, "通过搜索框快速保存。");
+      const captureText = limitIncomingText(stripUrlFromSharedText(rawInputText), 500);
+      const result = await addLaterFromExternal(title || normalizedInputUrl, normalizedInputUrl, source, "通过搜索框快速保存。", {
+        captureText,
+        saveContext: buildSaveContextFromParts([
+          "通过搜索框快速保存",
+          captureText ? `原始输入：${captureText}` : ""
+        ])
+      });
 
       if (!result.added && result.reason === "duplicate") {
         toast("这条链接已经在收件箱里");
@@ -8574,6 +10621,8 @@ function fillUrlTemplate(template, query, domain = "") {
         reason: "保存的 AI 回答。",
         autoSummary: "",
         bodyText: "",
+        captureText: question,
+        saveContext: recentHistory ? `关联最近 AI 询问：${question}` : "保存的 AI 回答。",
         metadataFetched: false,
         lastSummaryFetchAt: "",
         lastSummaryFetchStatus: "",
@@ -8602,6 +10651,7 @@ function fillUrlTemplate(template, query, domain = "") {
       activateTab("laterSection");
       renderLater();
       renderKnowledge();
+      renderCreatorSources();
       renderGlobalSearchResults();
       void renderDataManagementPanels();
       focusRenderedItem(normalizedItem.id, "later");
@@ -8625,6 +10675,8 @@ function fillUrlTemplate(template, query, domain = "") {
         reason: "",
         autoSummary: "",
         bodyText: inputText,
+        captureText: limitIncomingText(inputText, 500),
+        saveContext: "通过搜索框保存的快速笔记。",
         metadataFetched: false,
         tags: mergeAutomaticBasicTags([], {
           kind: "quick-note",
@@ -8648,6 +10700,7 @@ function fillUrlTemplate(template, query, domain = "") {
       activateTab("laterSection");
       renderLater();
       renderKnowledge();
+      renderCreatorSources();
       renderGlobalSearchResults();
       void renderDataManagementPanels();
       focusRenderedItem(normalizedItem.id, "later");
@@ -8831,8 +10884,8 @@ function fillUrlTemplate(template, query, domain = "") {
     }
 
     function laterTagClass(status) {
-      if (status === "已整理" || status === "已吸收") return "ok";
-      if (status === "待整理" || status === "阅读中" || status === "待读") return "warn";
+      if (status === "已吸收") return "ok";
+      if (status === "待整理" || status === "待读") return "warn";
       if (status === "已废弃") return "danger";
       return "";
     }

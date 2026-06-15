@@ -26,13 +26,20 @@
         ["url", ["url", "link"]]
       ];
 
+      function truncateParam(key, value) {
+        var maxMap = { title: 220, text: 1200, url: 2048 };
+        var normalized = String(value || "").replace(/\s+/g, " ").trim();
+        var maxLength = maxMap[key] || 1000;
+        return normalized.length > maxLength ? normalized.slice(0, maxLength) + "…" : normalized;
+      }
+
       mappings.forEach(function (mapping) {
         var targetKey = mapping[0];
         var aliases = mapping[1];
         for (var i = 0; i < aliases.length; i += 1) {
           var value = incoming.searchParams.get(aliases[i]);
           if (value) {
-            target.searchParams.set(targetKey, value);
+            target.searchParams.set(targetKey, truncateParam(targetKey, value));
             break;
           }
         }

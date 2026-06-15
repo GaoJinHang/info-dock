@@ -36,9 +36,17 @@ function normalizePath(value) {
   return path || "/";
 }
 
+const SHARE_PARAM_MAX_LENGTHS = { title: 220, text: 1200, url: 2048, description: 700, link: 2048, name: 220 };
+
+function truncateShareParam(key, value) {
+  const cleanValue = String(value || "").replace(/\s+/g, " ").trim();
+  const maxLength = SHARE_PARAM_MAX_LENGTHS[key] || 1000;
+  return cleanValue.length > maxLength ? `${cleanValue.slice(0, maxLength)}…` : cleanValue;
+}
+
 function appendShareParam(targetUrl, key, value) {
   if (value == null) return;
-  const cleanValue = String(value).trim();
+  const cleanValue = truncateShareParam(key, value);
   if (cleanValue) targetUrl.searchParams.set(key, cleanValue);
 }
 
