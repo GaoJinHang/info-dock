@@ -201,6 +201,132 @@
       border-color: var(--primary);
     }
 
+    .local-search-dropdown {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      top: 88px;
+      z-index: 30;
+      display: grid;
+      gap: 8px;
+      max-height: min(460px, 60vh);
+      overflow: auto;
+      padding: 10px;
+      border: 1px solid rgba(37, 99, 235, 0.22);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 22px 48px rgba(15, 23, 42, 0.16);
+    }
+
+    .local-search-section {
+      display: grid;
+      gap: 6px;
+    }
+
+    .local-search-section-title {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: 0.02em;
+    }
+
+    .local-search-item {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      display: grid;
+      gap: 6px;
+      text-align: left;
+      background: white;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .local-search-item:hover,
+    .local-search-item:focus-visible {
+      border-color: rgba(37, 99, 235, 0.45);
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.10);
+      outline: none;
+    }
+
+    .local-search-title {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .local-search-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .local-search-snippet,
+    .local-search-empty {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.55;
+    }
+
+    .local-search-empty {
+      padding: 8px 4px;
+    }
+
+    .local-search-footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .external-ai-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2px 2px 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .external-ai-links {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      color: var(--text);
+      font-weight: 750;
+    }
+
+    .external-ai-link {
+      border: 0;
+      padding: 0;
+      color: var(--primary);
+      background: transparent;
+      font: inherit;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .external-ai-link:hover,
+    .external-ai-link:focus-visible {
+      text-decoration: underline;
+      outline: none;
+    }
+
+    .external-ai-hint {
+      flex: 1 1 260px;
+      text-align: right;
+    }
+
 
     .ai-answer-modal {
       width: min(720px, 100%);
@@ -580,6 +706,39 @@
       white-space: nowrap;
     }
 
+    .ai-quick-danger-btn {
+      color: var(--danger);
+      background: rgba(254, 226, 226, 0.38);
+      border-color: rgba(220, 38, 38, 0.18);
+      box-shadow: none;
+    }
+
+    .ai-quick-danger-btn:hover {
+      background: var(--danger-soft);
+    }
+
+    .explicit-edit-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding-top: 6px;
+      border-top: 1px dashed var(--line);
+    }
+
+    .unsaved-edit-hint {
+      margin-right: auto;
+      color: var(--warning);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .compact-field textarea.tall-edit-field {
+      min-height: 78px;
+    }
+
     .conclusion-nudge-row .tiny-btn,
     .title-nudge-row .tiny-btn {
       color: var(--primary);
@@ -708,6 +867,43 @@
       gap: 10px;
     }
 
+    .platform-dock-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+
+    .platform-dock-head strong {
+      display: block;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .platform-dock-head span {
+      display: inline-block;
+    }
+
+    .platform-scroll-hint {
+      color: var(--primary);
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .platform-sort-banner {
+      grid-column: 1 / -1;
+      padding: 9px 10px;
+      border: 1px dashed rgba(37, 99, 235, 0.35);
+      border-radius: 14px;
+      color: var(--primary);
+      background: var(--primary-soft);
+      font-size: 12.5px;
+      font-weight: 750;
+    }
+
     .section-title {
       display: flex;
       align-items: center;
@@ -725,6 +921,7 @@
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 8px;
+      align-items: stretch;
     }
 
     .platform-card {
@@ -1909,6 +2106,24 @@
         border-radius: 18px;
       }
 
+      .local-search-dropdown {
+        left: 12px;
+        right: 12px;
+        top: 66px;
+        max-height: min(420px, 58vh);
+      }
+
+      .external-ai-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .external-ai-hint {
+        flex: 1 1 auto;
+        text-align: left;
+      }
+
       .search-main {
         gap: 9px;
       }
@@ -1948,15 +2163,35 @@
         padding: 10px;
       }
 
+      .platform-dock-head {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .platform-scroll-hint {
+        display: inline-flex;
+      }
+
       .platforms-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        display: flex;
         gap: 8px;
+        overflow-x: auto;
+        padding: 0 2px 6px;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
       }
 
       .platform-card {
+        flex: 0 0 168px;
         min-height: 58px;
         padding: 8px;
         border-radius: 14px;
+        scroll-snap-align: start;
+      }
+
+      .platform-sort-banner {
+        flex: 0 0 260px;
       }
 
       .platform-card-main {
@@ -2309,14 +2544,31 @@
             <button class="ghost-btn copy-search-btn" id="quickNoteBtn" type="button">📥 存入收件箱</button>
           </div>
         </div>
-        <div class="global-search-box" aria-label="全文搜索">
-          <input id="globalSearchInput" class="field global-search-input" type="search" placeholder="🔍 搜索所有内容：标题、标签、备注、正文" autocomplete="off" />
+        <div id="localSearchDropdown" class="local-search-dropdown hidden" role="listbox" aria-label="本地搜索结果"></div>
+        <div class="external-ai-row" aria-label="外部 AI 快捷入口">
+          <div class="external-ai-links">
+            <span>外部 AI：</span>
+            <button class="external-ai-link" type="button" data-action="external-ai-home" data-platform-id="doubao">豆包</button>
+            <span aria-hidden="true">·</span>
+            <button class="external-ai-link" type="button" data-action="external-ai-home" data-platform-id="deepseek">DeepSeek</button>
+          </div>
+          <span class="external-ai-hint">在外部 AI 完成对话后，可复制回答回 Info Dock 存入收件箱。</span>
+        </div>
+        <div class="global-search-box hidden" aria-label="全文搜索" aria-hidden="true">
+          <input id="globalSearchInput" class="field global-search-input" type="search" placeholder="🔍 搜索所有内容：标题、标签、备注、正文" autocomplete="off" tabindex="-1" />
           <div id="globalSearchResults" class="global-search-results hidden"></div>
         </div>
         <div class="status-msg" id="statusMsg"></div>
       </section>
 
       <section class="card platform-dock" id="platformDock" aria-label="平台入口">
+        <div class="platform-dock-head">
+          <div>
+            <strong>网页搜索平台</strong>
+            <span>点击平台按钮，使用当前输入框内容进行外部搜索。</span>
+          </div>
+          <span class="platform-scroll-hint">移动端可横向滑动查看更多</span>
+        </div>
         <div class="platforms-grid" id="platformCards"></div>
       </section>
 </header>
@@ -2846,6 +3098,11 @@
       }
     ];
 
+    const EXTERNAL_AI_PLATFORM_IDS = new Set(["doubao", "deepseek"]);
+    const DEFAULT_VISIBLE_PLATFORM_COUNT = 6;
+    const LOCAL_SEARCH_MIN_QUERY_LENGTH = 2;
+    const LOCAL_SEARCH_MAX_RESULTS = 10;
+
     const STORAGE_KEYS = {
       platforms: "infoDock.platforms.v1",
       history: "infoDock.history.v1",
@@ -2870,6 +3127,7 @@
       searchInput: $("#searchInput"),
       quickNoteBtn: $("#quickNoteBtn"),
       statusMsg: $("#statusMsg"),
+      localSearchDropdown: $("#localSearchDropdown"),
       globalSearchInput: $("#globalSearchInput"),
       globalSearchResults: $("#globalSearchResults"),
       platformDock: $("#platformDock"),
@@ -3205,6 +3463,30 @@
     let pendingImportMode = "merge";
     let isSortingPlatforms = false;
     let selectedSortPlatformId = "";
+    let showAllPlatforms = false;
+    let localSearchDebounceTimer = 0;
+    let currentLocalSearchResults = [];
+    let afterItemUpdateRefreshTimer = 0;
+    let afterItemUpdateRefreshOptions = { renderHistory: false, renderKnowledge: false, renderCreatorSources: false, renderDataPanels: false };
+    const EXPLICIT_LATER_EDIT_ACTIONS = new Set([
+      "later-source",
+      "later-related-history",
+      "later-title",
+      "later-url",
+      "later-tags",
+      "later-conclusion",
+      "later-capture-text",
+      "later-save-context",
+      "later-body-text"
+    ]);
+    const EXPLICIT_HISTORY_EDIT_ACTIONS = new Set([
+      "history-note",
+      "history-tags",
+      "history-is-research",
+      "history-research-goal",
+      "history-target-sample-count",
+      "history-research-note"
+    ]);
     const searchSnapshotFetchQueue = new Set();
 
     async function boot() {
@@ -3422,14 +3704,23 @@
       if (elements.resetPwaInstallDismissBtn) elements.resetPwaInstallDismissBtn.addEventListener("click", () => {
         void refreshPwaInstallState();
       });
-      elements.globalSearchInput.addEventListener("input", renderGlobalSearchResults);
-      elements.globalSearchInput.addEventListener("focus", renderGlobalSearchResults);
+      if (elements.globalSearchInput) {
+        elements.globalSearchInput.addEventListener("input", renderGlobalSearchResults);
+        elements.globalSearchInput.addEventListener("focus", renderGlobalSearchResults);
+      }
 
+      elements.searchInput.addEventListener("input", scheduleLocalSearchDropdown);
+      elements.searchInput.addEventListener("focus", scheduleLocalSearchDropdown);
       elements.searchInput.addEventListener("keydown", async (event) => {
         if (event.key === "Enter") {
           event.preventDefault();
-          const firstPlatform = platforms[0];
-          if (firstPlatform) await runPlatformEntrance(firstPlatform.id, "web");
+          renderLocalSearchDropdown();
+          if (isLocalSearchDropdownVisible() && currentLocalSearchResults.length) {
+            openLocalSearchResult(currentLocalSearchResults[0]);
+            return;
+          }
+          setStatus("本地暂无匹配结果。可以点击下方平台卡片继续进行外部网页搜索。");
+          toast("本地暂无匹配结果，请点击平台卡片搜索网页。");
         }
       });
 
@@ -3539,6 +3830,9 @@
 
       document.addEventListener("click", (event) => {
         void handleGlobalClick(event);
+        if (elements.searchInput && !event.target.closest(".search-card")) {
+          hideLocalSearchDropdown();
+        }
       });
       document.addEventListener("input", (event) => {
         void handleGlobalInput(event);
@@ -3549,6 +3843,7 @@
 
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
+          hideLocalSearchDropdown();
           closeAddPlatformModal();
           closeSnapshotModal();
           closeCreatorSourceModal();
@@ -3980,6 +4275,7 @@
       else creatorSources.unshift(source);
       creatorSources = normalizeCreatorSources(creatorSources);
       saveCreatorSourcesToLocalStorage();
+      await rebuildSearchIndex();
       closeCreatorSourceModal();
       renderCreatorSources();
       await renderDataManagementPanels();
@@ -4004,6 +4300,7 @@
       const now = new Date().toISOString();
       creatorSources = normalizeCreatorSources(creatorSources.map((source) => source.id === id ? { ...source, ...patch, updatedAt: now } : source));
       saveCreatorSourcesToLocalStorage();
+      await rebuildSearchIndex();
       if (shouldRender) renderCreatorSources();
       await renderDataManagementPanels();
     }
@@ -4102,6 +4399,7 @@
       if (!window.confirm(`删除信息源「${source.name}」？已保存到收件箱的内容不会受影响。`)) return;
       creatorSources = creatorSources.filter((item) => item.id !== id);
       saveCreatorSourcesToLocalStorage();
+      await rebuildSearchIndex();
       renderCreatorSources();
       await renderDataManagementPanels();
       toast("信息源已删除。 ");
@@ -5301,8 +5599,12 @@
         const content = contentById.get(item.id) || {};
         searchEngine.addToIndex(buildHistorySearchDoc(item, content));
       });
+      creatorSources.forEach((source) => {
+        searchEngine.addToIndex(buildCreatorSourceSearchDoc(source));
+      });
 
       renderGlobalSearchResults();
+      renderLocalSearchDropdown();
     }
 
     function getHistoryById(id) {
@@ -5388,6 +5690,57 @@
       };
     }
 
+    function buildCreatorSourceSearchDoc(source) {
+      const statusLabel = CREATOR_SOURCE_STATUS_LABELS[source.status] || source.status || "";
+      const typeLabel = CREATOR_SOURCE_TYPE_LABELS[source.type] || source.type || "";
+      const frequencyLabel = CREATOR_SOURCE_FREQUENCY_LABELS[source.checkFrequency] || source.checkFrequency || "";
+      return {
+        id: source.id,
+        itemType: "creator",
+        title: source.name || "未命名信息源",
+        source: source.platform || "其他",
+        reason: [
+          source.description,
+          source.reason,
+          source.profileUrl,
+          source.mobileUrl,
+          source.appUrl,
+          source.rssUrl,
+          source.rsshubUrl,
+          source.searchUrlTemplate
+        ].filter(Boolean).join(" "),
+        conclusion: "",
+        keyword: source.name || "",
+        platform: source.platform || "",
+        note: [
+          source.category,
+          source.type,
+          typeLabel,
+          source.status,
+          statusLabel,
+          source.checkFrequency,
+          frequencyLabel
+        ].filter(Boolean).join(" "),
+        tags: normalizeTags(source.tags || []).join(" "),
+        bodyText: [
+          source.description,
+          source.reason,
+          source.profileUrl,
+          source.mobileUrl,
+          source.appUrl,
+          source.rssUrl,
+          source.rsshubUrl,
+          source.searchUrlTemplate
+        ].filter(Boolean).join(" "),
+        url: source.profileUrl || source.mobileUrl || source.appUrl || "",
+        createdAt: source.createdAt || "",
+        autoSummary: source.description || "",
+        status: statusLabel,
+        category: source.category || "",
+        entranceType: typeLabel
+      };
+    }
+
     function renderGlobalSearchResults() {
       if (!elements.globalSearchInput || !elements.globalSearchResults) return;
       const query = elements.globalSearchInput.value.trim();
@@ -5457,6 +5810,255 @@
       const prefix = start > 0 ? "…" : "";
       const suffix = start + 180 < content.length ? "…" : "";
       return `${prefix}${snippet}${suffix}`;
+    }
+
+    function isResearchHistoryItem(item = {}) {
+      return Boolean(item.isResearch || item.researchGoal || item.researchNote || normalizeTags(item.tags || []).includes("#研究"));
+    }
+
+    function getLocalSearchResultType(result) {
+      if (result.itemType === "creator") {
+        return {
+          key: "source",
+          label: "信息源",
+          tab: "creatorSourcesSection",
+          focusType: "creator",
+          order: 4
+        };
+      }
+
+      if (result.itemType === "later") {
+        const item = laterItems.find((entry) => entry.id === result.id);
+        const isKnowledgeResult = KNOWLEDGE_STATUS_SET.has(result.status) || KNOWLEDGE_STATUS_SET.has(item?.status);
+        return isKnowledgeResult
+          ? { key: "knowledge", label: "知识库", tab: "knowledgeSection", focusType: "later", order: 3 }
+          : { key: "inbox", label: "收件箱", tab: "laterSection", focusType: "later", order: 2 };
+      }
+
+      const historyItem = historyItems.find((entry) => entry.id === result.id);
+      if (isResearchHistoryItem(historyItem)) {
+        return {
+          key: "research",
+          label: "研究内容",
+          tab: "historySection",
+          focusType: "history",
+          order: 5
+        };
+      }
+
+      return {
+        key: "history",
+        label: "搜索历史",
+        tab: "historySection",
+        focusType: "history",
+        order: 1
+      };
+    }
+
+    function getLocalSearchResultSource(result, localType) {
+      if (result.itemType === "creator") {
+        const source = getCreatorSourceById(result.id);
+        const status = source ? (CREATOR_SOURCE_STATUS_LABELS[source.status] || source.status || "") : result.status;
+        return [result.source || result.platform || "其他", status].filter(Boolean).join(" · ");
+      }
+      if (localType.key === "knowledge" || localType.key === "inbox") {
+        const item = laterItems.find((entry) => entry.id === result.id);
+        return [item?.source || result.source || "其他", item?.status || result.status || ""].filter(Boolean).join(" · ");
+      }
+      const historyItem = historyItems.find((entry) => entry.id === result.id);
+      return [
+        historyItem?.platform || result.platform || result.source || "其他",
+        localType.key === "research" ? "研究主题" : (historyItem?.status || result.status || "")
+      ].filter(Boolean).join(" · ");
+    }
+
+    function searchLocalContent(query, maxResults = LOCAL_SEARCH_MAX_RESULTS) {
+      const cleanQuery = String(query || "").trim();
+      if (cleanQuery.length < LOCAL_SEARCH_MIN_QUERY_LENGTH) return [];
+      const seen = new Set();
+      const ranked = searchEngine.search(cleanQuery)
+        .map((result) => ({
+          ...result,
+          localType: getLocalSearchResultType(result)
+        }))
+        .filter((result) => {
+          const key = `${result.itemType}:${result.id}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return ["history", "inbox", "knowledge", "source", "research"].includes(result.localType.key);
+        })
+        .sort((a, b) => {
+          if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
+          return a.localType.order - b.localType.order;
+        });
+
+      const grouped = [];
+      ["history", "inbox", "knowledge", "source", "research"].forEach((key) => {
+        ranked.filter((result) => result.localType.key === key).forEach((result) => grouped.push(result));
+      });
+      return grouped.slice(0, maxResults);
+    }
+
+    function isLocalSearchDropdownVisible() {
+      return Boolean(elements.localSearchDropdown && !elements.localSearchDropdown.classList.contains("hidden"));
+    }
+
+    function hideLocalSearchDropdown() {
+      currentLocalSearchResults = [];
+      if (!elements.localSearchDropdown) return;
+      elements.localSearchDropdown.innerHTML = "";
+      elements.localSearchDropdown.classList.add("hidden");
+    }
+
+    function scheduleLocalSearchDropdown() {
+      window.clearTimeout(localSearchDebounceTimer);
+      localSearchDebounceTimer = window.setTimeout(renderLocalSearchDropdown, 160);
+    }
+
+    function renderLocalSearchDropdown() {
+      if (!elements.localSearchDropdown || !elements.searchInput) return;
+      const query = elements.searchInput.value.trim();
+      const panel = elements.localSearchDropdown;
+
+      if (!query) {
+        hideLocalSearchDropdown();
+        return;
+      }
+
+      if (query.length < LOCAL_SEARCH_MIN_QUERY_LENGTH) {
+        currentLocalSearchResults = [];
+        panel.innerHTML = `<p class="local-search-empty">继续输入至少 ${LOCAL_SEARCH_MIN_QUERY_LENGTH} 个字符，可搜索本地历史、收件箱、知识库、信息源和研究内容。</p>`;
+        panel.classList.remove("hidden");
+        return;
+      }
+
+      const results = searchLocalContent(query, LOCAL_SEARCH_MAX_RESULTS);
+      currentLocalSearchResults = results;
+      panel.classList.remove("hidden");
+
+      if (!results.length) {
+        panel.innerHTML = `
+          <p class="local-search-empty">本地暂无匹配结果。可以点击下方平台卡片继续进行外部网页搜索。</p>
+        `;
+        return;
+      }
+
+      const groups = new Map();
+      results.forEach((result) => {
+        const key = result.localType.key;
+        if (!groups.has(key)) groups.set(key, { label: result.localType.label, items: [] });
+        groups.get(key).items.push(result);
+      });
+
+      panel.innerHTML = Array.from(groups.values()).map((group) => `
+        <div class="local-search-section">
+          <div class="local-search-section-title">${escapeHtml(group.label)}</div>
+          ${group.items.map((result) => renderLocalSearchResultItem(result, query)).join("")}
+        </div>
+      `).join("") + `
+        <div class="local-search-footer">
+          <span>Enter 打开第一条本地结果；没有本地结果时，请点击下方平台搜索网页。</span>
+          <span>最多显示 ${LOCAL_SEARCH_MAX_RESULTS} 条</span>
+        </div>
+      `;
+    }
+
+    function renderLocalSearchResultItem(result, query) {
+      const localType = result.localType || getLocalSearchResultType(result);
+      const title = result.title || result.keyword || "未命名内容";
+      const source = getLocalSearchResultSource(result, localType);
+      const snippet = getSearchResultSnippet(result, query);
+      return `
+        <button
+          class="local-search-item"
+          type="button"
+          role="option"
+          data-action="local-search-jump"
+          data-id="${escapeAttribute(result.id)}"
+          data-item-type="${escapeAttribute(result.itemType)}"
+          data-local-type="${escapeAttribute(localType.key)}"
+        >
+          <span class="local-search-meta">
+            <span class="tag search-type-badge search-type-${escapeAttribute(localType.key)}">${escapeHtml(localType.label)}</span>
+            ${source ? `<span class="tag">${escapeHtml(source)}</span>` : ""}
+          </span>
+          <strong class="local-search-title">${escapeHtml(title)}</strong>
+          ${snippet ? `<span class="local-search-snippet">${escapeHtml(snippet)}</span>` : ""}
+        </button>
+      `;
+    }
+
+    function clearFiltersForLocalJump(localTypeKey) {
+      if (localTypeKey === "history" || localTypeKey === "research") {
+        elements.historyPlatformFilter.value = "全部平台";
+        elements.historyStatusFilter.value = "全部状态";
+        elements.historyTextFilter.value = "";
+        return;
+      }
+
+      if (localTypeKey === "knowledge") {
+        if (elements.knowledgeSourceFilter) elements.knowledgeSourceFilter.value = "全部来源";
+        if (elements.knowledgeStatusFilter) elements.knowledgeStatusFilter.value = "全部状态";
+        if (elements.knowledgeTextFilter) elements.knowledgeTextFilter.value = "";
+        return;
+      }
+
+      if (localTypeKey === "source") {
+        if (elements.creatorPlatformFilter) elements.creatorPlatformFilter.value = "全部平台";
+        if (elements.creatorCategoryFilter) elements.creatorCategoryFilter.value = "全部分类";
+        if (elements.creatorStatusFilter) elements.creatorStatusFilter.value = "全部状态";
+        if (elements.creatorTextFilter) elements.creatorTextFilter.value = "";
+        creatorDueFilterActive = false;
+        return;
+      }
+
+      reviewFilterActive = false;
+      if (elements.laterSourceFilter) elements.laterSourceFilter.value = "全部来源";
+      if (elements.laterStatusFilter) elements.laterStatusFilter.value = "全部状态";
+      if (elements.laterTextFilter) elements.laterTextFilter.value = "";
+      if (elements.laterRelatedFilter) elements.laterRelatedFilter.value = "全部研究";
+      currentRelatedHistoryFilter = "";
+    }
+
+    function openLocalSearchResult(result) {
+      if (!result) return;
+      const localType = result.localType || getLocalSearchResultType(result);
+      hideLocalSearchDropdown();
+      clearFiltersForLocalJump(localType.key);
+
+      if (localType.key === "knowledge") {
+        activateTab("knowledgeSection");
+        renderKnowledge();
+        focusRenderedItem(result.id, "later");
+        return;
+      }
+
+      if (localType.key === "source") {
+        activateTab("creatorSourcesSection");
+        renderCreatorSources();
+        focusRenderedItem(result.id, "creator");
+        return;
+      }
+
+      if (localType.key === "inbox") {
+        activateTab("laterSection");
+        renderLater();
+        focusRenderedItem(result.id, "later");
+        return;
+      }
+
+      activateTab("historySection");
+      renderHistory();
+      focusRenderedItem(result.id, "history");
+    }
+
+    function openLocalSearchResultById(id, itemType, localTypeKey) {
+      const result = currentLocalSearchResults.find((entry) =>
+        entry.id === id && entry.itemType === itemType && entry.localType?.key === localTypeKey
+      ) || searchLocalContent(elements.searchInput?.value || "", LOCAL_SEARCH_MAX_RESULTS).find((entry) =>
+        entry.id === id && entry.itemType === itemType
+      ) || { id, itemType, localType: getLocalSearchResultType({ id, itemType }) };
+      openLocalSearchResult(result);
     }
 
     function hasUserProvidedLaterReason(reason) {
@@ -5606,8 +6208,7 @@
 
     function renderLaterMemoryAnchor(item) {
       const anchor = getLaterMemoryAnchor(item);
-      if (!anchor) return "";
-      return renderCompactPreview(anchor.text, anchor.label, 150);
+      return `<div data-later-memory-anchor>${anchor ? renderCompactPreview(anchor.text, anchor.label, 150) : ""}</div>`;
     }
 
     function getLaterDisplayTitle(item) {
@@ -7643,39 +8244,64 @@
       return `${value.slice(0, maxLength)}…`;
     }
 
+    function getSearchPlatforms() {
+      return platforms.filter((platform) => !isAiPlatform(platform));
+    }
+
+    function getOrderedSearchPlatforms() {
+      const searchPlatforms = getSearchPlatforms();
+      const bing = searchPlatforms.find((platform) => platform.id === "bing")
+        || searchPlatforms.find((platform) => platform.name === "必应");
+      return bing
+        ? [bing, ...searchPlatforms.filter((platform) => platform !== bing)]
+        : searchPlatforms;
+    }
+
     function renderPlatformCards() {
-      const bing = platforms.find((platform) => platform.id === "bing") || platforms.find((platform) => platform.name === "必应") || platforms[0];
-      const otherPlatforms = platforms.filter((platform) => platform !== bing);
+      const orderedSearchPlatforms = getOrderedSearchPlatforms();
+      const bing = orderedSearchPlatforms[0]?.id === "bing" || orderedSearchPlatforms[0]?.name === "必应"
+        ? orderedSearchPlatforms[0]
+        : null;
+      const shouldShowAll = isSortingPlatforms || showAllPlatforms;
+      const visiblePlatforms = shouldShowAll
+        ? orderedSearchPlatforms
+        : orderedSearchPlatforms.slice(0, DEFAULT_VISIBLE_PLATFORM_COUNT);
+      const hiddenCount = Math.max(0, orderedSearchPlatforms.length - visiblePlatforms.length);
 
-      const bingCard = bing ? `
-        <button class="platform-card platform-card-main" type="button" data-action="platform-bing" data-platform-id="${escapeAttribute(bing.id)}">
-          <h3>${escapeHtml(bing.name === "必应" ? "必应搜索" : `${bing.name}搜索`)}</h3>
-        </button>
-      ` : "";
+      const sortBanner = isSortingPlatforms
+        ? `<div class="platform-sort-banner">排序模式：依次点击两个非必应平台卡片即可互换顺序；点击“完成排序”退出，排序会立即保存在本机。</div>`
+        : "";
 
-      const platformCards = otherPlatforms.map((platform) => {
-        const isAi = isAiPlatform(platform);
-        const actionsHtml = isAi
-          ? `<button class="tiny-btn" type="button" data-action="platform-home" data-platform-id="${escapeAttribute(platform.id)}">打开主页</button>`
-          : `
-              <button class="tiny-btn" type="button" data-action="platform-web" data-platform-id="${escapeAttribute(platform.id)}">网页搜索</button>
-              <button class="tiny-btn" type="button" data-action="platform-site" data-platform-id="${escapeAttribute(platform.id)}">Bing site</button>
-            `;
-
+      const platformCards = visiblePlatforms.map((platform) => {
+        const isFixedBing = bing && platform.id === bing.id;
+        const sortable = isSortingPlatforms && !isFixedBing;
         return `
           <article
             class="platform-card ${isSortingPlatforms ? "sorting" : ""} ${selectedSortPlatformId === platform.id ? "selected" : ""}"
-            ${isSortingPlatforms ? `data-action="platform-sort-select" data-platform-id="${escapeAttribute(platform.id)}"` : ""}
+            ${sortable ? `data-action="platform-sort-select" data-platform-id="${escapeAttribute(platform.id)}"` : ""}
           >
             <div class="platform-card-head">
-              <h3>${escapeHtml(platform.name)}</h3>
-              ${isAi && !isSortingPlatforms ? `<span class="sort-hint">AI</span>` : ""}
-              ${isSortingPlatforms ? `<span class="sort-hint">${selectedSortPlatformId === platform.id ? "已选" : "选择"}</span>` : ""}
+              <h3>${escapeHtml(platform.name === "必应" ? "必应搜索" : platform.name)}</h3>
+              ${isSortingPlatforms ? `<span class="sort-hint">${isFixedBing ? "固定" : (selectedSortPlatformId === platform.id ? "已选" : "选择")}</span>` : ""}
             </div>
-            ${isSortingPlatforms ? "" : `<div class="platform-actions">${actionsHtml}</div>`}
+            ${isSortingPlatforms ? "" : `
+              <div class="platform-actions">
+                <button class="tiny-btn" type="button" data-action="platform-web" data-platform-id="${escapeAttribute(platform.id)}">网页搜索</button>
+                <button class="tiny-btn" type="button" data-action="platform-site" data-platform-id="${escapeAttribute(platform.id)}">Bing site</button>
+              </div>
+            `}
           </article>
         `;
       }).join("");
+
+      const moreCard = !isSortingPlatforms && orderedSearchPlatforms.length > DEFAULT_VISIBLE_PLATFORM_COUNT
+        ? `
+          <button class="platform-card platform-card-more" type="button" data-action="toggle-more-platforms">
+            <h3>${showAllPlatforms ? "收起平台" : `更多平台`}</h3>
+            <span class="sort-hint">${showAllPlatforms ? "回到常用入口" : `还有 ${hiddenCount} 个`}</span>
+          </button>
+        `
+        : "";
 
       const addCard = `
         <button class="platform-card add" type="button" data-action="open-add-platform">
@@ -7686,12 +8312,12 @@
       const sortCard = `
         <button class="platform-card platform-card-sort-control ${isSortingPlatforms ? "active" : ""}" type="button" data-action="toggle-platform-sort">
           <h3>${isSortingPlatforms ? "完成排序" : "自定义排序"}</h3>
+          ${isSortingPlatforms ? "" : `<span class="sort-hint">调整平台顺序</span>`}
         </button>
       `;
 
-      elements.platformCards.innerHTML = bingCard + platformCards + addCard + sortCard;
+      elements.platformCards.innerHTML = sortBanner + platformCards + moreCard + addCard + sortCard;
     }
-
 
     function renderFilters() {
       const platformNames = unique([
@@ -7818,8 +8444,9 @@
     function togglePlatformSort() {
       isSortingPlatforms = !isSortingPlatforms;
       selectedSortPlatformId = "";
+      if (isSortingPlatforms) showAllPlatforms = true;
       renderPlatformCards();
-      toast(isSortingPlatforms ? "已进入排序模式：依次点击两个非必应卡片即可互换位置。" : "已退出排序模式。");
+      toast(isSortingPlatforms ? "已进入排序模式：依次点击两个非必应平台卡片即可互换位置，完成后点“完成排序”。" : "已完成平台排序。");
     }
 
     async function selectPlatformForSwap(platformId) {
@@ -7893,6 +8520,16 @@
       const url = getPlatformHomeUrl(platform);
       window.open(url, "_blank", "noopener,noreferrer");
       setStatus(`已打开「${platform.name}」主页。外部 AI 对话完成后，可复制有价值的回答回 Info Dock 顶部搜索框并存入收件箱。`);
+      toast(`已打开 ${platform.name} 主页。`);
+    }
+
+    async function openExternalAiHome(platformId) {
+      const platform = platforms.find((item) => item.id === platformId)
+        || DEFAULT_PLATFORMS.find((item) => item.id === platformId);
+      if (!platform) return;
+      const url = getPlatformHomeUrl(platform);
+      window.open(url, "_blank", "noopener,noreferrer");
+      setStatus(`已打开「${platform.name}」主页。外部 AI 完成对话后，可复制回答回 Info Dock 存入收件箱。`);
       toast(`已打开 ${platform.name} 主页。`);
     }
 
@@ -8124,7 +8761,7 @@ function fillUrlTemplate(template, query, domain = "") {
           </div>
           <details class="compact-details compact-edit-details">
             <summary>编辑、研究与关联</summary>
-            <div class="compact-details-body">
+            <div class="compact-details-body" data-explicit-edit-form="history" data-id="${escapeAttribute(item.id)}">
               <div class="compact-edit-grid">
                 <label class="compact-field"><span>状态</span>
                   <select data-action="history-status" data-id="${escapeAttribute(item.id)}">
@@ -8142,6 +8779,11 @@ function fillUrlTemplate(template, query, domain = "") {
               ${renderExistingTagButtons(item, "history") ? `<div class="tag-row">${renderExistingTagButtons(item, "history")}</div>` : ""}
               ${renderSuggestedTagButtons(item, "history")}
               ${renderResearchPanel(item)}
+              <div class="explicit-edit-actions" data-explicit-edit-form="history" data-id="${escapeAttribute(item.id)}">
+                <span class="unsaved-edit-hint hidden" data-edit-dirty-hint>有未保存修改</span>
+                <button class="primary-btn" type="button" data-action="save-history-explicit-edit" data-id="${escapeAttribute(item.id)}">保存修改</button>
+                <button class="ghost-btn" type="button" data-action="cancel-history-explicit-edit" data-id="${escapeAttribute(item.id)}">取消</button>
+              </div>
               ${renderBacklinks("history", item.id)}
             </div>
           </details>
@@ -8575,7 +9217,10 @@ function fillUrlTemplate(template, query, domain = "") {
 
     function focusRenderedItem(id, itemType) {
       setTimeout(() => {
-        const target = document.querySelector(`[data-item-type="${escapeCssSelectorValue(itemType)}"][data-item-id="${escapeCssSelectorValue(id)}"]`);
+        const selector = itemType === "creator"
+          ? `[data-source-id="${escapeCssSelectorValue(id)}"]`
+          : `[data-item-type="${escapeCssSelectorValue(itemType)}"][data-item-id="${escapeCssSelectorValue(id)}"]`;
+        const target = document.querySelector(selector);
         if (!target) {
           toast("未找到对应条目，可能已被删除或被筛选隐藏。");
           return;
@@ -8646,11 +9291,11 @@ function fillUrlTemplate(template, query, domain = "") {
       return `
         <div class="ai-quick-triage-row" role="group" aria-label="AI 回答快捷处理">
           <span class="ai-quick-triage-label">AI 快捷处理</span>
-          <button class="tiny-btn" type="button" data-action="later-ai-fill-conclusion" data-id="${escapeAttribute(item.id)}">填入结论</button>
-          <button class="tiny-btn" type="button" data-action="later-ai-supplement-tags" data-id="${escapeAttribute(item.id)}">补标签</button>
-          <button class="tiny-btn" type="button" data-action="later-ai-quick-status" data-id="${escapeAttribute(item.id)}" data-status="待整理">待整理</button>
-          <button class="tiny-btn" type="button" data-action="later-ai-quick-status" data-id="${escapeAttribute(item.id)}" data-status="已吸收">已吸收</button>
-          <button class="danger-btn" type="button" data-action="later-ai-quick-status" data-id="${escapeAttribute(item.id)}" data-status="已废弃">已废弃</button>
+          <button class="tiny-btn" type="button" data-action="later-ai-fill-conclusion" data-ai-quick-key="fill-conclusion" data-id="${escapeAttribute(item.id)}">填入结论</button>
+          <button class="tiny-btn" type="button" data-action="later-ai-supplement-tags" data-ai-quick-key="supplement-tags" data-id="${escapeAttribute(item.id)}">补标签</button>
+          <button class="tiny-btn" type="button" data-action="later-ai-quick-status" data-ai-quick-key="status-待整理" data-id="${escapeAttribute(item.id)}" data-status="待整理">待整理</button>
+          <button class="tiny-btn" type="button" data-action="later-ai-quick-status" data-ai-quick-key="status-已吸收" data-id="${escapeAttribute(item.id)}" data-status="已吸收">已吸收</button>
+          <button class="tiny-btn ai-quick-danger-btn" type="button" data-action="later-ai-quick-status" data-ai-quick-key="status-已废弃" data-id="${escapeAttribute(item.id)}" data-status="已废弃">已废弃</button>
         </div>
       `;
     }
@@ -8729,35 +9374,325 @@ function fillUrlTemplate(template, query, domain = "") {
 
     function focusAiAnswerContextEditor(id) {
       focusLaterEditorField(id, [
+        `textarea[data-action="later-save-context"][data-id="${escapeCssSelectorValue(id)}"]`,
         `textarea[data-action="later-conclusion"][data-id="${escapeCssSelectorValue(id)}"]`,
         `input[data-action="later-title"][data-id="${escapeCssSelectorValue(id)}"]`,
         `input[data-action="later-tags"][data-id="${escapeCssSelectorValue(id)}"]`
       ]);
     }
 
+
+    function findExplicitEditPanel(node, type = "") {
+      if (!node?.closest) return null;
+      const panel = node.closest("[data-explicit-edit-form]");
+      if (!panel) return null;
+      if (type && panel.dataset.explicitEditForm !== type) return null;
+      return panel;
+    }
+
+    function setExplicitEditDirty(panel, dirty = true) {
+      if (!panel) return;
+      panel.dataset.dirty = dirty ? "1" : "0";
+      const hint = panel.querySelector("[data-edit-dirty-hint]");
+      if (hint) hint.classList.toggle("hidden", !dirty);
+    }
+
+    function markExplicitEditDirtyFromNode(node) {
+      const panel = findExplicitEditPanel(node);
+      if (panel) setExplicitEditDirty(panel, true);
+    }
+
+    function setFieldValue(root, action, id, value) {
+      const selector = `[data-action="${escapeCssSelectorValue(action)}"][data-id="${escapeCssSelectorValue(id)}"]`;
+      const field = root.querySelector(selector);
+      if (!field) return;
+      if (field.type === "checkbox") {
+        field.checked = Boolean(value);
+      } else {
+        field.value = value == null ? "" : String(value);
+      }
+    }
+
+    function syncLaterExplicitEditFormValues(id, item = null) {
+      const latest = item || laterItems.find((entry) => entry.id === id);
+      if (!latest) return;
+      document.querySelectorAll(`[data-explicit-edit-form="later"][data-id="${escapeCssSelectorValue(id)}"]`).forEach((panel) => {
+        setFieldValue(panel, "later-source", id, latest.source || "其他");
+        setFieldValue(panel, "later-related-history", id, latest.relatedHistoryId || "");
+        setFieldValue(panel, "later-title", id, latest.title || "");
+        setFieldValue(panel, "later-url", id, latest.url || "");
+        setFieldValue(panel, "later-tags", id, formatTagsForEdit(latest.tags || []));
+        setFieldValue(panel, "later-conclusion", id, latest.conclusion || "");
+        setFieldValue(panel, "later-capture-text", id, latest.captureText || "");
+        setFieldValue(panel, "later-save-context", id, latest.saveContext || "");
+        setFieldValue(panel, "later-body-text", id, latest.bodyText || "");
+        setExplicitEditDirty(panel, false);
+      });
+    }
+
+    function syncHistoryExplicitEditFormValues(id, item = null) {
+      const latest = item || historyItems.find((entry) => entry.id === id);
+      if (!latest) return;
+      const card = document.querySelector(`[data-item-type="history"][data-item-id="${escapeCssSelectorValue(id)}"]`);
+      if (!card) return;
+      setFieldValue(card, "history-note", id, latest.note || "");
+      setFieldValue(card, "history-tags", id, formatTagsForEdit(latest.tags || []));
+      setFieldValue(card, "history-is-research", id, Boolean(latest.isResearch));
+      setFieldValue(card, "history-research-goal", id, latest.researchGoal || "");
+      setFieldValue(card, "history-target-sample-count", id, latest.targetSampleCount || "");
+      setFieldValue(card, "history-research-note", id, latest.researchNote || "");
+      card.querySelectorAll(`[data-explicit-edit-form="history"][data-id="${escapeCssSelectorValue(id)}"]`).forEach((panel) => setExplicitEditDirty(panel, false));
+    }
+
+    function getFieldValue(root, action, id, fallback = "") {
+      const selector = `[data-action="${escapeCssSelectorValue(action)}"][data-id="${escapeCssSelectorValue(id)}"]`;
+      const field = root.querySelector(selector);
+      if (!field) return fallback;
+      if (field.type === "checkbox") return Boolean(field.checked);
+      return field.value;
+    }
+
+    function getLaterExplicitEditPatch(panel, item) {
+      const id = item.id;
+      const selectedHistoryId = String(getFieldValue(panel, "later-related-history", id, item.relatedHistoryId || "") || "");
+      let tags = normalizeTags(getFieldValue(panel, "later-tags", id, formatTagsForEdit(item.tags || [])));
+      if (selectedHistoryId) tags = normalizeTags([...tags, "#研究资料"]);
+      const patch = {
+        source: getFieldValue(panel, "later-source", id, item.source || "其他"),
+        relatedHistoryId: selectedHistoryId,
+        title: getFieldValue(panel, "later-title", id, item.title || "").trim(),
+        url: getFieldValue(panel, "later-url", id, item.url || "").trim(),
+        tags,
+        conclusion: getFieldValue(panel, "later-conclusion", id, item.conclusion || ""),
+        captureText: getFieldValue(panel, "later-capture-text", id, item.captureText || ""),
+        saveContext: getFieldValue(panel, "later-save-context", id, item.saveContext || ""),
+        bodyText: getFieldValue(panel, "later-body-text", id, item.bodyText || "")
+      };
+      if (patch.title && patch.title !== String(item.title || "") && !isWeakLaterTitle(patch.title, patch.url || item.url)) {
+        patch.titleEditedAt = new Date().toISOString();
+      }
+      return patch;
+    }
+
+    function getHistoryExplicitEditPatch(card, item) {
+      const id = item.id;
+      return {
+        note: getFieldValue(card, "history-note", id, item.note || ""),
+        tags: normalizeTags(getFieldValue(card, "history-tags", id, formatTagsForEdit(item.tags || []))),
+        isResearch: Boolean(getFieldValue(card, "history-is-research", id, item.isResearch || false)),
+        researchGoal: getFieldValue(card, "history-research-goal", id, item.researchGoal || ""),
+        targetSampleCount: normalizeTargetSampleCount(getFieldValue(card, "history-target-sample-count", id, item.targetSampleCount || "")),
+        researchNote: getFieldValue(card, "history-research-note", id, item.researchNote || "")
+      };
+    }
+
+    function patchLaterItemInMemory(id, patch) {
+      laterItems = laterItems.map((entry) => entry.id === id ? { ...entry, ...patch } : entry);
+      return laterItems.find((entry) => entry.id === id) || null;
+    }
+
+    function renderLaterMetaForCard(item, isKnowledgeCard = false) {
+      if (isKnowledgeCard) {
+        return `
+          <span class="tag">${escapeHtml(item.source || "其他")}</span>
+          <span class="tag ${laterTagClass(item.status)}">${escapeHtml(item.status)}</span>
+          <span class="tag">${formatTime(item.createdAt)}</span>
+          ${renderLimitedTagChips(item.tags, 3)}
+        `;
+      }
+      return `
+        <span class="tag">${escapeHtml(item.source || "其他")}</span>
+        <span class="tag ${laterTagClass(item.status)}">${escapeHtml(item.status)}</span>
+        <span class="tag">预计：${escapeHtml(estimateLaterItemTime(item))}</span>
+        <span class="tag">${formatTime(item.createdAt)}</span>
+        ${renderContentFetchStatusTag(item)}
+        ${renderMetadataStatusTag(item)}
+        ${renderLimitedTagChips(item.tags, 3)}
+      `;
+    }
+
+    function updateLaterCardDom(id, item = null) {
+      const latest = item || laterItems.find((entry) => entry.id === id);
+      if (!latest) return;
+      document.querySelectorAll(`[data-item-type="later"][data-item-id="${escapeCssSelectorValue(id)}"]`).forEach((card) => {
+        const title = card.querySelector(".item-head .item-title");
+        if (title) title.innerHTML = renderLaterTitleHtml(latest);
+        const meta = card.querySelector(".item-head .meta");
+        if (meta) meta.innerHTML = renderLaterMetaForCard(latest, card.classList.contains("knowledge-item"));
+        const anchor = card.querySelector("[data-later-memory-anchor]");
+        if (anchor) {
+          const memory = getLaterMemoryAnchor(latest);
+          anchor.innerHTML = memory ? renderCompactPreview(memory.text, memory.label, 150) : "";
+        }
+        const knowledgeConclusion = card.querySelector(".knowledge-conclusion");
+        if (knowledgeConclusion) {
+          knowledgeConclusion.innerHTML = `
+            <strong>结论</strong>
+            ${latest.conclusion ? `<p>${renderWikiText(limitText(latest.conclusion, 160))}</p>` : `<p class="hint">还没有结论。可以先补一句核心判断或下一步用法。</p>`}
+          `;
+        }
+      });
+    }
+
+    function updateHistoryCardDom(id, item = null) {
+      const latest = item || historyItems.find((entry) => entry.id === id);
+      if (!latest) return;
+      const card = document.querySelector(`[data-item-type="history"][data-item-id="${escapeCssSelectorValue(id)}"]`);
+      if (!card) return;
+      const meta = card.querySelector(".item-head .meta");
+      if (meta) {
+        meta.innerHTML = `
+          <span class="tag">${escapeHtml(latest.platform)}</span>
+          <span class="tag">${escapeHtml(latest.entranceType || "网页搜索")}</span>
+          <span class="tag ${historyTagClass(latest.status)}">${escapeHtml(latest.status)}</span>
+          <span class="tag">${formatTime(latest.time)}</span>
+          ${renderSearchSnapshotStatusTag(latest)}
+          ${renderLimitedTagChips(latest.tags, 3)}
+        `;
+      }
+      const researchSummary = card.querySelector(".research-summary");
+      if (researchSummary) {
+        const progress = getResearchProgress(latest);
+        const targetLabel = progress.targetSampleCount > 0 ? String(progress.targetSampleCount) : "未设目标";
+        const progressText = progress.targetSampleCount > 0
+          ? `可研究 ${progress.readCount} / ${progress.targetSampleCount}，已吸收 ${progress.organizedCount}`
+          : `可研究 ${progress.readCount}，已吸收 ${progress.organizedCount}`;
+        researchSummary.innerHTML = `
+          <span class="tag ${latest.isResearch ? "ok" : ""}">${latest.isResearch ? "研究主题" : "普通搜索"}</span>
+          <span class="tag">关联资料 ${progress.total} 条</span>
+          <span class="tag">目标样本 ${escapeHtml(targetLabel)}</span>
+          <span class="tag">研究进度：${escapeHtml(progressText)}</span>
+          ${progress.total ? `<button class="tiny-btn" type="button" data-action="view-related-later" data-id="${escapeAttribute(latest.id)}">查看关联资料</button>` : ""}
+        `;
+      }
+    }
+
+    function scheduleAfterItemUpdateRefresh(options = {}) {
+      afterItemUpdateRefreshOptions = {
+        renderHistory: afterItemUpdateRefreshOptions.renderHistory || Boolean(options.renderHistory),
+        renderKnowledge: afterItemUpdateRefreshOptions.renderKnowledge || options.renderKnowledge !== false,
+        renderCreatorSources: afterItemUpdateRefreshOptions.renderCreatorSources || Boolean(options.renderCreatorSources),
+        renderDataPanels: afterItemUpdateRefreshOptions.renderDataPanels || options.renderDataPanels !== false
+      };
+      if (afterItemUpdateRefreshTimer) window.clearTimeout(afterItemUpdateRefreshTimer);
+      afterItemUpdateRefreshTimer = window.setTimeout(async () => {
+        const refreshOptions = afterItemUpdateRefreshOptions;
+        afterItemUpdateRefreshTimer = 0;
+        afterItemUpdateRefreshOptions = { renderHistory: false, renderKnowledge: false, renderCreatorSources: false, renderDataPanels: false };
+        try {
+          await rebuildSearchIndex();
+          rebuildBacklinkIndex();
+          renderFilters();
+          renderPendingReviewPanel();
+          if (triageSessionState.active) renderLaterTriageModal();
+          if (refreshOptions.renderHistory) renderHistory();
+          if (refreshOptions.renderKnowledge) renderKnowledge();
+          if (refreshOptions.renderCreatorSources) renderCreatorSources();
+          renderGlobalSearchResults();
+          if (refreshOptions.renderDataPanels) void renderDataManagementPanels();
+        } catch (error) {
+          console.warn("延迟刷新失败：", error);
+        }
+      }, Number.isFinite(options.delayMs) ? options.delayMs : 140);
+    }
+
+    function setAiQuickButtonBusy(id, key, busy = true) {
+      const buttons = document.querySelectorAll(`[data-item-type="later"][data-item-id="${escapeCssSelectorValue(id)}"] [data-ai-quick-key="${escapeCssSelectorValue(key)}"]`);
+      buttons.forEach((button) => {
+        if (busy) {
+          button.dataset.originalLabel = button.textContent || "";
+          button.textContent = "处理中…";
+          button.disabled = true;
+        } else {
+          if (button.dataset.originalLabel) button.textContent = button.dataset.originalLabel;
+          button.disabled = false;
+          delete button.dataset.originalLabel;
+        }
+      });
+    }
+
+    async function saveLaterExplicitEdit(id, triggerNode = null) {
+      const item = laterItems.find((entry) => entry.id === id);
+      const panel = findExplicitEditPanel(triggerNode, "later") || document.querySelector(`[data-explicit-edit-form="later"][data-id="${escapeCssSelectorValue(id)}"]`);
+      if (!item || !panel) return;
+      const patch = getLaterExplicitEditPatch(panel, item);
+      const nextItem = { ...item, ...patch };
+      updateLaterCardDom(id, nextItem);
+      syncLaterExplicitEditFormValues(id, nextItem);
+      await updateLaterItem(id, patch, false);
+      const isKnowledgeContext = Boolean(triggerNode?.closest?.(".knowledge-item"));
+      scheduleAfterItemUpdateRefresh({ renderKnowledge: !isKnowledgeContext, renderDataPanels: true });
+      toast("已保存修改");
+    }
+
+    function cancelLaterExplicitEdit(id, triggerNode = null) {
+      const item = laterItems.find((entry) => entry.id === id);
+      if (!item) return;
+      syncLaterExplicitEditFormValues(id, item);
+      toast("已取消未保存修改。 ");
+    }
+
+    async function saveHistoryExplicitEdit(id, triggerNode = null) {
+      const item = historyItems.find((entry) => entry.id === id);
+      const card = document.querySelector(`[data-item-type="history"][data-item-id="${escapeCssSelectorValue(id)}"]`);
+      if (!item || !card) return;
+      const patch = getHistoryExplicitEditPatch(card, item);
+      const nextItem = { ...item, ...patch };
+      updateHistoryCardDom(id, nextItem);
+      syncHistoryExplicitEditFormValues(id, nextItem);
+      await updateHistoryItem(id, patch, false);
+      scheduleAfterItemUpdateRefresh({ renderHistory: false, renderKnowledge: true, renderDataPanels: true });
+      toast("已保存修改");
+    }
+
+    function cancelHistoryExplicitEdit(id, triggerNode = null) {
+      const item = historyItems.find((entry) => entry.id === id);
+      if (!item) return;
+      syncHistoryExplicitEditFormValues(id, item);
+      toast("已取消未保存修改。 ");
+    }
+
     async function applyAiAnswerQuickStatus(id, status) {
       if (!["待整理", "已吸收", "已废弃"].includes(status)) return;
       const item = laterItems.find((entry) => entry.id === id);
       if (!item || !isLaterAiAnswer(item)) return;
-      await updateLaterItem(id, {
+      if (status === "已废弃" && !window.confirm("确定要将这条 AI 回答标为已废弃吗？")) return;
+      const key = `status-${status}`;
+      setAiQuickButtonBusy(id, key, true);
+      const patch = {
         status,
         lastTriagedAt: new Date().toISOString()
-      }, true);
-      renderCreatorSources();
-      void renderDataManagementPanels();
-      setStatus(`已将 AI 回答“${item.title || "未命名内容"}”标记为「${status}」。`);
+      };
+      const optimisticItem = { ...item, ...patch };
+      updateLaterCardDom(id, optimisticItem);
+      try {
+        await updateLaterItem(id, patch, false);
+        scheduleAfterItemUpdateRefresh({ renderKnowledge: status === "已吸收", renderCreatorSources: true, renderDataPanels: true });
+        const toastMap = {
+          "待整理": "已标为待整理",
+          "已吸收": "已标为已吸收",
+          "已废弃": "已标为已废弃"
+        };
+        toast(toastMap[status] || `已标为${status}`);
+        setStatus(`已将 AI 回答“${item.title || "未命名内容"}”标记为「${status}」。`);
+      } finally {
+        setAiQuickButtonBusy(id, key, false);
+      }
     }
 
     async function fillAiAnswerConclusion(id) {
       const item = laterItems.find((entry) => entry.id === id);
       if (!item || !isLaterAiAnswer(item)) return;
-      const answerText = getLaterAiAnswerText(item);
+      const answerText = String(item.aiOriginalAnswer || item.bodyText || "").trim();
       if (!answerText) {
         toast("没有可用于生成结论的 AI 回答正文。");
         return;
       }
 
-      const structuredSummary = getAiAnswerStructuredSummary(item);
+      const existingSummary = normalizeStructuredSummary(item.structuredSummary) || normalizeStructuredSummary({});
+      const structuredSummary = existingSummary.oneSentenceConclusion
+        ? existingSummary
+        : structureAiAnswer(answerText);
       const conclusion = limitText(structuredSummary.oneSentenceConclusion || "", 220);
       if (!conclusion) {
         toast("没有提取到可填入的结论。");
@@ -8765,11 +9700,17 @@ function fillUrlTemplate(template, query, domain = "") {
       }
 
       const existingConclusion = String(item.conclusion || "").trim();
-      if (existingConclusion && existingConclusion !== conclusion) {
-        const shouldOverwrite = window.confirm("这条内容已经有结论。要用结构化摘要的一句话结论覆盖吗？");
+      if (existingConclusion) {
+        if (existingConclusion === conclusion) {
+          toast("当前结论已经是这句话。 ");
+          syncLaterExplicitEditFormValues(id, item);
+          return;
+        }
+        const shouldOverwrite = window.confirm("这条内容已经有结论。确认用 AI 摘要结论覆盖吗？");
         if (!shouldOverwrite) return;
       }
 
+      setAiQuickButtonBusy(id, "fill-conclusion", true);
       const patch = {
         conclusion,
         structuredSummary
@@ -8777,26 +9718,48 @@ function fillUrlTemplate(template, query, domain = "") {
       if (!String(item.autoSummary || "").trim()) {
         patch.autoSummary = buildAiAnswerAutoSummary(structuredSummary);
       }
-      await updateLaterItem(id, patch, true);
-      renderCreatorSources();
-      void renderDataManagementPanels();
-      toast(existingConclusion ? "已按确认覆盖结论。" : "已填入结论。");
+      const optimisticItem = { ...item, ...patch };
+      updateLaterCardDom(id, optimisticItem);
+      syncLaterExplicitEditFormValues(id, optimisticItem);
+      try {
+        await updateLaterItem(id, patch, false);
+        scheduleAfterItemUpdateRefresh({ renderKnowledge: true, renderCreatorSources: true, renderDataPanels: true });
+        toast("已填入结论");
+      } finally {
+        setAiQuickButtonBusy(id, "fill-conclusion", false);
+      }
     }
 
     async function supplementAiAnswerTags(id) {
       const item = laterItems.find((entry) => entry.id === id);
       if (!item || !isLaterAiAnswer(item)) return;
       const answerText = getLaterAiAnswerText(item);
-      const suggestedTags = generateAiAnswerTags(item.source || "外部 AI", answerText);
+      const suggestedTags = normalizeTags([
+        ...generateAiAnswerTags(item.source || "外部 AI", answerText),
+        ...suggestTags({
+          kind: "later",
+          title: item.title,
+          url: item.url,
+          source: item.source,
+          summary: answerText
+        })
+      ]);
       const nextTags = normalizeTags([...(item.tags || []), ...suggestedTags]);
       if (formatTagsForEdit(nextTags) === formatTagsForEdit(item.tags || [])) {
-        toast("没有新的推荐标签可补充。");
+        toast("没有新的推荐标签可补充。 ");
         return;
       }
-      await updateLaterItem(id, { tags: nextTags }, true);
-      renderCreatorSources();
-      void renderDataManagementPanels();
-      toast("已补充 AI 回答推荐标签。");
+      setAiQuickButtonBusy(id, "supplement-tags", true);
+      const optimisticItem = { ...item, tags: nextTags };
+      updateLaterCardDom(id, optimisticItem);
+      syncLaterExplicitEditFormValues(id, optimisticItem);
+      try {
+        await updateLaterItem(id, { tags: nextTags }, false);
+        scheduleAfterItemUpdateRefresh({ renderKnowledge: true, renderCreatorSources: true, renderDataPanels: true });
+        toast("已补充标签");
+      } finally {
+        setAiQuickButtonBusy(id, "supplement-tags", false);
+      }
     }
 
     function renderLater() {
@@ -8901,7 +9864,7 @@ function fillUrlTemplate(template, query, domain = "") {
             ${renderConclusionNudge(item)}
             <details class="compact-details compact-edit-details">
               <summary>详情与编辑</summary>
-              <div class="compact-details-body">
+              <div class="compact-details-body" data-explicit-edit-form="later" data-id="${escapeAttribute(item.id)}">
                 ${item.autoSummary ? `<details class="compact-details"><summary>自动摘要</summary><p class="auto-summary">${escapeHtml(item.autoSummary)}</p></details>` : ""}
                 ${item.captureText ? `<details class="compact-details"><summary>保存选文</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.captureText, 420))}</p></details>` : ""}
                 ${item.saveContext ? `<details class="compact-details"><summary>保存上下文</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.saveContext, 420))}</p></details>` : ""}
@@ -8934,6 +9897,20 @@ function fillUrlTemplate(template, query, domain = "") {
                     <textarea data-action="later-conclusion" data-id="${escapeAttribute(item.id)}" placeholder="看完后写一句结论。">${escapeHtml(item.conclusion || "")}</textarea>
                   </label>
                   ${renderWikiPreview(item.conclusion)}
+                  <label class="compact-field wide"><span>保存选文</span>
+                    <textarea class="tall-edit-field" data-action="later-capture-text" data-id="${escapeAttribute(item.id)}" placeholder="保存或粘贴当时选中的关键段落。">${escapeHtml(item.captureText || "")}</textarea>
+                  </label>
+                  <label class="compact-field wide"><span>保存上下文</span>
+                    <textarea class="tall-edit-field" data-action="later-save-context" data-id="${escapeAttribute(item.id)}" placeholder="记录为什么保存、从哪里来、准备怎么用。">${escapeHtml(item.saveContext || "")}</textarea>
+                  </label>
+                  <label class="compact-field wide"><span>正文 / 元数据</span>
+                    <textarea class="tall-edit-field" data-action="later-body-text" data-id="${escapeAttribute(item.id)}" placeholder="可选：补充正文、摘录或元数据。">${escapeHtml(item.bodyText || "")}</textarea>
+                  </label>
+                  <div class="explicit-edit-actions">
+                    <span class="unsaved-edit-hint hidden" data-edit-dirty-hint>有未保存修改</span>
+                    <button class="primary-btn" type="button" data-action="save-later-explicit-edit" data-id="${escapeAttribute(item.id)}">保存修改</button>
+                    <button class="ghost-btn" type="button" data-action="cancel-later-explicit-edit" data-id="${escapeAttribute(item.id)}">取消</button>
+                  </div>
                 </div>
                 ${renderSuggestedTagButtons(item, "later")}
                 ${renderBacklinks("later", item.id)}
@@ -9044,7 +10021,7 @@ function fillUrlTemplate(template, query, domain = "") {
 
             <details class="compact-details compact-edit-details">
               <summary>编辑知识条目</summary>
-              <div class="compact-details-body">
+              <div class="compact-details-body" data-explicit-edit-form="later" data-id="${escapeAttribute(item.id)}">
                 <div class="compact-edit-grid">
                   <label class="compact-field"><span>状态</span>
                     <select data-action="later-status" data-id="${escapeAttribute(item.id)}">
@@ -9062,6 +10039,20 @@ function fillUrlTemplate(template, query, domain = "") {
                     <textarea data-action="later-conclusion" data-id="${escapeAttribute(item.id)}" placeholder="沉淀这条内容的核心结论。">${escapeHtml(item.conclusion || "")}</textarea>
                   </label>
                   ${renderWikiPreview(item.conclusion)}
+                  <label class="compact-field wide"><span>保存选文</span>
+                    <textarea class="tall-edit-field" data-action="later-capture-text" data-id="${escapeAttribute(item.id)}" placeholder="保存或粘贴关键段落。">${escapeHtml(item.captureText || "")}</textarea>
+                  </label>
+                  <label class="compact-field wide"><span>保存上下文</span>
+                    <textarea class="tall-edit-field" data-action="later-save-context" data-id="${escapeAttribute(item.id)}" placeholder="记录这条知识为什么重要、适合怎么用。">${escapeHtml(item.saveContext || "")}</textarea>
+                  </label>
+                  <label class="compact-field wide"><span>正文 / 元数据</span>
+                    <textarea class="tall-edit-field" data-action="later-body-text" data-id="${escapeAttribute(item.id)}" placeholder="可选：补充正文、摘录或元数据。">${escapeHtml(item.bodyText || "")}</textarea>
+                  </label>
+                  <div class="explicit-edit-actions">
+                    <span class="unsaved-edit-hint hidden" data-edit-dirty-hint>有未保存修改</span>
+                    <button class="primary-btn" type="button" data-action="save-later-explicit-edit" data-id="${escapeAttribute(item.id)}">保存修改</button>
+                    <button class="ghost-btn" type="button" data-action="cancel-later-explicit-edit" data-id="${escapeAttribute(item.id)}">取消</button>
+                  </div>
                 </div>
                 ${renderSuggestedTagButtons(item, "later")}
                 ${renderBacklinks("later", item.id)}
@@ -9233,6 +10224,36 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (action === "open-quick-note") {
         await handleQuickNoteButtonClick();
+        return;
+      }
+
+      if (action === "local-search-jump") {
+        openLocalSearchResultById(id, node.dataset.itemType || "", node.dataset.localType || "");
+        return;
+      }
+
+      if (action === "external-ai-home") {
+        await openExternalAiHome(node.dataset.platformId);
+        return;
+      }
+
+      if (action === "save-later-explicit-edit") {
+        await saveLaterExplicitEdit(id, node);
+        return;
+      }
+
+      if (action === "cancel-later-explicit-edit") {
+        cancelLaterExplicitEdit(id, node);
+        return;
+      }
+
+      if (action === "save-history-explicit-edit") {
+        await saveHistoryExplicitEdit(id, node);
+        return;
+      }
+
+      if (action === "cancel-history-explicit-edit") {
+        cancelHistoryExplicitEdit(id, node);
         return;
       }
 
@@ -9420,7 +10441,7 @@ function fillUrlTemplate(template, query, domain = "") {
         await runPlatformEntrance(node.dataset.platformId, "web");
       }
 
-      if (action === "platform-home" || action === "platform-ai") {
+      if (action === "platform-home") {
         await openPlatformHome(node.dataset.platformId);
       }
 
@@ -9430,6 +10451,12 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (action === "toggle-platform-sort") {
         togglePlatformSort();
+      }
+
+      if (action === "toggle-more-platforms") {
+        showAllPlatforms = !showAllPlatforms;
+        renderPlatformCards();
+        return;
       }
 
       if (action === "platform-sort-select") {
@@ -9458,8 +10485,8 @@ function fillUrlTemplate(template, query, domain = "") {
         const item = historyItems.find((entry) => entry.id === id);
         if (!item) return;
         const platform = platforms.find((entry) => entry.id === item.platformId) || platforms.find((entry) => entry.name === item.platform);
-        if (platform && (item.entranceType === "AI询问" || isAiPlatform(platform))) {
-          await openPlatformHome(platform.id);
+        if (platform && isAiPlatform(platform)) {
+          await openExternalAiHome(platform.id);
           return;
         }
         elements.searchInput.value = item.keyword;
@@ -9594,6 +10621,16 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (!action) return;
 
+      if (EXPLICIT_LATER_EDIT_ACTIONS.has(action) && findExplicitEditPanel(node, "later")) {
+        markExplicitEditDirtyFromNode(node);
+        return;
+      }
+
+      if (EXPLICIT_HISTORY_EDIT_ACTIONS.has(action) && findExplicitEditPanel(node, "history")) {
+        markExplicitEditDirtyFromNode(node);
+        return;
+      }
+
       if (action === "history-status") {
         await updateHistoryItem(id, {
           status: node.value,
@@ -9674,10 +10711,10 @@ function fillUrlTemplate(template, query, domain = "") {
     async function updateHistoryItem(id, patch, shouldRender = true) {
       historyItems = historyItems.map((item) => item.id === id ? { ...item, ...patch } : item);
       await save(STORE_NAMES.history, historyItems);
-      await rebuildSearchIndex();
-      rebuildBacklinkIndex();
 
       if (shouldRender) {
+        await rebuildSearchIndex();
+        rebuildBacklinkIndex();
         renderFilters();
         renderHistory();
         renderLater();
@@ -9855,8 +10892,6 @@ function fillUrlTemplate(template, query, domain = "") {
       const previousUrl = previousItem?.url || "";
       laterItems = laterItems.map((item) => item.id === id ? { ...item, ...patch } : item);
       await save(STORE_NAMES.later, laterItems);
-      await rebuildSearchIndex();
-      rebuildBacklinkIndex();
 
       const nextItem = laterItems.find((item) => item.id === id);
       if (nextItem && Object.prototype.hasOwnProperty.call(patch, "url") && patch.url !== previousUrl) {
@@ -9869,6 +10904,8 @@ function fillUrlTemplate(template, query, domain = "") {
       }
 
       if (shouldRender) {
+        await rebuildSearchIndex();
+        rebuildBacklinkIndex();
         renderFilters();
         renderLater();
         renderKnowledge();
@@ -10379,6 +11416,7 @@ function fillUrlTemplate(template, query, domain = "") {
       }
 
       elements.searchInput.value = "";
+      hideLocalSearchDropdown();
       toast("已保存到收件箱");
       return true;
     }
@@ -10441,6 +11479,7 @@ function fillUrlTemplate(template, query, domain = "") {
       void renderDataManagementPanels();
       focusRenderedItem(normalizedItem.id, "later");
       elements.searchInput.value = "";
+      hideLocalSearchDropdown();
       toast("已保存 AI 回答到收件箱。 ");
       return true;
     }
@@ -10489,6 +11528,7 @@ function fillUrlTemplate(template, query, domain = "") {
       void renderDataManagementPanels();
       focusRenderedItem(normalizedItem.id, "later");
       elements.searchInput.value = "";
+      hideLocalSearchDropdown();
       toast("已保存到收件箱");
       return true;
     }
