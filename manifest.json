@@ -2,7 +2,7 @@
   "name": "Info Dock",
   "short_name": "Info Dock",
   "description": "快速保存网页到 Info Dock 收件箱。",
-  "start_url": "./info-dock-051904.html?source=pwa&v=061010-share-target-get-index",
+  "start_url": "./info-dock-051904.html?source=pwa&v=061606-p2-same-source-backup",
   "scope": "./",
   "display": "standalone",
   "theme_color": "#2563eb",

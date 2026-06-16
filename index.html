@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#2563eb" />
-  <link rel="manifest" href="./manifest.webmanifest?v=061010-share-target-get-index">
+  <link rel="manifest" href="./manifest.webmanifest?v=061606-p2-same-source-backup">
   <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
   <link rel="apple-touch-icon" href="icon-192.png">
   <script src="https://cdn.jsdelivr.net/npm/minisearch@6.3.0/dist/umd/index.js"></script>
@@ -1064,6 +1064,20 @@
       background: var(--primary-soft);
     }
 
+    .backup-reminder-dot {
+      display: none;
+      width: 8px;
+      height: 8px;
+      margin-left: 6px;
+      border-radius: 999px;
+      background: #d97706;
+      vertical-align: middle;
+    }
+
+    .tab-btn.backup-warning .backup-reminder-dot {
+      display: inline-block;
+    }
+
     .section {
       display: none;
     }
@@ -1119,6 +1133,38 @@
       color: var(--muted);
       font-size: 13px;
       line-height: 1.55;
+    }
+
+    .backup-warning-note,
+    .same-source-hint,
+    .same-source-filter-banner {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .backup-warning-note {
+      padding: 8px 10px;
+      border: 1px solid rgba(217, 119, 6, 0.28);
+      border-radius: 12px;
+      background: rgba(255, 247, 237, 0.9);
+      color: #9a3412;
+    }
+
+    .same-source-hint {
+      margin: 7px 0 0;
+    }
+
+    .same-source-filter-banner {
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(239, 246, 255, 0.82);
+      color: var(--muted);
+      font-size: 13px;
     }
 
     .storage-stat-grid {
@@ -1485,6 +1531,29 @@
       padding: 0 14px;
     }
 
+    .empty-actions,
+    .sample-data-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .sample-data-toolbar {
+      margin-bottom: 10px;
+      padding: 10px 12px;
+      border: 1px dashed rgba(37, 99, 235, 0.24);
+      border-radius: 16px;
+      background: rgba(239, 246, 255, 0.72);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .sample-data-toolbar strong {
+      color: var(--text);
+    }
+
     .later-form {
       padding: 16px;
       display: grid;
@@ -1644,6 +1713,92 @@
       padding: 0 12px;
       background: white;
       min-width: 0;
+    }
+
+    .creator-feed-preview {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid rgba(37, 99, 235, 0.18);
+      border-radius: 16px;
+      background: rgba(239, 246, 255, 0.56);
+    }
+
+    .creator-feed-preview-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .creator-feed-preview-title {
+      display: grid;
+      gap: 2px;
+      color: var(--text);
+      font-weight: 760;
+    }
+
+    .creator-feed-preview-title span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .creator-feed-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .creator-feed-item {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid rgba(203, 213, 225, 0.72);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.78);
+    }
+
+    .creator-feed-item input {
+      width: auto;
+      margin-top: 3px;
+    }
+
+    .creator-feed-item-title {
+      display: inline-block;
+      font-weight: 750;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .creator-feed-item-meta {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .creator-feed-item-summary {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+    }
+
+    .creator-feed-error {
+      color: var(--danger);
+      background: var(--danger-soft);
+      border-color: rgba(220, 38, 38, 0.18);
+    }
+
+    .creator-feed-loading {
+      color: var(--primary);
+    }
+
+    .keyboard-selected {
+      outline: 3px solid rgba(37, 99, 235, 0.32);
+      box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.08), var(--shadow);
     }
 
     .creator-template-grid {
@@ -2578,7 +2733,7 @@
       <button class="tab-btn" type="button" data-tab="laterSection">收件箱</button>
       <button class="tab-btn" type="button" data-tab="knowledgeSection">知识库</button>
       <button class="tab-btn" type="button" data-tab="creatorSourcesSection">信息源</button>
-      <button class="tab-btn" type="button" data-tab="settingsSection">⚙️ 设置</button>
+      <button class="tab-btn" id="settingsTabBtn" type="button" data-tab="settingsSection">⚙️ 设置<span class="backup-reminder-dot" aria-hidden="true"></span></button>
     </nav>
 
     <section id="historySection" class="section active" aria-label="搜索历史">
@@ -3007,7 +3162,7 @@
       { label: "知乎创作者", platform: "知乎", type: "creator", category: "观点", checkFrequency: "weekly", description: "适合沉淀长回答、经验判断和观点交叉验证。" },
       { label: "微信公众号", platform: "微信公众号", type: "newsletter", category: "公众号", checkFrequency: "weekly", description: "适合定期查看深度文章、专栏和行业观察。" },
       { label: "独立博客", platform: "网站", type: "website", category: "博客", checkFrequency: "monthly", description: "适合长期关注作者的系统化输出。" },
-      { label: "RSS 源", platform: "RSS", type: "rss", category: "订阅", checkFrequency: "weekly", description: "本阶段只保存 RSS/RSSHub 地址，不自动抓取文章流。" },
+      { label: "RSS 源", platform: "RSS", type: "rss", category: "订阅", checkFrequency: "weekly", description: "保存 RSS/RSSHub 地址后，可在信息源卡片中手动刷新近期内容。" },
       { label: "关键词主题", platform: "其他", type: "keyword", category: "主题", checkFrequency: "occasional", description: "适合记录一个需要定期主动搜索的主题。" }
     ];
 
@@ -3144,6 +3299,7 @@
       laterStatusChips: $("#laterStatusChips"),
       laterRelatedFilter: $("#laterRelatedFilter"),
       laterTextFilter: $("#laterTextFilter"),
+      laterSection: $("#laterSection"),
       knowledgeSourceFilter: $("#knowledgeSourceFilter"),
       knowledgeStatusFilter: $("#knowledgeStatusFilter"),
       knowledgeStatusChips: $("#knowledgeStatusChips"),
@@ -3253,7 +3409,8 @@
       cleanupOrphanSnapshotsBtn: $("#cleanupOrphanSnapshotsBtn"),
       cleanupOldSnapshotsBtn: $("#cleanupOldSnapshotsBtn"),
       clearBodySnapshotsBtn: $("#clearBodySnapshotsBtn"),
-      storageManageStatus: $("#storageManageStatus")
+      storageManageStatus: $("#storageManageStatus"),
+      settingsTabBtn: $("#settingsTabBtn")
     };
 
     const searchEngine = (() => {
@@ -3414,6 +3571,8 @@
     let laterItems = [];
     let creatorSources = [];
     let creatorDueFilterActive = false;
+    const creatorFeedPreviewState = new Map();
+    let keyboardSelectedLaterId = "";
     let triageSessionState = createEmptyTriageSessionState();
     let backlinkIndex = new Map();
     const contentFetchQueue = new Set();
@@ -3455,9 +3614,13 @@
     let reviewSettings = { ...DEFAULT_REVIEW_SETTINGS };
     let reviewFilterActive = false;
     let currentRelatedHistoryFilter = "";
+    let currentSameSourceRootId = "";
     let deferredPwaInstallPrompt = null;
     const PWA_INSTALL_DISMISSED_KEY = "infoDock.pwaInstallDismissed.v4";
     const LAST_EXPORT_KEY = "infoDock.lastExportAt.v1";
+    const LAST_BACKUP_REMINDER_DISMISSED_KEY = "infoDock.lastBackupReminderDismissedAt.v1";
+    const BACKUP_REMINDER_THRESHOLD_DAYS = 7;
+    const BACKUP_REMINDER_THROTTLE_MS = 24 * 60 * 60 * 1000;
     const BACKUP_SCHEMA_VERSION = 1;
     const SNAPSHOT_BODY_TYPES = new Set(["page-body", "search-snapshot"]);
     let pendingImportMode = "merge";
@@ -3467,7 +3630,7 @@
     let localSearchDebounceTimer = 0;
     let currentLocalSearchResults = [];
     let afterItemUpdateRefreshTimer = 0;
-    let afterItemUpdateRefreshOptions = { renderHistory: false, renderKnowledge: false, renderCreatorSources: false, renderDataPanels: false };
+    let afterItemUpdateRefreshOptions = { renderHistory: false, renderLater: false, renderKnowledge: false, renderCreatorSources: false, renderDataPanels: false, renderFilters: false };
     const EXPLICIT_LATER_EDIT_ACTIONS = new Set([
       "later-source",
       "later-related-history",
@@ -3508,6 +3671,7 @@
       await handleSharedData();
       await consumeIncomingLaterItem();
       setTimeout(checkReviewReminderOnStartup, 700);
+      setTimeout(checkBackupReminderOnStartup, 1000);
     }
 
     function setupPwaInstallPrompt() {
@@ -3712,6 +3876,7 @@
       elements.searchInput.addEventListener("input", scheduleLocalSearchDropdown);
       elements.searchInput.addEventListener("focus", scheduleLocalSearchDropdown);
       elements.searchInput.addEventListener("keydown", async (event) => {
+        if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) return;
         if (event.key === "Enter") {
           event.preventDefault();
           renderLocalSearchDropdown();
@@ -3842,14 +4007,7 @@
       });
 
       document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
-          hideLocalSearchDropdown();
-          closeAddPlatformModal();
-          closeSnapshotModal();
-          closeCreatorSourceModal();
-          closeItemActionSheet();
-          closeLaterTriageModal();
-        }
+        void handleGlobalKeydown(event);
       });
     }
 
@@ -3894,13 +4052,15 @@
         checkFrequency: normalizeCreatorSourceFrequency(source.checkFrequency),
         lastCheckedAt: source.lastCheckedAt || "",
         lastOpenedAt: source.lastOpenedAt || "",
+        lastFeedFetchedAt: source.lastFeedFetchedAt || "",
         status: normalizeCreatorSourceStatus(source.status),
         isPinned: Boolean(source.isPinned),
         rssUrl: String(source.rssUrl || "").trim(),
         rsshubUrl: String(source.rsshubUrl || source.rssHubUrl || "").trim(),
         searchUrlTemplate: String(source.searchUrlTemplate || "").trim(),
         createdAt: source.createdAt || now,
-        updatedAt: source.updatedAt || source.createdAt || now
+        updatedAt: source.updatedAt || source.createdAt || now,
+        isSample: Boolean(source.isSample)
       };
     }
 
@@ -4098,6 +4258,9 @@
       const statusLabel = CREATOR_SOURCE_STATUS_LABELS[source.status] || source.status || "关注中";
       const typeLabel = CREATOR_SOURCE_TYPE_LABELS[source.type] || source.type || "创作者";
       const frequencyLabel = CREATOR_SOURCE_FREQUENCY_LABELS[source.checkFrequency] || source.checkFrequency || "每周";
+      const hasFeedUrl = Boolean(source.rsshubUrl || source.rssUrl);
+      const feedState = getCreatorFeedState(source.id);
+      const selectedCount = feedState.selectedIds.size;
       return `
         <article class="card item creator-card" data-source-id="${escapeAttribute(source.id)}">
           <div class="item-head item-menu-head">
@@ -4110,6 +4273,7 @@
                 <span class="tag ${source.status === "paused" ? "status-warn" : "status-ok"}">${escapeHtml(statusLabel)}</span>
                 <span class="tag">${escapeHtml(frequencyLabel)}</span>
                 ${due ? `<span class="tag status-warn">建议查看</span>` : ""}
+                ${source.lastFeedFetchedAt ? `<span class="tag ok">RSS ${formatTime(source.lastFeedFetchedAt)}</span>` : ""}
                 ${tagsHtml}
               </div>
             </div>
@@ -4118,14 +4282,16 @@
             ${source.description ? `<p>${escapeHtml(limitText(source.description, 180))}</p>` : `<p class="hint">还没有简介。</p>`}
             ${source.reason ? `<p class="creator-source-line"><strong>为什么关注：</strong>${escapeHtml(limitText(source.reason, 220))}</p>` : ""}
             <p class="creator-source-line"><strong>主页：</strong>${escapeHtml(limitText(source.profileUrl || "未填写", 120))}</p>
-            <p class="creator-source-line"><strong>最近查看：</strong>${formatDateTime(source.lastOpenedAt)}　<strong>最近检查：</strong>${formatDateTime(source.lastCheckedAt)}</p>
-            ${(source.rssUrl || source.rsshubUrl) ? `<p class="creator-rss-hint">RSS 预览后续支持；本阶段只保存和复制地址。</p>` : ""}
+            <p class="creator-source-line"><strong>最近查看：</strong>${formatDateTime(source.lastOpenedAt)}　<strong>最近检查：</strong>${formatDateTime(source.lastCheckedAt)}${source.lastFeedFetchedAt ? `　<strong>最近 RSS：</strong>${formatDateTime(source.lastFeedFetchedAt)}` : ""}</p>
+            ${hasFeedUrl ? `<p class="creator-source-line"><strong>近期内容：</strong>可手动刷新 RSS/RSSHub 预览，不会后台自动轮询。</p>` : ""}
           </div>
           <div class="creator-actions">
             <button class="primary-btn" type="button" data-action="open-creator-home" data-id="${escapeAttribute(source.id)}">打开主页</button>
             <button class="primary-btn" type="button" data-action="mark-creator-checked" data-id="${escapeAttribute(source.id)}">标记已查看</button>
             <button class="ghost-btn" type="button" data-action="save-creator-to-inbox" data-id="${escapeAttribute(source.id)}">保存到收件箱</button>
             <button class="ghost-btn" type="button" data-action="creator-site-search" data-id="${escapeAttribute(source.id)}">站内搜索</button>
+            ${hasFeedUrl ? `<button class="ghost-btn" type="button" data-action="refresh-creator-feed" data-id="${escapeAttribute(source.id)}" ${feedState.loading ? "disabled" : ""}>${feedState.loading ? "刷新中…" : "刷新近期内容"}</button>` : ""}
+            ${hasFeedUrl ? `<button class="ghost-btn" type="button" data-action="batch-save-creator-feed" data-id="${escapeAttribute(source.id)}" ${selectedCount ? "" : "disabled"}>批量保存选中${selectedCount ? `（${selectedCount}）` : ""}</button>` : ""}
             <button class="ghost-btn secondary" type="button" data-action="copy-creator-profile" data-id="${escapeAttribute(source.id)}">复制主页链接</button>
             <button class="ghost-btn secondary" type="button" data-action="copy-creator-rss" data-id="${escapeAttribute(source.id)}" ${source.rssUrl ? "" : "disabled"}>复制 RSS</button>
             <button class="ghost-btn secondary" type="button" data-action="copy-creator-rsshub" data-id="${escapeAttribute(source.id)}" ${source.rsshubUrl ? "" : "disabled"}>复制 RSSHub</button>
@@ -4133,6 +4299,7 @@
             <button class="ghost-btn" type="button" data-action="toggle-creator-pause" data-id="${escapeAttribute(source.id)}">${source.status === "paused" ? "恢复关注" : "暂停关注"}</button>
             <button class="danger-btn" type="button" data-action="delete-creator-source" data-id="${escapeAttribute(source.id)}">删除</button>
           </div>
+          ${hasFeedUrl ? renderCreatorFeedPreview(source, feedState) : ""}
           <details class="compact-details">
             <summary>粘贴内容链接并保存</summary>
             <div class="creator-content-save">
@@ -4301,9 +4468,361 @@
       creatorSources = normalizeCreatorSources(creatorSources.map((source) => source.id === id ? { ...source, ...patch, updatedAt: now } : source));
       saveCreatorSourcesToLocalStorage();
       await rebuildSearchIndex();
-      if (shouldRender) renderCreatorSources();
+      if (shouldRender === "partial") updateCreatorSourceCardDom(id);
+      else if (shouldRender) renderCreatorSources();
       await renderDataManagementPanels();
     }
+
+    function getCreatorFeedState(sourceId) {
+      const key = String(sourceId || "");
+      if (!creatorFeedPreviewState.has(key)) {
+        creatorFeedPreviewState.set(key, {
+          loading: false,
+          loaded: false,
+          error: "",
+          message: "",
+          items: [],
+          selectedIds: new Set()
+        });
+      }
+      return creatorFeedPreviewState.get(key);
+    }
+
+    function setCreatorFeedState(sourceId, patch = {}) {
+      const previous = getCreatorFeedState(sourceId);
+      const nextSelected = patch.selectedIds instanceof Set
+        ? patch.selectedIds
+        : Array.isArray(patch.selectedIds)
+          ? new Set(patch.selectedIds)
+          : previous.selectedIds;
+      const next = {
+        ...previous,
+        ...patch,
+        selectedIds: nextSelected
+      };
+      creatorFeedPreviewState.set(String(sourceId || ""), next);
+      return next;
+    }
+
+    function updateCreatorSourceCardDom(id) {
+      const source = getCreatorSourceById(id);
+      if (!source) return;
+      document.querySelectorAll(`[data-source-id="${escapeCssSelectorValue(id)}"]`).forEach((card) => {
+        const state = captureListRenderState(card);
+        card.outerHTML = renderCreatorSourceCard(source);
+        const nextCard = document.querySelector(`[data-source-id="${escapeCssSelectorValue(id)}"]`);
+        restoreListRenderState(nextCard, state);
+      });
+    }
+
+    function updateCreatorFeedSelectionDom(id) {
+      const state = getCreatorFeedState(id);
+      document.querySelectorAll(`[data-source-id="${escapeCssSelectorValue(id)}"]`).forEach((card) => {
+        card.querySelectorAll('[data-action="toggle-creator-feed-item"]').forEach((input) => {
+          input.checked = state.selectedIds.has(input.dataset.feedId || "");
+        });
+        card.querySelectorAll('[data-action="batch-save-creator-feed"]').forEach((button) => {
+          const count = state.selectedIds.size;
+          button.disabled = !count;
+          button.textContent = count ? `批量保存选中（${count}）` : "批量保存选中";
+        });
+      });
+    }
+
+    function renderCreatorFeedPreview(source, state = getCreatorFeedState(source.id)) {
+      const feedUrl = source.rsshubUrl || source.rssUrl || "";
+      if (!feedUrl) return "";
+      if (state.loading) {
+        return `
+          <div class="creator-feed-preview creator-feed-loading" data-feed-preview-id="${escapeAttribute(source.id)}">
+            <div class="creator-feed-preview-head">
+              <div class="creator-feed-preview-title">正在刷新近期内容<span>通过当前 CORS 代理抓取 RSS/RSSHub，不会后台自动轮询。</span></div>
+            </div>
+          </div>
+        `;
+      }
+      if (state.error) {
+        return `
+          <div class="creator-feed-preview creator-feed-error" data-feed-preview-id="${escapeAttribute(source.id)}">
+            <div class="creator-feed-preview-head">
+              <div class="creator-feed-preview-title">近期内容刷新失败<span>${escapeHtml(state.error)}</span></div>
+              <button class="tiny-btn" type="button" data-action="refresh-creator-feed" data-id="${escapeAttribute(source.id)}">重试</button>
+            </div>
+          </div>
+        `;
+      }
+      if (!state.loaded) {
+        return `
+          <div class="creator-feed-preview" data-feed-preview-id="${escapeAttribute(source.id)}">
+            <div class="creator-feed-preview-head">
+              <div class="creator-feed-preview-title">RSS 近期内容预览<span>优先使用 RSSHub；手动点击“刷新近期内容”后显示最近 5-10 条。</span></div>
+              <span class="tag">${source.rsshubUrl ? "RSSHub" : "RSS"}</span>
+            </div>
+            <p class="hint">当前地址：${escapeHtml(limitText(feedUrl, 120))}</p>
+          </div>
+        `;
+      }
+      if (!state.items.length) {
+        return `
+          <div class="creator-feed-preview" data-feed-preview-id="${escapeAttribute(source.id)}">
+            <div class="creator-feed-preview-head">
+              <div class="creator-feed-preview-title">没有解析到近期内容<span>可以检查 RSS/RSSHub 地址是否返回 RSS 2.0 或 Atom。</span></div>
+              <button class="tiny-btn" type="button" data-action="refresh-creator-feed" data-id="${escapeAttribute(source.id)}">重新刷新</button>
+            </div>
+          </div>
+        `;
+      }
+      const itemsHtml = state.items.map((item) => {
+        const checked = state.selectedIds.has(item.id);
+        const disabled = item.link ? "" : "disabled";
+        const titleHtml = item.link
+          ? `<a class="creator-feed-item-title" href="${escapeAttribute(item.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title || item.link)}</a>`
+          : `<span class="creator-feed-item-title">${escapeHtml(item.title || "未命名内容")}</span>`;
+        return `
+          <label class="creator-feed-item">
+            <input type="checkbox" data-action="toggle-creator-feed-item" data-id="${escapeAttribute(source.id)}" data-feed-id="${escapeAttribute(item.id)}" ${checked ? "checked" : ""} ${disabled} />
+            <span>
+              ${titleHtml}
+              <span class="creator-feed-item-meta">${escapeHtml(formatFeedTime(item.publishedAt))}${item.link ? ` · ${escapeHtml(getDisplayHostname(item.link))}` : ""}</span>
+              ${item.summary ? `<p class="creator-feed-item-summary">${escapeHtml(limitText(item.summary, 180))}</p>` : ""}
+            </span>
+          </label>
+        `;
+      }).join("");
+      return `
+        <div class="creator-feed-preview" data-feed-preview-id="${escapeAttribute(source.id)}">
+          <div class="creator-feed-preview-head">
+            <div class="creator-feed-preview-title">RSS 近期内容<span>默认选中前 ${Math.min(3, state.items.filter((item) => item.link).length)} 条，可手动勾选后批量保存。</span></div>
+            <button class="tiny-btn" type="button" data-action="refresh-creator-feed" data-id="${escapeAttribute(source.id)}">重新刷新</button>
+          </div>
+          ${state.message ? `<p class="hint">${escapeHtml(state.message)}</p>` : ""}
+          <div class="creator-feed-list">${itemsHtml}</div>
+        </div>
+      `;
+    }
+
+    function xmlChildrenByLocalName(parent, names) {
+      const wanted = new Set((Array.isArray(names) ? names : [names]).map((name) => String(name || "").toLowerCase()));
+      return Array.from(parent?.children || []).filter((child) => wanted.has(String(child.localName || child.nodeName || "").toLowerCase()));
+    }
+
+    function xmlTextByLocalName(parent, names) {
+      const node = xmlChildrenByLocalName(parent, names)[0];
+      return normalizePageText(node?.textContent || "");
+    }
+
+    function getFeedItemLink(node, feedUrl, isAtom = false) {
+      let value = "";
+      if (isAtom) {
+        const links = xmlChildrenByLocalName(node, "link");
+        const preferred = links.find((link) => !link.getAttribute("rel") || link.getAttribute("rel") === "alternate") || links[0];
+        value = preferred?.getAttribute("href") || preferred?.textContent || "";
+      } else {
+        value = xmlTextByLocalName(node, "link");
+        if (!value) {
+          const guid = xmlChildrenByLocalName(node, "guid")[0];
+          if (guid?.getAttribute("isPermaLink") !== "false") value = guid?.textContent || "";
+        }
+      }
+      value = normalizePageText(value);
+      if (!value) return "";
+      try {
+        return new URL(value, feedUrl).href;
+      } catch (error) {
+        return value;
+      }
+    }
+
+    function stripFeedHtml(value) {
+      const raw = String(value || "");
+      if (!raw) return "";
+      try {
+        const doc = parseHTML(raw);
+        return normalizePageText(doc.body?.textContent || decodeHtmlEntities(raw));
+      } catch (error) {
+        return normalizePageText(raw.replace(/<[^>]+>/g, " "));
+      }
+    }
+
+    function createFeedItemId(item, index) {
+      const raw = [item.link, item.title, item.publishedAt, index].join("|");
+      let hash = 0;
+      for (let cursor = 0; cursor < raw.length; cursor += 1) {
+        hash = ((hash << 5) - hash + raw.charCodeAt(cursor)) | 0;
+      }
+      return `feed-${Math.abs(hash).toString(36)}-${index}`;
+    }
+
+    function parseCreatorFeedItems(xmlText, feedUrl) {
+      const doc = new DOMParser().parseFromString(String(xmlText || ""), "application/xml");
+      const parserError = doc.querySelector("parsererror");
+      if (parserError) {
+        throw new Error(limitText(parserError.textContent || "RSS XML 解析失败。", 160));
+      }
+
+      const allXmlNodes = Array.from(doc.getElementsByTagName("*"));
+      const rssItems = allXmlNodes.filter((node) => String(node.localName || node.nodeName || "").toLowerCase() === "item");
+      const atomEntries = allXmlNodes.filter((node) => String(node.localName || node.nodeName || "").toLowerCase() === "entry");
+      const nodes = rssItems.length ? rssItems : atomEntries;
+      const isAtom = !rssItems.length && atomEntries.length;
+      if (!nodes.length) throw new Error("没有找到 RSS item 或 Atom entry。");
+
+      return nodes.slice(0, 10).map((node, index) => {
+        const title = xmlTextByLocalName(node, "title") || "未命名内容";
+        const link = getFeedItemLink(node, feedUrl, isAtom);
+        const publishedAt = xmlTextByLocalName(node, ["pubDate", "published", "updated", "date", "created"]);
+        const summary = stripFeedHtml(
+          xmlTextByLocalName(node, ["description", "summary", "content", "encoded", "subtitle"])
+        );
+        const item = { title, link, publishedAt, summary };
+        return { ...item, id: createFeedItemId(item, index) };
+      });
+    }
+
+    function formatFeedTime(value) {
+      const text = String(value || "").trim();
+      if (!text) return "时间未知";
+      const timestamp = Date.parse(text);
+      if (!Number.isFinite(timestamp)) return limitText(text, 48);
+      return formatDateTime(new Date(timestamp).toISOString());
+    }
+
+    async function refreshCreatorFeed(id) {
+      const source = getCreatorSourceById(id);
+      if (!source) return;
+      const feedUrl = source.rsshubUrl || source.rssUrl || "";
+      if (!feedUrl) {
+        toast("这个信息源还没有 RSS/RSSHub 地址。");
+        return;
+      }
+
+      setCreatorFeedState(id, { loading: true, loaded: true, error: "", message: "", items: [], selectedIds: new Set() });
+      updateCreatorSourceCardDom(id);
+      try {
+        const xmlText = await fetchViaProxy(feedUrl, {
+          accept: "application/rss+xml,application/atom+xml,application/xml,text/xml,text/plain,*/*;q=0.8",
+          timeoutMs: 12000,
+          maxRetries: 1,
+          dedupe: false
+        });
+        const items = parseCreatorFeedItems(xmlText, feedUrl).slice(0, 10);
+        const selectedIds = new Set(items.filter((item) => item.link).slice(0, 3).map((item) => item.id));
+        setCreatorFeedState(id, {
+          loading: false,
+          loaded: true,
+          error: "",
+          message: items.length ? `已解析 ${items.length} 条近期内容。` : "没有解析到近期内容。",
+          items,
+          selectedIds
+        });
+
+        const now = new Date().toISOString();
+        creatorSources = normalizeCreatorSources(creatorSources.map((entry) => entry.id === id ? {
+          ...entry,
+          lastCheckedAt: now,
+          lastFeedFetchedAt: now,
+          updatedAt: now
+        } : entry));
+        saveCreatorSourcesToLocalStorage();
+        renderCreatorSourceStats();
+        updateCreatorSourceCardDom(id);
+        scheduleAfterItemUpdateRefresh({ renderCreatorSources: false, renderDataPanels: true, renderFilters: false, delayMs: 260 });
+      } catch (error) {
+        const message = error?.message || String(error) || "抓取失败。";
+        console.warn("RSS 近期内容刷新失败：", error);
+        setCreatorFeedState(id, { loading: false, loaded: true, error: message, message: "", items: [], selectedIds: new Set() });
+        updateCreatorSourceCardDom(id);
+      }
+    }
+
+    function toggleCreatorFeedItem(id, feedItemId, checked) {
+      const state = getCreatorFeedState(id);
+      const selectedIds = new Set(state.selectedIds);
+      if (checked) selectedIds.add(feedItemId);
+      else selectedIds.delete(feedItemId);
+      setCreatorFeedState(id, { selectedIds });
+      updateCreatorFeedSelectionDom(id);
+    }
+
+    function getCreatorFeedTags(source) {
+      return normalizeTags(["#来自信息源", ...(source.tags || []), ...(source.isSample ? ["#示例", "#可删除"] : [])]);
+    }
+
+    async function batchSaveSelectedCreatorFeedItems(id) {
+      const source = getCreatorSourceById(id);
+      const state = getCreatorFeedState(id);
+      if (!source || !state.items.length) return;
+      const selectedItems = state.items.filter((item) => state.selectedIds.has(item.id) && item.link);
+      if (!selectedItems.length) {
+        toast("请先勾选要保存的 RSS 条目。");
+        return;
+      }
+
+      let added = 0;
+      let skipped = 0;
+      let failed = 0;
+      for (const item of selectedItems) {
+        try {
+          const result = await addLaterFromExternal(
+            item.title || item.link,
+            item.link,
+            source.platform || source.name || "信息源",
+            `来自信息源「${source.name}」的 RSS 近期内容`,
+            {
+              saveContext: `来自信息源「${source.name}」的 RSS 近期内容`,
+              autoSummary: item.summary || "",
+              tags: getCreatorFeedTags(source),
+              creatorSourceId: source.id,
+              duplicateMode: "skip",
+              render: false,
+              rebuildSearch: false
+            }
+          );
+          if (result?.added) added += 1;
+          else if (result?.reason === "duplicate") skipped += 1;
+          else failed += 1;
+        } catch (error) {
+          failed += 1;
+          console.warn("批量保存 RSS 条目失败：", error);
+        }
+      }
+
+      const selectedIds = new Set(state.selectedIds);
+      selectedItems.forEach((item) => selectedIds.delete(item.id));
+      const resultParts = [
+        added ? `已保存 ${added} 条` : "",
+        skipped ? `已存在，跳过 ${skipped} 条` : "",
+        failed ? `失败 ${failed} 条` : ""
+      ].filter(Boolean);
+      setCreatorFeedState(id, {
+        selectedIds,
+        message: resultParts.join("；") || "没有新增内容。"
+      });
+      updateCreatorSourceCardDom(id);
+
+      if (added) {
+        await rebuildSearchIndex();
+        rebuildBacklinkIndex();
+        renderFilters();
+        renderLater();
+        renderGlobalSearchResults();
+        void renderDataManagementPanels();
+      }
+      toast(resultParts.join("；") || "没有新增内容。");
+    }
+
+    function clearCreatorFeedSelections() {
+      let changed = false;
+      creatorFeedPreviewState.forEach((state, id) => {
+        if (state.selectedIds?.size) {
+          setCreatorFeedState(id, { selectedIds: new Set() });
+          updateCreatorFeedSelectionDom(id);
+          changed = true;
+        }
+      });
+      return changed;
+    }
+
 
     async function openCreatorHome(id) {
       const source = getCreatorSourceById(id);
@@ -4334,11 +4853,11 @@
         {
           saveContext: source.reason || `来自信息源关注台：${source.name}`,
           autoSummary: source.description,
-          tags: normalizeTags(source.tags || [])
+          tags: normalizeTags(source.tags || []),
+          creatorSourceId: source.id
         }
       );
-      renderLater();
-      toast(result.added ? "已把信息源保存到收件箱。" : "收件箱中已有这个主页链接。 ");
+      toast(describeLaterSaveResult(result, "已把信息源保存到收件箱。"));
     }
 
     function buildCreatorSearchUrl(source, query) {
@@ -4422,12 +4941,12 @@
         `来自信息源：${source.name}`,
         {
           saveContext: `来自信息源「${source.name}」：${source.reason || "用户手动粘贴内容链接"}`,
-          tags: normalizeTags(source.tags || [])
+          tags: normalizeTags(source.tags || []),
+          creatorSourceId: source.id
         }
       );
-      if (input) input.value = "";
-      renderLater();
-      toast(result.added ? "已保存内容链接到收件箱。" : "收件箱中已有这条链接。 ");
+      if (result.added && input) input.value = "";
+      toast(describeLaterSaveResult(result, "已保存内容链接到收件箱。"));
     }
 
 
@@ -4922,6 +5441,78 @@
       return date.toLocaleString("zh-CN", { hour12: false });
     }
 
+    function getBackupAgeInfo() {
+      const lastExport = loadLastExportAt();
+      if (!lastExport) {
+        return { lastExport: "", timestamp: 0, ageDays: null, relativeLabel: "从未", specificLabel: "无" };
+      }
+      const timestamp = new Date(lastExport).getTime();
+      if (Number.isNaN(timestamp)) {
+        return { lastExport, timestamp: 0, ageDays: null, relativeLabel: "从未", specificLabel: formatDateTime(lastExport) };
+      }
+      const ageDays = Math.max(0, Math.floor((Date.now() - timestamp) / (24 * 60 * 60 * 1000)));
+      return {
+        lastExport,
+        timestamp,
+        ageDays,
+        relativeLabel: ageDays === 0 ? "今天" : `${ageDays} 天前`,
+        specificLabel: formatDateTime(lastExport)
+      };
+    }
+
+    function getBackupReminderMessage(info = getBackupAgeInfo()) {
+      if (!info.lastExport || info.ageDays === null) return "建议先导出一份 JSON 存档。";
+      if (info.ageDays >= BACKUP_REMINDER_THRESHOLD_DAYS) {
+        return `您已经 ${info.ageDays} 天没有备份数据了，建议导出一份 JSON 存档。`;
+      }
+      return "";
+    }
+
+    function loadBackupReminderDismissedAt() {
+      try {
+        return localStorage.getItem(LAST_BACKUP_REMINDER_DISMISSED_KEY) || "";
+      } catch (error) {
+        return "";
+      }
+    }
+
+    function isBackupReminderThrottled() {
+      const dismissedAt = new Date(loadBackupReminderDismissedAt()).getTime();
+      return !Number.isNaN(dismissedAt) && Date.now() - dismissedAt < BACKUP_REMINDER_THROTTLE_MS;
+    }
+
+    function updateSettingsBackupReminderUi(info = getBackupAgeInfo()) {
+      const message = getBackupReminderMessage(info);
+      if (elements.settingsTabBtn) {
+        elements.settingsTabBtn.classList.toggle("backup-warning", Boolean(message));
+        elements.settingsTabBtn.title = message || "设置";
+      }
+    }
+
+    function rememberBackupReminderShown() {
+      try {
+        localStorage.setItem(LAST_BACKUP_REMINDER_DISMISSED_KEY, new Date().toISOString());
+      } catch (error) {
+        console.warn("记录备份提醒节流状态失败：", error);
+      }
+    }
+
+    function dismissBackupReminder() {
+      rememberBackupReminderShown();
+      void renderBackupSummary();
+      toast("已暂时收起备份提醒。 ");
+    }
+
+    function checkBackupReminderOnStartup() {
+      const info = getBackupAgeInfo();
+      const message = getBackupReminderMessage(info);
+      updateSettingsBackupReminderUi(info);
+      if (!message || isBackupReminderThrottled()) return;
+      rememberBackupReminderShown();
+      setStatus(message);
+      toast(message);
+    }
+
     function getValidContentIds() {
       return new Set([
         ...historyItems.map((item) => item.id),
@@ -4983,10 +5574,14 @@
         const filename = `${options.prefix || "info-dock-backup"}-${datePart}.json`;
         downloadTextFile(filename, text, "application/json");
         localStorage.setItem(LAST_EXPORT_KEY, payload.exportedAt);
+        localStorage.removeItem(LAST_BACKUP_REMINDER_DISMISSED_KEY);
+        updateSettingsBackupReminderUi();
         if (!options.silent) {
           setBackupStatus(`已导出 ${payload.counts.history} 条搜索、${payload.counts.later} 条收件箱、${payload.counts.sources || 0} 个信息源、${payload.counts.contents} 个快照。`, true);
           toast("已导出完整 JSON 备份。");
           await renderDataManagementPanels();
+        } else {
+          await renderBackupSummary();
         }
         return payload;
       } catch (error) {
@@ -5031,13 +5626,21 @@
       if (!elements.dataBackupSummary) return;
       const contents = await loadAllContentSnapshots();
       const persisted = await checkPersistentStorage();
-      const lastExport = loadLastExportAt();
-      const backupAgeHint = lastExport ? `上次导出：${formatDateTime(lastExport)}` : "上次导出：从未，建议先导出一份备份";
+      const backupInfo = getBackupAgeInfo();
+      const backupReminderMessage = getBackupReminderMessage(backupInfo);
+      const backupAgeHint = `上次备份：${backupInfo.relativeLabel}；具体时间：${backupInfo.specificLabel}`;
+      updateSettingsBackupReminderUi(backupInfo);
+      const sampleCounts = getSampleDataCounts();
+      const sampleActionHtml = sampleCounts.later || sampleCounts.sources
+        ? `<button class="tiny-btn ghost-btn" type="button" data-action="clear-sample-data">清除示例数据</button>`
+        : `<button class="tiny-btn ghost-btn" type="button" data-action="load-sample-data">加载示例数据，快速体验</button>`;
       elements.dataBackupSummary.innerHTML = `
         <div>记录：${historyItems.length} 条搜索历史，${laterItems.length} 条收件箱，${platforms.length} 个搜索平台，${creatorSources.length} 个信息源。</div>
         <div>快照：${contents.length} 个，估算 ${formatBytes(byteSize(contents))}。</div>
         <div>${backupAgeHint}。</div>
+        ${backupReminderMessage ? `<div class="backup-warning-note"><span>${escapeHtml(backupReminderMessage)}</span>${isBackupReminderThrottled() ? `<span>今日已提醒</span>` : `<button class="tiny-btn ghost-btn" type="button" data-action="dismiss-backup-reminder">稍后提醒</button>`}</div>` : ""}
         <div>持久化存储：${persisted === true ? "已开启" : persisted === false ? "未开启或浏览器未授予" : "当前浏览器不支持检测"}。</div>
+        <div class="sample-data-toolbar"><span><strong>新用户示例</strong>：${sampleCounts.later || sampleCounts.sources ? `当前有 ${sampleCounts.later} 条示例收件箱 / ${sampleCounts.sources} 个示例信息源。` : "可加载 #示例 #可删除 数据，不会覆盖真实数据。"}</span>${sampleActionHtml}</div>
       `;
     }
 
@@ -5553,8 +6156,12 @@
           lastOpenedAt: item.lastOpenedAt || "",
           titleEditedAt: item.titleEditedAt || "",
           relatedHistoryId: item.relatedHistoryId || "",
+          creatorSourceId: item.creatorSourceId || "",
+          parentId: String(item.parentId || item.duplicateOfId || ""),
+          duplicateReason: String(item.duplicateReason || ""),
           aiOriginalAnswer: item.aiOriginalAnswer || "",
-          structuredSummary: normalizeStructuredSummary(item.structuredSummary)
+          structuredSummary: normalizeStructuredSummary(item.structuredSummary),
+          isSample: Boolean(item.isSample)
         };
       });
     }
@@ -5623,6 +6230,172 @@
       ].filter(Boolean).join(" ");
     }
 
+    function getCreatorSourceSearchText(creatorSourceId) {
+      if (!creatorSourceId) return "";
+      const source = getCreatorSourceById(creatorSourceId);
+      if (!source) return "";
+      return [
+        source.name,
+        source.platform,
+        source.category,
+        source.description,
+        source.reason,
+        normalizeTags(source.tags || []).join(" ")
+      ].filter(Boolean).join(" ");
+    }
+
+    function getLaterItemById(id) {
+      if (!id) return null;
+      return laterItems.find((item) => item.id === id) || null;
+    }
+
+    function getLaterCreatedTime(item) {
+      const value = new Date(item?.createdAt || 0).getTime();
+      return Number.isNaN(value) ? Number.MAX_SAFE_INTEGER : value;
+    }
+
+    function getSameUrlLaterItems(url) {
+      const cleanUrl = String(url || "").trim();
+      if (!cleanUrl) return [];
+      return laterItems
+        .filter((item) => hasSameNormalizedUrl(item.url, cleanUrl))
+        .slice()
+        .sort((a, b) => {
+          const timeDifference = getLaterCreatedTime(a) - getLaterCreatedTime(b);
+          if (timeDifference) return timeDifference;
+          return laterItems.indexOf(b) - laterItems.indexOf(a);
+        });
+    }
+
+    function getSameSourceRootItem(itemOrId) {
+      const item = typeof itemOrId === "string" ? getLaterItemById(itemOrId) : itemOrId;
+      if (!item) return null;
+      if (!item.parentId) return item;
+      const explicitParent = getLaterItemById(item.parentId);
+      if (explicitParent) return explicitParent;
+      const sameUrlItems = getSameUrlLaterItems(item.url);
+      return sameUrlItems[0] || item;
+    }
+
+    function getSameSourceClusterItems(itemOrId) {
+      const item = typeof itemOrId === "string" ? getLaterItemById(itemOrId) : itemOrId;
+      if (!item) return [];
+      const root = getSameSourceRootItem(item);
+      if (!root) return [item];
+      const cluster = laterItems.filter((entry) => entry.id === root.id || entry.parentId === root.id);
+      if (!cluster.some((entry) => entry.id === item.id)) cluster.push(item);
+      return cluster.sort((a, b) => getLaterCreatedTime(a) - getLaterCreatedTime(b));
+    }
+
+    function getSameSourceSearchText(item) {
+      const root = getSameSourceRootItem(item);
+      if (!root) return "";
+      const cluster = getSameSourceClusterItems(item);
+      if (item.id !== root.id) {
+        return ["同源补充", "主条目", root.title, root.url, root.source].filter(Boolean).join(" ");
+      }
+      return cluster
+        .filter((entry) => entry.id !== root.id)
+        .flatMap((entry) => [entry.title, entry.url, entry.captureText, entry.saveContext, entry.autoSummary, entry.conclusion])
+        .filter(Boolean)
+        .join(" ");
+    }
+
+    function getSameSourceRelation(item) {
+      const root = getSameSourceRootItem(item);
+      const cluster = getSameSourceClusterItems(item);
+      return {
+        root,
+        cluster,
+        isSupplement: Boolean(item?.parentId && root && root.id !== item.id),
+        supplementCount: root ? Math.max(0, cluster.length - 1) : 0
+      };
+    }
+
+    function renderSameSourceMetaTags(item) {
+      const relation = getSameSourceRelation(item);
+      if (relation.isSupplement) return `<span class="tag">同源补充</span>`;
+      if (relation.supplementCount) return `<span class="tag">同源内容 ${relation.supplementCount} 条</span>`;
+      return "";
+    }
+
+    function renderSameSourceRelation(item) {
+      const relation = getSameSourceRelation(item);
+      if (!relation.root) return "";
+      if (relation.isSupplement) {
+        return `
+          <p class="hint same-source-hint">
+            <span>同源补充 · 主条目：${escapeHtml(relation.root.title || relation.root.url || "未命名内容")}</span>
+            <button class="tiny-btn" type="button" data-action="jump-same-source-parent" data-id="${escapeAttribute(item.id)}">跳到原条目</button>
+            <button class="tiny-btn" type="button" data-action="view-same-source" data-id="${escapeAttribute(item.id)}">查看同源内容</button>
+          </p>
+        `;
+      }
+      if (relation.supplementCount) {
+        return `
+          <p class="hint same-source-hint">
+            <span>同源内容 ${relation.supplementCount} 条</span>
+            <button class="tiny-btn" type="button" data-action="view-same-source" data-id="${escapeAttribute(item.id)}">查看同源内容</button>
+          </p>
+        `;
+      }
+      return "";
+    }
+
+    function viewSameSourceItems(id) {
+      const item = getLaterItemById(id);
+      const root = getSameSourceRootItem(item);
+      const cluster = getSameSourceClusterItems(item);
+      if (!root || cluster.length < 2) {
+        toast("当前没有可查看的同源补充。");
+        return;
+      }
+      currentSameSourceRootId = root.id;
+      reviewFilterActive = false;
+      currentRelatedHistoryFilter = "";
+      activateTab("laterSection");
+      if (elements.laterSourceFilter) elements.laterSourceFilter.value = "全部来源";
+      if (elements.laterStatusFilter) elements.laterStatusFilter.value = "全部状态";
+      if (elements.laterRelatedFilter) elements.laterRelatedFilter.value = "全部研究";
+      if (elements.laterTextFilter) elements.laterTextFilter.value = "";
+      renderLater();
+      setStatus(`正在查看 ${cluster.length} 条同源内容。`);
+    }
+
+    function clearSameSourceFilter() {
+      currentSameSourceRootId = "";
+      renderLater();
+      setStatus("已退出同源内容查看。 ");
+    }
+
+    function repairOrphanSameSourceParentLinks(items = laterItems) {
+      const normalizedItems = normalizeLaterItems(items);
+      const ids = new Set(normalizedItems.map((item) => item.id));
+      const orphanGroups = new Map();
+
+      normalizedItems.forEach((item) => {
+        if (!item.parentId || ids.has(item.parentId) || !item.url) return;
+        const key = normalizeUrl(item.url);
+        if (!orphanGroups.has(key)) orphanGroups.set(key, []);
+        orphanGroups.get(key).push(item);
+      });
+
+      const repairedParents = new Map();
+      orphanGroups.forEach((orphans, key) => {
+        const sameUrlItems = normalizedItems
+          .filter((entry) => entry.url && normalizeUrl(entry.url) === key)
+          .sort((a, b) => getLaterCreatedTime(a) - getLaterCreatedTime(b));
+        const root = sameUrlItems.find((entry) => !entry.parentId || ids.has(entry.parentId)) || sameUrlItems[0];
+        if (!root) return;
+        if (!ids.has(root.parentId)) repairedParents.set(root.id, "");
+        orphans.forEach((item) => repairedParents.set(item.id, item.id === root.id ? "" : root.id));
+      });
+
+      return normalizedItems.map((item) => repairedParents.has(item.id)
+        ? { ...item, parentId: repairedParents.get(item.id) }
+        : item);
+    }
+
     function buildLaterSearchDoc(item, content = {}) {
       return {
         id: item.id,
@@ -5635,7 +6408,9 @@
           item.captureText,
           item.autoSummary || content.metaDescription || "",
           getStructuredSummarySearchText(item.structuredSummary),
-          getRelatedHistorySearchText(item.relatedHistoryId)
+          getRelatedHistorySearchText(item.relatedHistoryId),
+          getCreatorSourceSearchText(item.creatorSourceId),
+          getSameSourceSearchText(item)
         ].filter(Boolean).join(" "),
         conclusion: [
           item.conclusion,
@@ -5653,7 +6428,9 @@
           content.snapshotText,
           item.aiOriginalAnswer,
           getStructuredSummarySearchText(item.structuredSummary),
-          getRelatedHistorySearchText(item.relatedHistoryId)
+          getRelatedHistorySearchText(item.relatedHistoryId),
+          getCreatorSourceSearchText(item.creatorSourceId),
+          getSameSourceSearchText(item)
         ].filter(Boolean).join(" "),
         url: item.url,
         createdAt: item.createdAt,
@@ -6414,6 +7191,231 @@
       `;
     }
 
+    function getDetailsStateKey(details, index = 0) {
+      const card = details.closest("[data-item-id]");
+      const itemId = card?.dataset.itemId || "";
+      const itemType = card?.dataset.itemType || "";
+      const summaryText = String(details.querySelector(":scope > summary")?.textContent || "").replace(/\s+/g, " ").trim();
+      return `${itemType}:${itemId}:${summaryText || `details-${index}`}`;
+    }
+
+    function getFocusableFallback(card) {
+      if (!card) return null;
+      return card.querySelector("button, a[href], input, textarea, select, summary, [tabindex]:not([tabindex='-1'])");
+    }
+
+    function captureListRenderState(root) {
+      if (!root) return null;
+      const active = document.activeElement;
+      const activeCard = active?.closest?.("[data-item-id]");
+      const focusedInside = Boolean(activeCard && root.contains(activeCard));
+      const activeAction = focusedInside ? active?.dataset?.action || "" : "";
+      const activeId = focusedInside ? activeCard.dataset.itemId || "" : "";
+      const activeType = focusedInside ? activeCard.dataset.itemType || "" : "";
+      const itemOrder = Array.from(root.querySelectorAll("[data-item-id]")).map((card) => ({
+        id: card.dataset.itemId || "",
+        type: card.dataset.itemType || ""
+      }));
+      const activeIndex = itemOrder.findIndex((entry) => entry.id === activeId && entry.type === activeType);
+      const openDetails = new Set(Array.from(root.querySelectorAll("details[open]")).map((details, index) => getDetailsStateKey(details, index)));
+      return { focusedInside, activeId, activeType, activeAction, activeIndex, itemOrder, openDetails, scrollTop: root.scrollTop };
+    }
+
+    function restoreListRenderState(root, state) {
+      if (!root || !state) return;
+      root.querySelectorAll("details").forEach((details, index) => {
+        if (state.openDetails?.has(getDetailsStateKey(details, index))) details.open = true;
+      });
+      if (Number.isFinite(state.scrollTop)) root.scrollTop = state.scrollTop;
+      if (!state.focusedInside) return;
+      requestAnimationFrame(() => {
+        let card = null;
+        if (state.activeId) {
+          card = root.querySelector(`[data-item-type="${escapeCssSelectorValue(state.activeType)}"][data-item-id="${escapeCssSelectorValue(state.activeId)}"]`);
+        }
+        if (!card) {
+          const cards = Array.from(root.querySelectorAll("[data-item-id]"));
+          if (cards.length) card = cards[Math.min(Math.max(state.activeIndex, 0), cards.length - 1)] || cards[cards.length - 1];
+        }
+        if (!card) return;
+        const sameAction = state.activeAction ? card.querySelector(`[data-action="${escapeCssSelectorValue(state.activeAction)}"]`) : null;
+        const target = sameAction || getFocusableFallback(card);
+        target?.focus?.({ preventScroll: true });
+      });
+    }
+
+    function setListHtmlWithPreservedState(root, html) {
+      if (!root) return;
+      const state = captureListRenderState(root);
+      root.innerHTML = html;
+      restoreListRenderState(root, state);
+    }
+
+    function isShortcutEditableTarget(target) {
+      const node = target instanceof Element ? target : null;
+      if (!node) return false;
+      const tag = node.tagName?.toLowerCase();
+      if (["input", "textarea", "select", "button"].includes(tag)) return true;
+      return Boolean(node.closest('[contenteditable="true"], [role="textbox"]'));
+    }
+
+    function isAnyInteractionModalOpen() {
+      return [elements.addPlatformModal, elements.snapshotModal, elements.creatorSourceModal, elements.itemActionSheet, elements.triageModal]
+        .some((modal) => modal && modal.classList.contains("active"));
+    }
+
+    function getVisibleLaterCards() {
+      if (!elements.laterList) return [];
+      return Array.from(elements.laterList.querySelectorAll('[data-item-type="later"][data-item-id]'))
+        .filter((card) => card.offsetParent !== null || card.getClientRects().length > 0);
+    }
+
+    function applyKeyboardSelectedLaterCard() {
+      document.querySelectorAll('[data-item-type="later"].keyboard-selected').forEach((card) => {
+        card.classList.remove("keyboard-selected");
+      });
+      if (!keyboardSelectedLaterId || !elements.laterList) return;
+      const card = elements.laterList.querySelector(`[data-item-type="later"][data-item-id="${escapeCssSelectorValue(keyboardSelectedLaterId)}"]`);
+      if (card) card.classList.add("keyboard-selected");
+    }
+
+    function ensureKeyboardSelectedLaterCard() {
+      const cards = getVisibleLaterCards();
+      if (!cards.length) {
+        keyboardSelectedLaterId = "";
+        applyKeyboardSelectedLaterCard();
+        return null;
+      }
+      const current = cards.find((card) => card.dataset.itemId === keyboardSelectedLaterId);
+      if (current) {
+        applyKeyboardSelectedLaterCard();
+        return current;
+      }
+      keyboardSelectedLaterId = cards[0].dataset.itemId || "";
+      applyKeyboardSelectedLaterCard();
+      return cards[0];
+    }
+
+    function syncKeyboardSelectionAfterLaterRender() {
+      requestAnimationFrame(() => {
+        ensureKeyboardSelectedLaterCard();
+      });
+    }
+
+    function selectVisibleLaterByOffset(offset) {
+      const cards = getVisibleLaterCards();
+      if (!cards.length) return;
+      const currentIndex = cards.findIndex((card) => card.dataset.itemId === keyboardSelectedLaterId);
+      const baseIndex = currentIndex >= 0 ? currentIndex : 0;
+      const nextIndex = Math.min(cards.length - 1, Math.max(0, baseIndex + offset));
+      const nextCard = cards[nextIndex];
+      keyboardSelectedLaterId = nextCard.dataset.itemId || "";
+      applyKeyboardSelectedLaterCard();
+      nextCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function getKeyboardSelectedLaterCard() {
+      return ensureKeyboardSelectedLaterCard();
+    }
+
+    function focusKeyboardSelectedLaterEditor() {
+      const card = getKeyboardSelectedLaterCard();
+      if (!card) return;
+      const details = card.querySelector(".compact-edit-details");
+      if (details) details.open = true;
+      const conclusion = card.querySelector(`[data-action="later-conclusion"]`);
+      const title = card.querySelector(`[data-action="later-title"]`);
+      const target = conclusion || title || getFocusableFallback(card);
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+      requestAnimationFrame(() => {
+        target?.focus?.({ preventScroll: true });
+      });
+    }
+
+    async function openKeyboardSelectedLaterUrl() {
+      const card = getKeyboardSelectedLaterCard();
+      if (!card) return;
+      const id = card.dataset.itemId || "";
+      const item = laterItems.find((entry) => entry.id === id);
+      if (!item?.url) {
+        toast("当前选中条目没有链接。");
+        return;
+      }
+      window.open(item.url, "_blank", "noopener,noreferrer");
+      await updateLaterItem(id, { lastOpenedAt: new Date().toISOString() }, false);
+    }
+
+    async function runFirstAvailableSearchPlatform() {
+      const query = elements.searchInput?.value?.trim() || "";
+      if (!query) {
+        elements.searchInput?.focus();
+        return;
+      }
+      const platform = getOrderedSearchPlatforms().find((entry) => entry && (entry.urlTemplate || entry.mobileUrlTemplate || entry.domain || entry.id === "bing"));
+      if (!platform) {
+        toast("没有可用的网页搜索平台。");
+        return;
+      }
+      await runPlatformEntrance(platform.id, "web");
+    }
+
+    async function handleGlobalKeydown(event) {
+      const key = event.key;
+      if (key === "Escape") {
+        const clearedFeedSelection = clearCreatorFeedSelections();
+        hideLocalSearchDropdown();
+        closeAddPlatformModal();
+        closeSnapshotModal();
+        closeCreatorSourceModal();
+        closeItemActionSheet();
+        closeLaterTriageModal();
+        if (clearedFeedSelection) toast("已取消 RSS 预览选中。");
+        return;
+      }
+
+      const isMod = event.ctrlKey || event.metaKey;
+      const isEditableTarget = isShortcutEditableTarget(event.target);
+      const isSearchInputTarget = event.target === elements.searchInput;
+
+      if (isMod && key.toLowerCase() === "k" && !isEditableTarget) {
+        event.preventDefault();
+        elements.searchInput?.focus();
+        elements.searchInput?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+
+      if (isMod && key === "Enter" && (!isEditableTarget || isSearchInputTarget)) {
+        event.preventDefault();
+        await runFirstAvailableSearchPlatform();
+        return;
+      }
+
+      if (event.altKey || isMod || isEditableTarget || isAnyInteractionModalOpen()) return;
+      if (!elements.laterSection?.classList.contains("active")) return;
+
+      const lowerKey = key.toLowerCase();
+      if (lowerKey === "j") {
+        event.preventDefault();
+        selectVisibleLaterByOffset(1);
+        return;
+      }
+      if (lowerKey === "k") {
+        event.preventDefault();
+        selectVisibleLaterByOffset(-1);
+        return;
+      }
+      if (lowerKey === "s") {
+        event.preventDefault();
+        focusKeyboardSelectedLaterEditor();
+        return;
+      }
+      if (lowerKey === "o") {
+        event.preventDefault();
+        await openKeyboardSelectedLaterUrl();
+      }
+    }
+
+
     function jumpToItem(id, itemType) {
       if (!id || !itemType) return;
 
@@ -6426,8 +7428,11 @@
       } else {
         activateTab("laterSection");
         reviewFilterActive = false;
+        currentSameSourceRootId = "";
+        currentRelatedHistoryFilter = "";
         elements.laterSourceFilter.value = "全部来源";
         elements.laterStatusFilter.value = "全部状态";
+        if (elements.laterRelatedFilter) elements.laterRelatedFilter.value = "全部研究";
         elements.laterTextFilter.value = "";
         renderLater();
       }
@@ -6449,7 +7454,7 @@
 
       const item = laterItems.find((entry) => entry.id === id);
       if (!item) return;
-      await updateLaterItem(id, { tags: normalizeTags([...(item.tags || []), normalized]) }, true);
+      await updateLaterItem(id, { tags: normalizeTags([...(item.tags || []), normalized]) }, { render: "auto", renderDataPanels: true });
       toast(`已添加标签 ${normalized}。`);
     }
 
@@ -6467,7 +7472,7 @@
 
       const item = laterItems.find((entry) => entry.id === id);
       if (!item) return;
-      await updateLaterItem(id, { tags: normalizeTags(item.tags).filter((entry) => entry !== normalized) }, true);
+      await updateLaterItem(id, { tags: normalizeTags(item.tags).filter((entry) => entry !== normalized) }, { render: "auto", renderDataPanels: true });
       toast(`已移除标签 ${normalized}。`);
     }
 
@@ -6658,16 +7663,18 @@
       if (!item || !item.id || !item.url || contentFetchQueue.has(item.id) || contentRefreshQueue.has(item.id)) return;
       contentFetchQueue.add(item.id);
       contentFetchProgress.set(item.id, { label: "自动摘要中", attempt: 0, total: CONTENT_FETCH_MAX_ATTEMPTS });
+      updateLaterCardDom(item.id);
       window.setTimeout(async () => {
         contentRefreshQueue.add(item.id);
-        renderLater();
+        updateLaterCardDom(item.id);
         try {
           await refreshLaterContent(item.id, { silent: true });
         } finally {
           contentFetchQueue.delete(item.id);
           contentRefreshQueue.delete(item.id);
           contentFetchProgress.delete(item.id);
-          renderLater();
+          updateLaterCardDom(item.id);
+          scheduleAfterItemUpdateRefresh({ renderFilters: true, renderDataPanels: true });
         }
       }, 0);
     }
@@ -6798,12 +7805,13 @@
       }
 
       if (Object.keys(patch).length) {
-        laterItems = laterItems.map((entry) => entry.id === latest.id ? { ...entry, ...patch } : entry);
+        const updatedItem = patchLaterItemInMemory(latest.id, patch);
         await save(STORE_NAMES.later, laterItems);
+        updateLaterCardDom(latest.id, updatedItem);
+        scheduleAfterItemUpdateRefresh({ renderKnowledge: updatedItem ? KNOWLEDGE_STATUS_SET.has(updatedItem.status) : false, renderFilters: true, renderDataPanels: true });
+      } else {
+        updateLaterCardDom(latest.id);
       }
-
-      await rebuildSearchIndex();
-      renderLater();
 
       if (!options.silent) {
         if (freshSuccessText) {
@@ -8018,7 +9026,7 @@
       if (!id) return;
       if (progress) metadataFetchProgress.set(id, progress);
       else metadataFetchProgress.delete(id);
-      renderLater();
+      updateLaterCardDom(id);
     }
 
     function queueMetadataEnrichmentForLaterItem(item, options = {}) {
@@ -8055,7 +9063,8 @@
         } finally {
           metadataFetchQueue.delete(item.id);
           metadataFetchProgress.delete(item.id);
-          renderLater();
+          updateLaterCardDom(item.id);
+          scheduleAfterItemUpdateRefresh({ renderFilters: true, renderDataPanels: true });
         }
       }, options.delayMs ?? 1200);
     }
@@ -8177,11 +9186,11 @@
             patch.tags = mergedTags;
           }
 
-          laterItems = laterItems.map((entry) => entry.id === latest.id ? { ...entry, ...patch } : entry);
+          const updatedItem = patchLaterItemInMemory(latest.id, patch);
           await save(STORE_NAMES.later, laterItems);
-          await rebuildSearchIndex();
           metadataFetchProgress.delete(latest.id);
-          renderLater();
+          updateLaterCardDom(latest.id, updatedItem);
+          scheduleAfterItemUpdateRefresh({ renderKnowledge: updatedItem ? KNOWLEDGE_STATUS_SET.has(updatedItem.status) : false, renderFilters: true, renderDataPanels: true });
 
           if (!options.silent) {
             const sourceText = metadataSource === "snapshot" ? "（使用已保存页面）" : metadataSource === "memory" ? "（使用缓存）" : "";
@@ -8197,16 +9206,15 @@
 
       const latest = laterItems.find((entry) => entry.id === current.id) || current;
       const failureText = classifyFetchError(lastError || "未提取到可用元数据。");
-      laterItems = laterItems.map((entry) => entry.id === latest.id ? {
-        ...entry,
+      const failedItem = patchLaterItemInMemory(latest.id, {
         lastMetadataFetchAt: fetchStartedAt,
         lastMetadataFetchStatus: "failed",
         lastMetadataFetchError: failureText
-      } : entry);
+      });
       await save(STORE_NAMES.later, laterItems);
       metadataFetchProgress.delete(current.id);
-      await rebuildSearchIndex();
-      renderLater();
+      updateLaterCardDom(current.id, failedItem);
+      scheduleAfterItemUpdateRefresh({ renderKnowledge: failedItem ? KNOWLEDGE_STATUS_SET.has(failedItem.status) : false, renderFilters: true, renderDataPanels: true });
       if (!options.silent) toast(`${failureText} 已保留原内容。`);
       return laterItems.find((entry) => entry.id === current.id) || current;
     }
@@ -8627,13 +9635,19 @@ function fillUrlTemplate(template, query, domain = "") {
         .replaceAll("{domain}", domain)
         .replaceAll("{query}", encodeURIComponent(query));
     }
-    function renderEmptyState({ icon = "🔎", title = "", description = "", action = "focus-search", button = "开始" } = {}) {
+    function renderEmptyState({ icon = "🔎", title = "", description = "", action = "focus-search", button = "开始", secondaryAction = "", secondaryButton = "" } = {}) {
+      const secondaryButtonHtml = secondaryAction && secondaryButton
+        ? `<button class="tiny-btn ghost-btn" type="button" data-action="${escapeAttribute(secondaryAction)}">${escapeHtml(secondaryButton)}</button>`
+        : "";
       return `
         <div class="empty">
           <div class="empty-visual" aria-hidden="true">${escapeHtml(icon)}</div>
           <h3>${escapeHtml(title)}</h3>
           <p>${escapeHtml(description)}</p>
-          <button class="tiny-btn" type="button" data-action="${escapeAttribute(action)}">${escapeHtml(button)}</button>
+          <div class="empty-actions">
+            <button class="tiny-btn" type="button" data-action="${escapeAttribute(action)}">${escapeHtml(button)}</button>
+            ${secondaryButtonHtml}
+          </div>
         </div>
       `;
     }
@@ -9413,10 +10427,11 @@ function fillUrlTemplate(template, query, domain = "") {
       }
     }
 
-    function syncLaterExplicitEditFormValues(id, item = null) {
+    function syncLaterExplicitEditFormValues(id, item = null, options = {}) {
       const latest = item || laterItems.find((entry) => entry.id === id);
       if (!latest) return;
       document.querySelectorAll(`[data-explicit-edit-form="later"][data-id="${escapeCssSelectorValue(id)}"]`).forEach((panel) => {
+        if (options.preserveDirty && panel.dataset.dirty === "1") return;
         setFieldValue(panel, "later-source", id, latest.source || "其他");
         setFieldValue(panel, "later-related-history", id, latest.relatedHistoryId || "");
         setFieldValue(panel, "later-title", id, latest.title || "");
@@ -9486,6 +10501,113 @@ function fillUrlTemplate(template, query, domain = "") {
       };
     }
 
+    function getCurrentLaterRelatedFilterValue() {
+      return currentRelatedHistoryFilter || elements.laterRelatedFilter?.value || "全部研究";
+    }
+
+    function doesLaterItemMatchCurrentFilters(item) {
+      if (!item) return false;
+      const sourceFilter = elements.laterSourceFilter?.value || "全部来源";
+      const statusFilter = elements.laterStatusFilter?.value || "全部状态";
+      const relatedFilter = getCurrentLaterRelatedFilterValue();
+      const textFilter = normalize(elements.laterTextFilter?.value || "");
+      const baseAllowed = !reviewFilterActive || isPendingReviewItem(item);
+      const matchesSource = sourceFilter === "全部来源" || item.source === sourceFilter;
+      const matchesStatus = statusFilter === "全部状态" || item.status === statusFilter;
+      const matchesRelated = relatedFilter === "全部研究"
+        || (relatedFilter === "未关联" && !item.relatedHistoryId)
+        || (relatedFilter.startsWith("history:") && item.relatedHistoryId === relatedFilter.slice("history:".length));
+      const relatedHistoryText = getRelatedHistorySearchText(item.relatedHistoryId);
+      const haystack = normalize([
+        item.title,
+        item.url,
+        item.source,
+        item.reason,
+        item.autoSummary,
+        item.captureText,
+        item.saveContext,
+        item.bodyText,
+        item.aiOriginalAnswer,
+        getStructuredSummarySearchText(item.structuredSummary),
+        normalizeTags(item.tags).join(" "),
+        item.estimate,
+        item.conclusion,
+        relatedHistoryText
+      ].join(" "));
+      return baseAllowed && matchesSource && matchesStatus && matchesRelated && (!textFilter || haystack.includes(textFilter));
+    }
+
+    function doesLaterItemMatchCurrentKnowledgeFilters(item) {
+      if (!item || !KNOWLEDGE_STATUS_SET.has(item.status)) return false;
+      const sourceFilter = elements.knowledgeSourceFilter?.value || "全部来源";
+      const statusFilter = elements.knowledgeStatusFilter?.value || "全部状态";
+      const textFilter = normalize(elements.knowledgeTextFilter?.value || "");
+      const relatedHistoryLabel = getRelatedHistoryLabel(item.relatedHistoryId);
+      const haystack = normalize([
+        item.title,
+        item.url,
+        item.source,
+        item.status,
+        normalizeTags(item.tags).join(" "),
+        item.conclusion,
+        item.autoSummary,
+        item.captureText,
+        item.saveContext,
+        item.bodyText,
+        item.aiOriginalAnswer,
+        getStructuredSummarySearchText(item.structuredSummary),
+        relatedHistoryLabel
+      ].join(" "));
+      return (sourceFilter === "全部来源" || item.source === sourceFilter)
+        && (statusFilter === "全部状态" || item.status === statusFilter)
+        && (!textFilter || haystack.includes(textFilter));
+    }
+
+    function shouldRenderLaterListForPatch(previousItem, nextItem) {
+      if (!previousItem || !nextItem) return true;
+      return doesLaterItemMatchCurrentFilters(previousItem) !== doesLaterItemMatchCurrentFilters(nextItem);
+    }
+
+    function shouldRenderKnowledgeListForPatch(previousItem, nextItem) {
+      if (!previousItem || !nextItem) return false;
+      const wasKnowledge = KNOWLEDGE_STATUS_SET.has(previousItem.status);
+      const isKnowledge = KNOWLEDGE_STATUS_SET.has(nextItem.status);
+      if (wasKnowledge !== isKnowledge) return true;
+      return doesLaterItemMatchCurrentKnowledgeFilters(previousItem) !== doesLaterItemMatchCurrentKnowledgeFilters(nextItem);
+    }
+
+    function normalizeLaterUpdateOptions(previousItem, nextItem, patch, options = true) {
+      if (typeof options === "boolean") {
+        if (!options) return { render: "none", renderLater: false, renderKnowledge: false, updateCard: false, refresh: false };
+        return {
+          render: "auto",
+          renderLater: shouldRenderLaterListForPatch(previousItem, nextItem),
+          renderKnowledge: shouldRenderKnowledgeListForPatch(previousItem, nextItem),
+          updateCard: true,
+          refresh: true,
+          renderDataPanels: false
+        };
+      }
+      const normalized = { ...(options || {}) };
+      const render = normalized.render || (normalized.skipFullRender ? "partial" : "auto");
+      if (render === "full") {
+        return { ...normalized, render, renderLater: normalized.renderLater !== false, renderKnowledge: normalized.renderKnowledge !== false, updateCard: false, refresh: true };
+      }
+      if (render === "none") {
+        return { ...normalized, render, renderLater: false, renderKnowledge: Boolean(normalized.renderKnowledge || normalized.refreshKnowledge), updateCard: Boolean(normalized.updateCard), refresh: Boolean(normalized.refresh) };
+      }
+      const renderLater = normalized.renderLater ?? shouldRenderLaterListForPatch(previousItem, nextItem);
+      const renderKnowledge = normalized.renderKnowledge ?? normalized.refreshKnowledge ?? shouldRenderKnowledgeListForPatch(previousItem, nextItem);
+      return {
+        ...normalized,
+        render,
+        renderLater,
+        renderKnowledge,
+        updateCard: normalized.updateCard !== false,
+        refresh: normalized.refresh !== false
+      };
+    }
+
     function patchLaterItemInMemory(id, patch) {
       laterItems = laterItems.map((entry) => entry.id === id ? { ...entry, ...patch } : entry);
       return laterItems.find((entry) => entry.id === id) || null;
@@ -9497,6 +10619,7 @@ function fillUrlTemplate(template, query, domain = "") {
           <span class="tag">${escapeHtml(item.source || "其他")}</span>
           <span class="tag ${laterTagClass(item.status)}">${escapeHtml(item.status)}</span>
           <span class="tag">${formatTime(item.createdAt)}</span>
+          ${renderSameSourceMetaTags(item)}
           ${renderLimitedTagChips(item.tags, 3)}
         `;
       }
@@ -9505,24 +10628,74 @@ function fillUrlTemplate(template, query, domain = "") {
         <span class="tag ${laterTagClass(item.status)}">${escapeHtml(item.status)}</span>
         <span class="tag">预计：${escapeHtml(estimateLaterItemTime(item))}</span>
         <span class="tag">${formatTime(item.createdAt)}</span>
+        ${renderSameSourceMetaTags(item)}
         ${renderContentFetchStatusTag(item)}
         ${renderMetadataStatusTag(item)}
         ${renderLimitedTagChips(item.tags, 3)}
       `;
     }
 
+    function updateOptionalCardBlock(card, selector, html, beforeSelector = ".compact-edit-details") {
+      const existing = card.querySelector(selector);
+      if (html) {
+        if (existing) {
+          existing.outerHTML = html;
+        } else {
+          const anchor = card.querySelector(beforeSelector);
+          if (anchor) anchor.insertAdjacentHTML("beforebegin", html);
+        }
+      } else if (existing) {
+        existing.remove();
+      }
+    }
+
+    function updateLaterEditTagRows(card, latest) {
+      card.querySelectorAll(`[data-explicit-edit-form="later"][data-id="${escapeCssSelectorValue(latest.id)}"]`).forEach((panel) => {
+        const html = renderExistingTagButtons(latest, "later");
+        const row = panel.querySelector(".tag-row");
+        if (html) {
+          if (row) {
+            row.innerHTML = html;
+          } else {
+            const tagsField = panel.querySelector(`[data-action="later-tags"][data-id="${escapeCssSelectorValue(latest.id)}"]`);
+            const label = tagsField?.closest?.("label");
+            label?.insertAdjacentHTML("afterend", `<div class="tag-row">${html}</div>`);
+          }
+        } else if (row) {
+          row.remove();
+        }
+      });
+    }
+
     function updateLaterCardDom(id, item = null) {
       const latest = item || laterItems.find((entry) => entry.id === id);
       if (!latest) return;
       document.querySelectorAll(`[data-item-type="later"][data-item-id="${escapeCssSelectorValue(id)}"]`).forEach((card) => {
+        const isKnowledgeCard = card.classList.contains("knowledge-item");
         const title = card.querySelector(".item-head .item-title");
         if (title) title.innerHTML = renderLaterTitleHtml(latest);
         const meta = card.querySelector(".item-head .meta");
-        if (meta) meta.innerHTML = renderLaterMetaForCard(latest, card.classList.contains("knowledge-item"));
+        if (meta) meta.innerHTML = renderLaterMetaForCard(latest, isKnowledgeCard);
         const anchor = card.querySelector("[data-later-memory-anchor]");
         if (anchor) {
           const memory = getLaterMemoryAnchor(latest);
           anchor.innerHTML = memory ? renderCompactPreview(memory.text, memory.label, 150) : "";
+        }
+        const sameSourceHint = card.querySelector(".same-source-hint");
+        const sameSourceHtml = renderSameSourceRelation(latest);
+        if (sameSourceHint && sameSourceHtml) sameSourceHint.outerHTML = sameSourceHtml;
+        if (sameSourceHint && !sameSourceHtml) sameSourceHint.remove();
+        if (!sameSourceHint && sameSourceHtml) {
+          const headBody = card.querySelector(".item-head > div:first-child");
+          headBody?.insertAdjacentHTML("beforeend", sameSourceHtml);
+        }
+        const relationLabel = getRelatedHistoryLabel(latest.relatedHistoryId);
+        const relationHint = card.querySelector(".compact-relation-hint");
+        if (relationHint && relationLabel) relationHint.textContent = relationLabel;
+        if (relationHint && !relationLabel) relationHint.remove();
+        if (!relationHint && relationLabel) {
+          const headBody = card.querySelector(".item-head > div:first-child");
+          headBody?.insertAdjacentHTML("beforeend", `<p class="hint compact-relation-hint">${escapeHtml(relationLabel)}</p>`);
         }
         const knowledgeConclusion = card.querySelector(".knowledge-conclusion");
         if (knowledgeConclusion) {
@@ -9531,6 +10704,12 @@ function fillUrlTemplate(template, query, domain = "") {
             ${latest.conclusion ? `<p>${renderWikiText(limitText(latest.conclusion, 160))}</p>` : `<p class="hint">还没有结论。可以先补一句核心判断或下一步用法。</p>`}
           `;
         }
+        updateOptionalCardBlock(card, ".ai-quick-triage-row", isLaterAiAnswer(latest) ? renderAiAnswerQuickActions(latest) : "");
+        updateOptionalCardBlock(card, ".ai-context-nudge-row", isLaterAiAnswer(latest) ? renderAiAnswerContextNudge(latest) : "");
+        updateOptionalCardBlock(card, ".title-nudge-row", renderTitleNudge(latest));
+        updateOptionalCardBlock(card, ".conclusion-nudge-row:not(.ai-context-nudge-row)", renderConclusionNudge(latest));
+        updateLaterEditTagRows(card, latest);
+        syncLaterExplicitEditFormValues(id, latest, { preserveDirty: true });
       });
     }
 
@@ -9570,23 +10749,29 @@ function fillUrlTemplate(template, query, domain = "") {
     function scheduleAfterItemUpdateRefresh(options = {}) {
       afterItemUpdateRefreshOptions = {
         renderHistory: afterItemUpdateRefreshOptions.renderHistory || Boolean(options.renderHistory),
-        renderKnowledge: afterItemUpdateRefreshOptions.renderKnowledge || options.renderKnowledge !== false,
+        renderLater: afterItemUpdateRefreshOptions.renderLater || Boolean(options.renderLater),
+        renderKnowledge: afterItemUpdateRefreshOptions.renderKnowledge || Boolean(options.renderKnowledge || options.refreshKnowledge),
         renderCreatorSources: afterItemUpdateRefreshOptions.renderCreatorSources || Boolean(options.renderCreatorSources),
-        renderDataPanels: afterItemUpdateRefreshOptions.renderDataPanels || options.renderDataPanels !== false
+        renderDataPanels: afterItemUpdateRefreshOptions.renderDataPanels || Boolean(options.renderDataPanels),
+        renderFilters: afterItemUpdateRefreshOptions.renderFilters !== false || options.renderFilters !== false
       };
       if (afterItemUpdateRefreshTimer) window.clearTimeout(afterItemUpdateRefreshTimer);
       afterItemUpdateRefreshTimer = window.setTimeout(async () => {
         const refreshOptions = afterItemUpdateRefreshOptions;
         afterItemUpdateRefreshTimer = 0;
-        afterItemUpdateRefreshOptions = { renderHistory: false, renderKnowledge: false, renderCreatorSources: false, renderDataPanels: false };
+        afterItemUpdateRefreshOptions = { renderHistory: false, renderLater: false, renderKnowledge: false, renderCreatorSources: false, renderDataPanels: false, renderFilters: false };
         try {
           await rebuildSearchIndex();
           rebuildBacklinkIndex();
-          renderFilters();
+          if (refreshOptions.renderFilters) renderFilters();
           renderPendingReviewPanel();
           if (triageSessionState.active) renderLaterTriageModal();
+          const activeElement = document.activeElement;
+          const editingLater = Boolean(activeElement && elements.laterList?.contains(activeElement) && activeElement.matches("input, textarea, select"));
+          const editingKnowledge = Boolean(activeElement && elements.knowledgeList?.contains(activeElement) && activeElement.matches("input, textarea, select"));
           if (refreshOptions.renderHistory) renderHistory();
-          if (refreshOptions.renderKnowledge) renderKnowledge();
+          if (refreshOptions.renderLater && !editingLater) renderLater();
+          if (refreshOptions.renderKnowledge && !editingKnowledge) renderKnowledge();
           if (refreshOptions.renderCreatorSources) renderCreatorSources();
           renderGlobalSearchResults();
           if (refreshOptions.renderDataPanels) void renderDataManagementPanels();
@@ -9619,9 +10804,7 @@ function fillUrlTemplate(template, query, domain = "") {
       const nextItem = { ...item, ...patch };
       updateLaterCardDom(id, nextItem);
       syncLaterExplicitEditFormValues(id, nextItem);
-      await updateLaterItem(id, patch, false);
-      const isKnowledgeContext = Boolean(triggerNode?.closest?.(".knowledge-item"));
-      scheduleAfterItemUpdateRefresh({ renderKnowledge: !isKnowledgeContext, renderDataPanels: true });
+      await updateLaterItem(id, patch, { render: "auto", updateCard: false, renderDataPanels: true });
       toast("已保存修改");
     }
 
@@ -9658,16 +10841,16 @@ function fillUrlTemplate(template, query, domain = "") {
       if (!item || !isLaterAiAnswer(item)) return;
       if (status === "已废弃" && !window.confirm("确定要将这条 AI 回答标为已废弃吗？")) return;
       const key = `status-${status}`;
-      setAiQuickButtonBusy(id, key, true);
       const patch = {
         status,
         lastTriagedAt: new Date().toISOString()
       };
       const optimisticItem = { ...item, ...patch };
       updateLaterCardDom(id, optimisticItem);
+      setAiQuickButtonBusy(id, key, true);
       try {
-        await updateLaterItem(id, patch, false);
-        scheduleAfterItemUpdateRefresh({ renderKnowledge: status === "已吸收", renderCreatorSources: true, renderDataPanels: true });
+        await updateLaterItem(id, patch, { render: "auto", updateCard: false, renderDataPanels: true });
+        scheduleAfterItemUpdateRefresh({ renderCreatorSources: true, renderDataPanels: true });
         const toastMap = {
           "待整理": "已标为待整理",
           "已吸收": "已标为已吸收",
@@ -9710,7 +10893,6 @@ function fillUrlTemplate(template, query, domain = "") {
         if (!shouldOverwrite) return;
       }
 
-      setAiQuickButtonBusy(id, "fill-conclusion", true);
       const patch = {
         conclusion,
         structuredSummary
@@ -9721,9 +10903,10 @@ function fillUrlTemplate(template, query, domain = "") {
       const optimisticItem = { ...item, ...patch };
       updateLaterCardDom(id, optimisticItem);
       syncLaterExplicitEditFormValues(id, optimisticItem);
+      setAiQuickButtonBusy(id, "fill-conclusion", true);
       try {
-        await updateLaterItem(id, patch, false);
-        scheduleAfterItemUpdateRefresh({ renderKnowledge: true, renderCreatorSources: true, renderDataPanels: true });
+        await updateLaterItem(id, patch, { render: "auto", updateCard: false, renderDataPanels: true });
+        scheduleAfterItemUpdateRefresh({ renderCreatorSources: true, renderDataPanels: true });
         toast("已填入结论");
       } finally {
         setAiQuickButtonBusy(id, "fill-conclusion", false);
@@ -9749,17 +10932,197 @@ function fillUrlTemplate(template, query, domain = "") {
         toast("没有新的推荐标签可补充。 ");
         return;
       }
-      setAiQuickButtonBusy(id, "supplement-tags", true);
       const optimisticItem = { ...item, tags: nextTags };
       updateLaterCardDom(id, optimisticItem);
       syncLaterExplicitEditFormValues(id, optimisticItem);
+      setAiQuickButtonBusy(id, "supplement-tags", true);
       try {
-        await updateLaterItem(id, { tags: nextTags }, false);
-        scheduleAfterItemUpdateRefresh({ renderKnowledge: true, renderCreatorSources: true, renderDataPanels: true });
+        await updateLaterItem(id, { tags: nextTags }, { render: "auto", updateCard: false, renderDataPanels: true });
+        scheduleAfterItemUpdateRefresh({ renderCreatorSources: true, renderDataPanels: true });
         toast("已补充标签");
       } finally {
         setAiQuickButtonBusy(id, "supplement-tags", false);
       }
+    }
+
+    function getSampleDataCounts() {
+      return {
+        later: laterItems.filter((item) => item.isSample).length,
+        sources: creatorSources.filter((source) => source.isSample).length
+      };
+    }
+
+    function renderSampleDataToolbar() {
+      const counts = getSampleDataCounts();
+      if (!counts.later && !counts.sources) return "";
+      return `
+        <div class="sample-data-toolbar">
+          <span><strong>示例数据</strong>：${counts.later} 条收件箱 / ${counts.sources} 个信息源，均带 #示例 #可删除。</span>
+          <button class="tiny-btn ghost-btn" type="button" data-action="clear-sample-data">清除示例数据</button>
+        </div>
+      `;
+    }
+
+    function buildSampleLaterItems() {
+      const now = new Date();
+      const iso = (offsetMinutes = 0) => new Date(now.getTime() - offsetMinutes * 60 * 1000).toISOString();
+      const baseTags = ["#示例", "#可删除"];
+      return normalizeLaterItems([
+        {
+          id: createId(),
+          title: "示例文章：如何建立个人信息收件箱",
+          url: "https://example.com/info-dock-sample-article",
+          source: "网站",
+          saveContext: "示例：从网页看到一篇方法论文章，先存入收件箱，稍后再整理。",
+          captureText: "把散落的链接、搜索记录和 AI 回答先收进一个地方，再统一补结论和标签。",
+          autoSummary: "这是一条文章链接示例，用于体验摘要、标签、来源和状态切换。",
+          bodyText: "示例正文：信息收件箱适合临时保存文章、教程、灵感和待验证材料。",
+          tags: [...baseTags, "#文章", "#信息管理"],
+          status: "收件箱",
+          createdAt: iso(8),
+          isSample: true
+        },
+        {
+          id: createId(),
+          title: "示例 AI 回答：如何判断资料是否值得吸收",
+          source: "外部 AI",
+          saveContext: "示例：在外部 AI 完成对话后，把回答复制回 Info Dock。",
+          bodyText: "判断一条资料是否值得吸收，可以看三个信号：它是否解决当前问题，是否能复用到未来项目，是否有清晰来源需要验证。下一步建议写一句结论，并补上主题标签。",
+          aiOriginalAnswer: "判断一条资料是否值得吸收，可以看三个信号：它是否解决当前问题，是否能复用到未来项目，是否有清晰来源需要验证。下一步建议写一句结论，并补上主题标签。",
+          structuredSummary: {
+            oneSentenceConclusion: "值得吸收的资料应能解决当前问题、可复用，并保留可验证来源。",
+            keyPoints: ["解决当前问题", "未来可复用", "来源可验证"],
+            actionItems: ["写一句结论", "补上主题标签"],
+            claimsToVerify: ["来源是否可靠"]
+          },
+          tags: [...baseTags, "#AI回答", "#整理"],
+          status: "待整理",
+          createdAt: iso(14),
+          isSample: true
+        },
+        {
+          id: createId(),
+          title: "示例纯文本笔记：下周复盘素材",
+          source: "快速笔记",
+          saveContext: "示例：没有链接也可以保存一段文字，之后再补结论。",
+          bodyText: "下周复盘时检查：哪些搜索最后真的转化成知识？哪些只是临时浏览？",
+          captureText: "哪些搜索最后真的转化成知识？",
+          tags: [...baseTags, "#笔记", "#复盘"],
+          status: "收件箱",
+          createdAt: iso(21),
+          isSample: true
+        },
+        {
+          id: createId(),
+          title: "示例摘录：产品性能优化观察",
+          url: "https://example.com/performance-note",
+          source: "GitHub",
+          saveContext: "示例：保存代码仓库说明时，同时记录为什么保存，避免之后想不起来。",
+          captureText: "避免在高频输入时重建整个列表，只更新当前卡片 DOM，并把索引刷新延后合并。",
+          autoSummary: "展示保存选文和保存上下文如何参与本地搜索。",
+          tags: [...baseTags, "#性能", "#前端"],
+          status: "收件箱",
+          createdAt: iso(30),
+          isSample: true
+        },
+        {
+          id: createId(),
+          title: "示例知识条目：局部更新优先",
+          source: "快速笔记",
+          conclusion: "高频操作应先局部更新当前卡片，再延迟合并刷新索引和统计。",
+          saveContext: "示例：这条已吸收内容会出现在知识库，可用于验证知识库刷新。",
+          bodyText: "当状态切换到已吸收时，知识库可以稍后刷新；当前按钮反馈不应该被整列表重绘阻塞。",
+          tags: [...baseTags, "#知识库", "#性能"],
+          status: "已吸收",
+          createdAt: iso(45),
+          lastTriagedAt: iso(44),
+          isSample: true
+        }
+      ]);
+    }
+
+    function buildSampleCreatorSources() {
+      const now = new Date().toISOString();
+      return normalizeCreatorSources([
+        {
+          id: createId(),
+          name: "示例信息源：产品笔记",
+          platform: "网站",
+          type: "website",
+          profileUrl: "https://example.com/product-notes",
+          category: "产品 / 方法论",
+          description: "示例信息源，用于体验信息源关注、保存到收件箱和本地搜索。",
+          reason: "示例：长期关注产品方法论与信息整理实践。",
+          tags: ["#示例", "#可删除", "#产品"],
+          checkFrequency: "weekly",
+          status: "following",
+          createdAt: now,
+          updatedAt: now,
+          isSample: true
+        },
+        {
+          id: createId(),
+          name: "示例创作者：AI 效率研究员",
+          platform: "B站",
+          type: "creator",
+          profileUrl: "https://space.bilibili.com/123456789",
+          category: "AI / 效率",
+          description: "示例创作者，用于体验创作者主页、站内搜索和保存内容链接。",
+          reason: "示例：关注 AI 工具如何进入日常工作流。",
+          tags: ["#示例", "#可删除", "#AI"],
+          checkFrequency: "weekly",
+          status: "following",
+          createdAt: now,
+          updatedAt: now,
+          isSample: true
+        }
+      ]);
+    }
+
+    async function loadSampleData() {
+      const counts = getSampleDataCounts();
+      if (counts.later || counts.sources) {
+        toast("示例数据已存在，可先清除示例数据后再加载。 ");
+        return;
+      }
+      const sampleLaterItems = buildSampleLaterItems();
+      const sampleSources = buildSampleCreatorSources();
+      laterItems = normalizeLaterItems([...sampleLaterItems, ...laterItems]);
+      creatorSources = normalizeCreatorSources([...sampleSources, ...creatorSources]);
+      await save(STORE_NAMES.later, laterItems);
+      saveCreatorSourcesToLocalStorage();
+      await rebuildSearchIndex();
+      rebuildBacklinkIndex();
+      renderFilters();
+      activateTab("laterSection");
+      renderLater();
+      renderKnowledge();
+      renderCreatorSources();
+      renderGlobalSearchResults();
+      void renderDataManagementPanels();
+      toast("已加载示例数据，可随时清除。 ");
+    }
+
+    async function clearSampleData() {
+      const counts = getSampleDataCounts();
+      if (!counts.later && !counts.sources) {
+        toast("当前没有示例数据。 ");
+        return;
+      }
+      if (!window.confirm(`确定清除 ${counts.later} 条示例收件箱内容和 ${counts.sources} 个示例信息源吗？用户真实数据不会受影响。`)) return;
+      laterItems = repairOrphanSameSourceParentLinks(laterItems.filter((item) => !item.isSample));
+      creatorSources = normalizeCreatorSources(creatorSources.filter((source) => !source.isSample));
+      await save(STORE_NAMES.later, laterItems);
+      saveCreatorSourcesToLocalStorage();
+      await rebuildSearchIndex();
+      rebuildBacklinkIndex();
+      renderFilters();
+      renderLater();
+      renderKnowledge();
+      renderCreatorSources();
+      renderGlobalSearchResults();
+      void renderDataManagementPanels();
+      toast("已清除示例数据，真实数据未受影响。 ");
     }
 
     function renderLater() {
@@ -9772,7 +11135,9 @@ function fillUrlTemplate(template, query, domain = "") {
       const relatedFilter = currentRelatedHistoryFilter || elements.laterRelatedFilter?.value || "全部研究";
       const textFilter = normalize(elements.laterTextFilter.value);
 
-      const baseItems = reviewFilterActive ? pendingReviewItems : laterItems;
+      const sameSourceItems = currentSameSourceRootId ? getSameSourceClusterItems(currentSameSourceRootId) : [];
+      if (currentSameSourceRootId && !sameSourceItems.length) currentSameSourceRootId = "";
+      const baseItems = currentSameSourceRootId ? sameSourceItems : (reviewFilterActive ? pendingReviewItems : laterItems);
       const filtered = baseItems.filter((item) => {
         const matchesSource = sourceFilter === "全部来源" || item.source === sourceFilter;
         const matchesStatus = statusFilter === "全部状态" || item.status === statusFilter;
@@ -9794,20 +11159,30 @@ function fillUrlTemplate(template, query, domain = "") {
           normalizeTags(item.tags).join(" "),
           item.estimate,
           item.conclusion,
-          relatedHistoryText
+          relatedHistoryText,
+          getSameSourceSearchText(item)
         ].join(" "));
         const matchesText = !textFilter || haystack.includes(textFilter);
         return matchesSource && matchesStatus && matchesRelated && matchesText;
       });
+
+      const sameSourceFilterBanner = currentSameSourceRootId ? `
+        <div class="same-source-filter-banner">
+          <span>正在查看同源内容簇，共 ${sameSourceItems.length} 条。</span>
+          <button class="tiny-btn ghost-btn" type="button" data-action="clear-same-source-filter">退出查看</button>
+        </div>
+      ` : "";
 
       if (!filtered.length) {
         const emptyState = !laterItems.length
           ? {
             icon: "📝",
             title: "收件箱还是空的",
-            description: "可以在顶部输入文字、链接或 AI 回答后点“📥 存入收件箱”，也可以把链接通过系统分享加入。",
-            action: "open-quick-note",
-            button: "存入收件箱"
+            description: "可以在顶部输入文字、链接或 AI 回答后点“📥 存入收件箱”，也可以加载示例数据快速体验。",
+            action: "load-sample-data",
+            button: "加载示例数据，快速体验",
+            secondaryAction: "open-quick-note",
+            secondaryButton: "存入收件箱"
           }
           : reviewFilterActive
             ? {
@@ -9824,11 +11199,13 @@ function fillUrlTemplate(template, query, domain = "") {
               action: "focus-search",
               button: "回到顶部搜索"
             };
-        elements.laterList.innerHTML = renderEmptyState(emptyState);
+        setListHtmlWithPreservedState(elements.laterList, `${sameSourceFilterBanner}${renderSampleDataToolbar()}${renderEmptyState(emptyState)}`);
+        syncKeyboardSelectionAfterLaterRender();
         return;
       }
 
-      elements.laterList.innerHTML = filtered.map((item) => {
+      const sampleToolbar = renderSampleDataToolbar();
+      const laterCardsHtml = filtered.map((item) => {
         const titleHtml = renderLaterTitleHtml(item);
         const summaryBusy = contentRefreshQueue.has(item.id) || contentFetchQueue.has(item.id) || contentFetchProgress.has(item.id);
         const metadataBusy = metadataFetchQueue.has(item.id) || metadataFetchProgress.has(item.id);
@@ -9846,11 +11223,13 @@ function fillUrlTemplate(template, query, domain = "") {
                   <span class="tag ${laterTagClass(item.status)}">${escapeHtml(item.status)}</span>
                   <span class="tag">预计：${escapeHtml(estimateLabel)}</span>
                   <span class="tag">${formatTime(item.createdAt)}</span>
+                  ${renderSameSourceMetaTags(item)}
                   ${renderContentFetchStatusTag(item)}
                   ${renderMetadataStatusTag(item)}
                   ${renderLimitedTagChips(item.tags, 3)}
                 </div>
                 ${renderLaterMemoryAnchor(item)}
+                ${renderSameSourceRelation(item)}
                 ${relatedHistoryLabel ? `<p class="hint compact-relation-hint">${escapeHtml(relatedHistoryLabel)}</p>` : ""}
               </div>
               <div class="actions">
@@ -9919,6 +11298,8 @@ function fillUrlTemplate(template, query, domain = "") {
           </article>
         `;
       }).join("");
+      setListHtmlWithPreservedState(elements.laterList, `${sameSourceFilterBanner}${sampleToolbar}${laterCardsHtml}`);
+      syncKeyboardSelectionAfterLaterRender();
     }
 
 
@@ -9959,7 +11340,8 @@ function fillUrlTemplate(template, query, domain = "") {
           item.bodyText,
           item.aiOriginalAnswer,
           getStructuredSummarySearchText(item.structuredSummary),
-          relatedHistoryLabel
+          relatedHistoryLabel,
+          getSameSourceSearchText(item)
         ].join(" "));
         const matchesText = !textFilter || haystack.includes(textFilter);
         return matchesSource && matchesStatus && matchesText;
@@ -9972,7 +11354,7 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (!knowledgeItems.length) {
         const hasKnowledge = getKnowledgeItems().length > 0;
-        elements.knowledgeList.innerHTML = renderEmptyState({
+        setListHtmlWithPreservedState(elements.knowledgeList, renderEmptyState({
           icon: hasKnowledge ? "🧠" : "📚",
           title: hasKnowledge ? "没有匹配的知识条目" : "知识库还是空的",
           description: hasKnowledge
@@ -9980,11 +11362,11 @@ function fillUrlTemplate(template, query, domain = "") {
             : "把收件箱条目的状态改为“已吸收”后，它会自动出现在知识库。",
           action: "focus-search",
           button: hasKnowledge ? "回到顶部搜索" : "去添加内容"
-        });
+        }));
         return;
       }
 
-      elements.knowledgeList.innerHTML = knowledgeItems.map((item) => {
+      const knowledgeCardsHtml = knowledgeItems.map((item) => {
         const titleHtml = renderLaterTitleHtml(item);
         const relatedHistoryLabel = getRelatedHistoryLabel(item.relatedHistoryId);
 
@@ -9997,8 +11379,10 @@ function fillUrlTemplate(template, query, domain = "") {
                   <span class="tag">${escapeHtml(item.source || "其他")}</span>
                   <span class="tag ${laterTagClass(item.status)}">${escapeHtml(item.status)}</span>
                   <span class="tag">${formatTime(item.createdAt)}</span>
+                  ${renderSameSourceMetaTags(item)}
                   ${renderLimitedTagChips(item.tags, 3)}
                 </div>
+                ${renderSameSourceRelation(item)}
                 ${relatedHistoryLabel ? `<p class="hint compact-relation-hint">${escapeHtml(relatedHistoryLabel)}</p>` : ""}
               </div>
               <div class="actions">
@@ -10061,6 +11445,7 @@ function fillUrlTemplate(template, query, domain = "") {
           </article>
         `;
       }).join("");
+      setListHtmlWithPreservedState(elements.knowledgeList, knowledgeCardsHtml);
     }
 
 
@@ -10150,6 +11535,14 @@ function fillUrlTemplate(template, query, domain = "") {
           actions.push({ action: "mark-later-ai-answer", label: "🤖 标记为 AI 回答" });
         }
 
+        const sameSourceRelation = getSameSourceRelation(item);
+        if (sameSourceRelation.isSupplement) {
+          actions.push({ action: "jump-same-source-parent", label: "↩️ 跳到原条目" });
+        }
+        if (sameSourceRelation.cluster.length > 1) {
+          actions.push({ action: "view-same-source", label: `🧩 查看同源内容（${sameSourceRelation.cluster.length}）` });
+        }
+
         actions.push({ action: "delete-later", label: "🗑 删除", danger: true });
         return actions;
       }
@@ -10224,6 +11617,39 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (action === "open-quick-note") {
         await handleQuickNoteButtonClick();
+        return;
+      }
+
+      if (action === "load-sample-data") {
+        await loadSampleData();
+        return;
+      }
+
+      if (action === "clear-sample-data") {
+        await clearSampleData();
+        return;
+      }
+
+      if (action === "dismiss-backup-reminder") {
+        dismissBackupReminder();
+        return;
+      }
+
+      if (action === "view-same-source") {
+        viewSameSourceItems(id);
+        return;
+      }
+
+      if (action === "clear-same-source-filter") {
+        clearSameSourceFilter();
+        return;
+      }
+
+      if (action === "jump-same-source-parent") {
+        const item = getLaterItemById(id);
+        const root = getSameSourceRootItem(item);
+        if (root) jumpToItem(root.id, "later");
+        else toast("原条目未找到。 ");
         return;
       }
 
@@ -10322,6 +11748,21 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (action === "copy-creator-rsshub") {
         await copyCreatorField(id, "rsshubUrl", "RSSHub");
+        return;
+      }
+
+      if (action === "refresh-creator-feed") {
+        await refreshCreatorFeed(id);
+        return;
+      }
+
+      if (action === "batch-save-creator-feed") {
+        await batchSaveSelectedCreatorFeedItems(id);
+        return;
+      }
+
+      if (action === "toggle-creator-feed-item") {
+        toggleCreatorFeedItem(id, node.dataset.feedId || "", Boolean(node.checked));
         return;
       }
 
@@ -10525,13 +11966,14 @@ function fillUrlTemplate(template, query, domain = "") {
         }
         contentRefreshQueue.add(item.id);
         contentFetchProgress.set(item.id, { label: "刷新摘要中", attempt: 0, total: CONTENT_FETCH_MAX_ATTEMPTS });
-        renderLater();
+        updateLaterCardDom(item.id);
         try {
           await refreshLaterContent(id, { silent: false });
         } finally {
           contentRefreshQueue.delete(item.id);
           contentFetchProgress.delete(item.id);
-          renderLater();
+          updateLaterCardDom(item.id);
+          scheduleAfterItemUpdateRefresh({ renderFilters: true, renderDataPanels: true });
         }
       }
 
@@ -10547,7 +11989,8 @@ function fillUrlTemplate(template, query, domain = "") {
         } finally {
           metadataFetchQueue.delete(item.id);
           metadataFetchProgress.delete(item.id);
-          renderLater();
+          updateLaterCardDom(item.id);
+          scheduleAfterItemUpdateRefresh({ renderFilters: true, renderDataPanels: true });
         }
       }
 
@@ -10601,7 +12044,7 @@ function fillUrlTemplate(template, query, domain = "") {
       if (action === "delete-later") {
         const item = laterItems.find((entry) => entry.id === id);
         const deletedSnapshots = item ? await maybeDeleteSnapshotsForItem(id, "这条收件箱内容") : 0;
-        laterItems = laterItems.filter((entry) => entry.id !== id);
+        laterItems = repairOrphanSameSourceParentLinks(laterItems.filter((entry) => entry.id !== id));
         await save(STORE_NAMES.later, laterItems);
         searchEngine.removeFromIndex(id);
         if (deletedSnapshots) await rebuildSearchIndex();
@@ -10677,7 +12120,7 @@ function fillUrlTemplate(template, query, domain = "") {
         await updateLaterItem(id, {
           relatedHistoryId: selectedHistoryId,
           tags: nextTags
-        }, true);
+        }, { render: "auto", renderDataPanels: true });
         if (selectedHistory && !selectedHistory.isResearch) {
           toast("已关联搜索历史。若这是长期研究，可在搜索历史里勾选“研究主题”。");
         }
@@ -10694,7 +12137,7 @@ function fillUrlTemplate(template, query, domain = "") {
       };
 
       if (action === "later-tags") {
-        await updateLaterItem(id, { tags: normalizeTags(node.value) }, event.type === "change");
+        await updateLaterItem(id, { tags: normalizeTags(node.value) }, event.type === "change" ? { render: "auto", renderDataPanels: true } : false);
         return;
       }
 
@@ -10722,60 +12165,51 @@ function fillUrlTemplate(template, query, domain = "") {
       }
     }
 
+    function promptDuplicateLaterAction(duplicateItem, cleanUrl) {
+      const label = duplicateItem?.title || duplicateItem?.url || cleanUrl || "已有条目";
+      const answer = window.prompt(
+        `检测到重复链接：${label}\n\n请输入操作编号：\n1 = 取消\n2 = 查看已有条目\n3 = 保存为同源补充`,
+        "2"
+      );
+      if (answer === null) return "cancel";
+      const value = String(answer || "").trim().toLowerCase();
+      if (["3", "s", "save", "补充", "同源补充"].includes(value)) return "supplement";
+      if (["2", "v", "view", "查看"].includes(value)) return "view";
+      return "cancel";
+    }
+
+    function describeLaterSaveResult(result, createdMessage = "已保存到收件箱。") {
+      if (result?.added && result.reason === "same-source-supplement") return "已保存为同源补充。";
+      if (result?.added) return createdMessage;
+      if (result?.duplicateAction === "view") return "已打开已有条目，未重复保存。";
+      if (result?.duplicateAction === "skip") return "重复链接已跳过。";
+      return "已取消重复链接保存。";
+    }
+
     async function addLaterItem() {
       if (!elements.laterTitle || !elements.laterUrl || !elements.laterSource) {
         toast("请使用顶部 📥 存入收件箱 保存链接或文字。 ");
-        return;
+        return false;
       }
 
       const title = elements.laterTitle.value.trim();
       const url = elements.laterUrl.value.trim();
       const source = elements.laterSource.value;
-
       if (!title) {
         toast("收件箱标题不能为空。");
-        return;
+        return false;
       }
 
-      if (url && laterItems.some((item) => item.url === url)) {
-        toast("这条链接已经在收件箱里。");
-        return;
-      }
-
-      const item = {
-        id: createId(),
-        title,
-        url,
-        source,
-        reason: "",
-        autoSummary: "",
-        bodyText: "",
-        captureText: "",
+      const result = await addLaterFromExternal(title, url, source, "通过手动表单添加。", {
         saveContext: "通过手动表单添加。",
-        metadataFetched: false,
-        tags: mergeAutomaticBasicTags(providedTags, {
-          kind: "later",
-          title,
-          url,
-          source
-        }),
-        estimate: estimateLaterItemTime({ title, url, source }),
-        status: "收件箱",
-        conclusion: "",
-        createdAt: new Date().toISOString(),
-        relatedHistoryId: ""
-      };
-
-      laterItems.unshift(item);
-      await save(STORE_NAMES.later, laterItems);
-      await rebuildSearchIndex();
-      rebuildBacklinkIndex();
-      queueContentFetchForLaterItem(item);
-      queueMetadataEnrichmentForLaterItem(item);
-      if (elements.laterForm) elements.laterForm.reset();
-      if (elements.laterSource) elements.laterSource.value = "其他";
-      renderLater();
-      toast("已添加到收件箱，正在后台抓取摘要和轻量元数据。 ");
+        tags: []
+      });
+      if (result.added) {
+        if (elements.laterForm) elements.laterForm.reset();
+        if (elements.laterSource) elements.laterSource.value = "其他";
+      }
+      toast(describeLaterSaveResult(result, "已添加到收件箱，正在后台抓取摘要和轻量元数据。 "));
+      return result.added;
     }
 
     async function addLaterFromExternal(title, url, source, reason = "通过系统分享添加。", options = {}) {
@@ -10786,18 +12220,35 @@ function fillUrlTemplate(template, query, domain = "") {
       const finalSource = normalizeLaterSource(source || detectSourceFromUrl(cleanUrl));
       const captureText = limitIncomingText(options.captureText || "", 500);
       const explicitContext = limitIncomingText(options.saveContext || "", 1000);
-      const saveContext = explicitContext || limitIncomingText(reason || "", 1000);
+      let saveContext = explicitContext || limitIncomingText(reason || "", 1000);
       const initialSummary = limitIncomingText(options.autoSummary || options.description || "", 600);
-      const providedTags = normalizeTags(options.tags || []);
+      let providedTags = normalizeTags(options.tags || []);
+      let parentId = "";
+      let duplicateReason = "";
+      let duplicateRoot = null;
 
       if (cleanUrl) {
-        const duplicateItem = laterItems.find((item) => hasSameNormalizedUrl(item.url, cleanUrl));
-        if (duplicateItem) {
-          return {
-            added: false,
-            reason: "duplicate",
-            item: duplicateItem
-          };
+        duplicateRoot = getSameUrlLaterItems(cleanUrl)[0] || null;
+        if (duplicateRoot) {
+          const duplicateMode = options.duplicateMode || "prompt";
+          const duplicateAction = duplicateMode === "skip"
+            ? "skip"
+            : duplicateMode === "supplement"
+              ? "supplement"
+              : promptDuplicateLaterAction(duplicateRoot, cleanUrl);
+
+          if (duplicateAction === "view") {
+            jumpToItem(duplicateRoot.id, "later");
+            return { added: false, reason: "duplicate", duplicateAction: "view", item: duplicateRoot };
+          }
+          if (duplicateAction !== "supplement") {
+            return { added: false, reason: "duplicate", duplicateAction: duplicateAction === "skip" ? "skip" : "cancel", item: duplicateRoot };
+          }
+
+          parentId = duplicateRoot.id;
+          duplicateReason = options.duplicateReason || "same-url-different-note";
+          providedTags = normalizeTags([...providedTags, "#同源补充"]);
+          saveContext = limitIncomingText([saveContext, "同一链接的补充记录。"].filter(Boolean).join("；"), 1000);
         }
       }
 
@@ -10827,70 +12278,63 @@ function fillUrlTemplate(template, query, domain = "") {
         postponeUntil: "",
         lastTriagedAt: "",
         lastOpenedAt: "",
-        relatedHistoryId: ""
+        relatedHistoryId: options.relatedHistoryId || "",
+        creatorSourceId: options.creatorSourceId || "",
+        parentId,
+        duplicateReason
       };
 
       const normalizedItem = normalizeLaterItems([item])[0];
       laterItems.unshift(normalizedItem);
       await save(STORE_NAMES.later, laterItems);
-      await rebuildSearchIndex();
-      rebuildBacklinkIndex();
+      if (options.rebuildSearch !== false) {
+        await rebuildSearchIndex();
+        rebuildBacklinkIndex();
+      }
       queueContentFetchForLaterItem(normalizedItem);
       queueMetadataEnrichmentForLaterItem(normalizedItem);
-      renderLater();
-      return { added: true, reason: "created", item: normalizedItem };
+      if (options.render !== false) renderLater();
+      return {
+        added: true,
+        reason: parentId ? "same-source-supplement" : "created",
+        item: normalizedItem,
+        parentItem: duplicateRoot
+      };
     }
 
     async function addLaterFromHistory(historyItem) {
-      const url = historyItem.url || "";
-      if (url && laterItems.some((item) => item.url === url)) {
-        toast("这条链接已经在收件箱里。");
-        return false;
+      const title = `${historyItem.platform}：${historyItem.keyword}`;
+      const result = await addLaterFromExternal(
+        title,
+        historyItem.url || "",
+        historyItem.platform,
+        "来自搜索历史。",
+        {
+          autoSummary: historyItem.note || "",
+          captureText: historyItem.note || historyItem.researchNote || "",
+          saveContext: limitIncomingText(`来自搜索历史：${historyItem.platform || "其他"} · ${historyItem.keyword || "未命名关键词"}${historyItem.researchGoal ? `；研究目标：${historyItem.researchGoal}` : ""}`, 1000),
+          tags: historyItem.isResearch ? normalizeTags([...(historyItem.tags || []), "#研究资料"]) : (historyItem.tags || []),
+          relatedHistoryId: historyItem.id
+        }
+      );
+
+      if (result.added) {
+        renderFilters();
+        renderKnowledge();
+        renderCreatorSources();
+      } else {
+        toast(describeLaterSaveResult(result));
       }
-
-      const item = {
-        id: createId(),
-        title: `${historyItem.platform}：${historyItem.keyword}`,
-        url,
-        source: normalizeLaterSource(historyItem.platform),
-        reason: "来自搜索历史。",
-        autoSummary: historyItem.note || "",
-        bodyText: "",
-        captureText: historyItem.note || historyItem.researchNote || "",
-        saveContext: limitIncomingText(`来自搜索历史：${historyItem.platform || "其他"} · ${historyItem.keyword || "未命名关键词"}${historyItem.researchGoal ? `；研究目标：${historyItem.researchGoal}` : ""}`, 1000),
-        metadataFetched: false,
-        tags: mergeAutomaticBasicTags(historyItem.isResearch ? normalizeTags([...(historyItem.tags || []), "#研究资料"]) : (historyItem.tags || []), {
-          kind: "later",
-          keyword: historyItem.keyword,
-          title: `${historyItem.platform}：${historyItem.keyword}`,
-          url,
-          source: historyItem.platform,
-          summary: historyItem.note || historyItem.researchNote || historyItem.researchGoal
-        }),
-        estimate: estimateLaterItemTime({ title: `${historyItem.platform}：${historyItem.keyword}`, url, source: historyItem.platform, bodyText: [historyItem.note, historyItem.researchNote, historyItem.researchGoal].filter(Boolean).join(" ") }),
-        status: "收件箱",
-        conclusion: "",
-        createdAt: new Date().toISOString(),
-        relatedHistoryId: historyItem.id
-      };
-
-      laterItems.unshift(item);
-      await save(STORE_NAMES.later, laterItems);
-      await rebuildSearchIndex();
-      rebuildBacklinkIndex();
-      queueContentFetchForLaterItem(item);
-      queueMetadataEnrichmentForLaterItem(item);
-      renderFilters();
-      renderLater();
-      renderKnowledge();
-      renderCreatorSources();
-      return true;
+      return result.added;
     }
 
     async function updateLaterItem(id, patch, shouldRender = true) {
       const previousItem = laterItems.find((item) => item.id === id);
+      if (!previousItem) return;
       const previousUrl = previousItem?.url || "";
-      laterItems = laterItems.map((item) => item.id === id ? { ...item, ...patch } : item);
+      const mergedItem = normalizeLaterItems([{ ...previousItem, ...patch }])[0];
+      const options = normalizeLaterUpdateOptions(previousItem, mergedItem, patch, shouldRender);
+      laterItems = laterItems.map((item) => item.id === id ? mergedItem : item);
       await save(STORE_NAMES.later, laterItems);
 
       const nextItem = laterItems.find((item) => item.id === id);
@@ -10903,13 +12347,31 @@ function fillUrlTemplate(template, query, domain = "") {
         metadataFetchProgress.delete(nextItem.id);
       }
 
-      if (shouldRender) {
+      if (options.render === "full" || options.renderLater) {
         await rebuildSearchIndex();
         rebuildBacklinkIndex();
         renderFilters();
         renderLater();
-        renderKnowledge();
+        if (options.renderKnowledge) renderKnowledge();
         renderGlobalSearchResults();
+        if (options.renderDataPanels) void renderDataManagementPanels();
+        return;
+      }
+
+      if (options.updateCard && nextItem) {
+        updateLaterCardDom(id, nextItem);
+      }
+
+      if (options.renderKnowledge) {
+        renderKnowledge();
+      }
+
+      if (options.refresh) {
+        scheduleAfterItemUpdateRefresh({
+          renderKnowledge: false,
+          renderFilters: true,
+          renderDataPanels: Boolean(options.renderDataPanels)
+        });
       }
     }
 
@@ -10999,11 +12461,12 @@ function fillUrlTemplate(template, query, domain = "") {
       renderAll();
 
       if (result.added) {
-        setStatus(`已通过手机分享加入收件箱：${result.item.title}`);
-        toast("已通过分享加入收件箱。 ");
+        setStatus(`${describeLaterSaveResult(result, "已通过手机分享加入收件箱。 ")} ${result.item.title}`);
+        toast(describeLaterSaveResult(result, "已通过分享加入收件箱。 "));
       } else if (result.reason === "duplicate") {
-        setStatus("这条链接已经在收件箱里。 ");
-        toast("这条链接已存在。 ");
+        const message = describeLaterSaveResult(result);
+        setStatus(message);
+        toast(message);
       } else if (!sharedUrl) {
         setStatus("已收到系统分享，但分享内容里没有可识别的链接。 ");
         toast("分享内容里没有可识别链接。 ");
@@ -11033,16 +12496,16 @@ function fillUrlTemplate(template, query, domain = "") {
       );
 
       if (result.added) {
-        setStatus(`已添加到收件箱：${result.item.title}`);
+        setStatus(`${describeLaterSaveResult(result, "已添加到收件箱。 ")} ${result.item.title}`);
       } else if (result.reason === "duplicate") {
-        setStatus("这条链接已经在收件箱里。 ");
+        setStatus(describeLaterSaveResult(result));
       }
 
       clearIncomingParams();
       setTimeout(() => {
         activateTab("laterSection");
         renderAll();
-        toast(result.added ? "已从外部页面加入收件箱。" : "这条链接已存在。 ");
+        toast(describeLaterSaveResult(result, "已从外部页面加入收件箱。"));
       }, 0);
 
       return result.added;
@@ -11394,11 +12857,6 @@ function fillUrlTemplate(template, query, domain = "") {
     async function saveUrlFromQuickNote(url, rawInputText = "") {
       const normalizedInputUrl = await normalizeUrlForQuickNote(url);
 
-      if (laterItems.some((item) => hasSameNormalizedUrl(item.url, normalizedInputUrl))) {
-        toast("这条链接已经在收件箱里");
-        return false;
-      }
-
       const source = typeof detectSourceFromUrl === "function" ? detectSourceFromUrl(normalizedInputUrl) : "其他";
       const title = await fetchTitleForQuickNote(normalizedInputUrl);
       const captureText = limitIncomingText(stripUrlFromSharedText(rawInputText), 500);
@@ -11410,14 +12868,14 @@ function fillUrlTemplate(template, query, domain = "") {
         ])
       });
 
-      if (!result.added && result.reason === "duplicate") {
-        toast("这条链接已经在收件箱里");
+      if (!result.added) {
+        toast(describeLaterSaveResult(result));
         return false;
       }
 
       elements.searchInput.value = "";
       hideLocalSearchDropdown();
-      toast("已保存到收件箱");
+      toast(describeLaterSaveResult(result, "已保存到收件箱"));
       return true;
     }
 
