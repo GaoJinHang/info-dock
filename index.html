@@ -137,10 +137,10 @@
     }
 
     #storageBadge {
-      position: fixed;
-      top: 14px;
-      right: 16px;
-      z-index: 110;
+      position: static;
+      flex: 0 1 auto;
+      max-width: min(100%, 360px);
+      margin-left: auto;
       box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
     }
 
@@ -199,6 +199,10 @@
     .copy-search-btn:hover {
       color: var(--primary);
       border-color: var(--primary);
+    }
+
+    .quick-note-label-short {
+      display: none;
     }
 
     .local-search-dropdown {
@@ -325,6 +329,36 @@
     .external-ai-hint {
       flex: 1 1 260px;
       text-align: right;
+    }
+
+    .external-ai-card {
+      padding: 12px 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .external-ai-card .external-ai-row {
+      padding: 0;
+    }
+
+    .external-ai-backup-panel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--line);
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+
+    .external-ai-backup-panel.warning {
+      color: #9a3412;
+    }
+
+    .external-ai-backup-message {
+      flex: 1 1 auto;
     }
 
 
@@ -1879,7 +1913,18 @@
 
     .review-actions {
       justify-content: flex-end;
+      align-items: center;
       flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .review-actions .review-action-btn {
+      flex: 0 0 auto;
+      min-height: 34px;
+      padding: 0 11px;
+      font-size: 12px;
+      line-height: 1.2;
+      white-space: nowrap;
     }
 
     .review-summary-row {
@@ -2279,6 +2324,15 @@
         text-align: left;
       }
 
+      .external-ai-backup-panel {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .external-ai-backup-panel .tiny-btn {
+        width: 100%;
+      }
+
       .search-main {
         gap: 9px;
       }
@@ -2375,9 +2429,9 @@
       }
 
       #storageBadge {
-        top: 10px;
-        right: 11px;
-        max-width: 46%;
+        align-self: flex-start;
+        max-width: 100%;
+        margin-left: 0;
         font-size: 12px;
       }
 
@@ -2453,7 +2507,21 @@
       }
 
       .review-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         justify-content: stretch;
+        gap: 5px;
+      }
+
+      .review-actions .review-action-btn {
+        width: 100%;
+        min-height: 34px;
+        padding: 0 8px;
+        font-size: 11.5px;
+      }
+
+      #clearReviewFilterBtn {
+        grid-column: 1 / -1;
       }
 
       .triage-backdrop.active {
@@ -2611,11 +2679,26 @@
 
     @media (max-width: 720px) {
       .search-row {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: stretch;
+      }
+
+      .search-input {
+        min-width: 0;
       }
 
       .copy-search-btn {
-        width: 100%;
+        width: auto;
+        min-width: max-content;
+        white-space: nowrap;
+      }
+
+      .quick-note-label-full {
+        display: none;
+      }
+
+      .quick-note-label-short {
+        display: inline;
       }
     }
 
@@ -2666,7 +2749,47 @@
       }
     }
 
-  </style>
+  
+    /* Inbox and knowledge filters: dedicated two-row layout. */
+    .inbox-filter-toolbar,
+    .knowledge-filter-toolbar {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .filter-select-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .filter-search-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      min-width: 0;
+    }
+
+    .filter-select-row select,
+    .filter-search-row input {
+      width: 100%;
+      min-width: 0;
+    }
+
+    @media (max-width: 720px) {
+      .inbox-filter-toolbar,
+      .knowledge-filter-toolbar {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 6px;
+      }
+
+      .filter-select-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 5px;
+      }
+    }
+
+</style>
 </head>
 <body>
   <div class="card pwa-install-card hidden" id="pwaInstallPrompt" role="dialog" aria-live="polite" aria-label="安装 Info Dock PWA">
@@ -2696,19 +2819,10 @@
         <div class="search-main">
           <div class="search-row">
             <input id="searchInput" class="search-input" type="search" placeholder="今天我要找什么？" autocomplete="off" enterkeyhint="search" />
-            <button class="ghost-btn copy-search-btn" id="quickNoteBtn" type="button">📥 存入收件箱</button>
+            <button class="ghost-btn copy-search-btn" id="quickNoteBtn" type="button" aria-label="存入收件箱"><span class="quick-note-label-full">📥 存入收件箱</span><span class="quick-note-label-short" aria-hidden="true">📥 存入</span></button>
           </div>
         </div>
         <div id="localSearchDropdown" class="local-search-dropdown hidden" role="listbox" aria-label="本地搜索结果"></div>
-        <div class="external-ai-row" aria-label="外部 AI 快捷入口">
-          <div class="external-ai-links">
-            <span>外部 AI：</span>
-            <button class="external-ai-link" type="button" data-action="external-ai-home" data-platform-id="doubao">豆包</button>
-            <span aria-hidden="true">·</span>
-            <button class="external-ai-link" type="button" data-action="external-ai-home" data-platform-id="deepseek">DeepSeek</button>
-          </div>
-          <span class="external-ai-hint">在外部 AI 完成对话后，可复制回答回 Info Dock 存入收件箱。</span>
-        </div>
         <div class="global-search-box hidden" aria-label="全文搜索" aria-hidden="true">
           <input id="globalSearchInput" class="field global-search-input" type="search" placeholder="🔍 搜索所有内容：标题、标签、备注、正文" autocomplete="off" tabindex="-1" />
           <div id="globalSearchResults" class="global-search-results hidden"></div>
@@ -2725,6 +2839,22 @@
           <span class="platform-scroll-hint">移动端可横向滑动查看更多</span>
         </div>
         <div class="platforms-grid" id="platformCards"></div>
+      </section>
+
+      <section class="card external-ai-card" aria-label="外部 AI 与数据备份提示">
+        <div class="external-ai-row" aria-label="外部 AI 快捷入口">
+          <div class="external-ai-links">
+            <span>外部 AI：</span>
+            <button class="external-ai-link" type="button" data-action="external-ai-home" data-platform-id="doubao">豆包</button>
+            <span aria-hidden="true">·</span>
+            <button class="external-ai-link" type="button" data-action="external-ai-home" data-platform-id="deepseek">DeepSeek</button>
+          </div>
+          <span class="external-ai-hint">外部 AI 对话不会自动保存。完成后请复制有价值的回答回 Info Dock，再存入收件箱。</span>
+        </div>
+        <div class="external-ai-backup-panel" id="externalAiBackupPanel" aria-live="polite">
+          <span class="external-ai-backup-message" id="externalAiBackupReminder">正在读取 JSON 备份状态…</span>
+          <button class="tiny-btn ghost-btn" type="button" data-action="export-json-backup">导出 JSON</button>
+        </div>
       </section>
 </header>
 
@@ -2781,37 +2911,43 @@
           <p class="hint" id="pendingReviewHint">默认规则：状态为收件箱/待读，且创建时间超过 3 天。</p>
         </div>
         <div class="actions review-actions">
-          <button class="primary-btn" type="button" data-action="start-later-triage" id="startTriageBtn">开始整理</button>
-          <button class="ghost-btn" type="button" data-action="start-review-triage" id="startReviewTriageBtn">开始整理待回顾</button>
-          <button class="ghost-btn" id="viewPendingReviewBtn" type="button">查看待回顾</button>
-          <button class="ghost-btn" id="randomReviewBtn" type="button">随机回顾</button>
-          <button class="ghost-btn hidden" id="clearReviewFilterBtn" type="button">退出待回顾筛选</button>
+          <button class="primary-btn review-action-btn" type="button" data-action="start-later-triage" id="startTriageBtn">开始整理</button>
+          <button class="ghost-btn review-action-btn" type="button" data-action="start-review-triage" id="startReviewTriageBtn">整理待回顾</button>
+          <button class="ghost-btn review-action-btn" id="viewPendingReviewBtn" type="button">查看待回顾</button>
+          <button class="ghost-btn review-action-btn" id="randomReviewBtn" type="button">随机回顾</button>
+          <button class="ghost-btn review-action-btn hidden" id="clearReviewFilterBtn" type="button">退出待回顾筛选</button>
         </div>
       </div>
 
-      <div class="card toolbar two">
-        <select id="laterSourceFilter" aria-label="来源平台"></select>
-        <select id="laterStatusFilter" aria-label="状态"></select>
-        <div id="laterStatusChips" class="status-chip-row" role="group" aria-label="收件箱状态快捷筛选"></div>
-        <select id="laterRelatedFilter" aria-label="关联研究"></select>
-        <input id="laterTextFilter" class="field" type="search" aria-label="关键词" placeholder="搜索标题、链接、摘要、结论" />
+      <div class="card toolbar inbox-filter-toolbar">
+        <div class="filter-select-row">
+          <select id="laterSourceFilter" aria-label="来源平台"></select>
+          <select id="laterStatusFilter" aria-label="状态"></select>
+          <select id="laterRelatedFilter" aria-label="关联研究"></select>
+        </div>
+        <div class="filter-search-row">
+          <input id="laterTextFilter" class="field" type="search" aria-label="关键词" placeholder="搜索标题、链接、摘要、结论" />
+        </div>
       </div>
       <div class="list" id="laterList"></div>
     </section>
 
     <section id="knowledgeSection" class="section" aria-label="知识库">
-      <div class="card toolbar knowledge-toolbar">
-        <select id="knowledgeSourceFilter" aria-label="知识来源"></select>
-        <select id="knowledgeStatusFilter" aria-label="知识状态">
-          <option value="全部状态">全部状态</option>
-          <option value="已吸收">已吸收</option>
-        </select>
-        <div id="knowledgeStatusChips" class="status-chip-row" role="group" aria-label="知识库状态快捷筛选"></div>
-        <input id="knowledgeTextFilter" class="field" type="search" aria-label="标签或关键词" placeholder="搜索标题、标签、结论、摘要、正文" />
-        <select id="knowledgeSort" aria-label="知识排序">
-          <option value="newest">最近创建</option>
-          <option value="oldest">最早创建</option>
-        </select>
+      <div class="card toolbar knowledge-filter-toolbar">
+        <div class="filter-select-row">
+          <select id="knowledgeSourceFilter" aria-label="知识来源"></select>
+          <select id="knowledgeStatusFilter" aria-label="知识状态">
+            <option value="全部状态">全部状态</option>
+            <option value="已吸收">已吸收</option>
+          </select>
+          <select id="knowledgeSort" aria-label="知识排序">
+            <option value="newest">最近创建</option>
+            <option value="oldest">最早创建</option>
+          </select>
+        </div>
+        <div class="filter-search-row">
+          <input id="knowledgeTextFilter" class="field" type="search" aria-label="标签或关键词" placeholder="搜索标题、标签、结论、摘要、正文" />
+        </div>
       </div>
       <div class="list" id="knowledgeList"></div>
     </section>
@@ -3287,6 +3423,8 @@
       globalSearchResults: $("#globalSearchResults"),
       platformDock: $("#platformDock"),
       platformCards: $("#platformCards"),
+      externalAiBackupPanel: $("#externalAiBackupPanel"),
+      externalAiBackupReminder: $("#externalAiBackupReminder"),
       historyPlatformFilter: $("#historyPlatformFilter"),
       historyStatusFilter: $("#historyStatusFilter"),
       historyTextFilter: $("#historyTextFilter"),
@@ -5481,12 +5619,25 @@
       return !Number.isNaN(dismissedAt) && Date.now() - dismissedAt < BACKUP_REMINDER_THROTTLE_MS;
     }
 
+    function renderExternalAiBackupReminder(info = getBackupAgeInfo()) {
+      if (!elements.externalAiBackupReminder) return;
+      const message = getBackupReminderMessage(info);
+      const specificTime = info.lastExport ? `（${info.specificLabel}）` : "";
+      elements.externalAiBackupReminder.textContent = message
+        ? `JSON 备份提醒：${message}`
+        : `JSON 备份：上次备份 ${info.relativeLabel}${specificTime}`;
+      if (elements.externalAiBackupPanel) {
+        elements.externalAiBackupPanel.classList.toggle("warning", Boolean(message));
+      }
+    }
+
     function updateSettingsBackupReminderUi(info = getBackupAgeInfo()) {
       const message = getBackupReminderMessage(info);
       if (elements.settingsTabBtn) {
         elements.settingsTabBtn.classList.toggle("backup-warning", Boolean(message));
         elements.settingsTabBtn.title = message || "设置";
       }
+      renderExternalAiBackupReminder(info);
     }
 
     function rememberBackupReminderShown() {
@@ -9267,30 +9418,44 @@
 
     function renderPlatformCards() {
       const orderedSearchPlatforms = getOrderedSearchPlatforms();
-      const bing = orderedSearchPlatforms[0]?.id === "bing" || orderedSearchPlatforms[0]?.name === "必应"
-        ? orderedSearchPlatforms[0]
-        : null;
+      const bing = orderedSearchPlatforms.find((platform) => platform.id === "bing")
+        || orderedSearchPlatforms.find((platform) => platform.name === "必应")
+        || null;
+      const sortablePlatforms = orderedSearchPlatforms.filter((platform) => platform !== bing);
       const shouldShowAll = isSortingPlatforms || showAllPlatforms;
       const visiblePlatforms = shouldShowAll
-        ? orderedSearchPlatforms
-        : orderedSearchPlatforms.slice(0, DEFAULT_VISIBLE_PLATFORM_COUNT);
-      const hiddenCount = Math.max(0, orderedSearchPlatforms.length - visiblePlatforms.length);
+        ? sortablePlatforms
+        : sortablePlatforms.slice(0, DEFAULT_VISIBLE_PLATFORM_COUNT);
+      const hiddenCount = Math.max(0, sortablePlatforms.length - visiblePlatforms.length);
 
       const sortBanner = isSortingPlatforms
-        ? `<div class="platform-sort-banner">排序模式：依次点击两个非必应平台卡片即可互换顺序；点击“完成排序”退出，排序会立即保存在本机。</div>`
+        ? `<div class="platform-sort-banner">排序模式：必应固定在顶部；依次点击两个其他平台卡片即可互换顺序。点击“完成排序”退出，排序会立即保存在本机。</div>`
+        : "";
+
+      const bingCard = bing
+        ? `
+          <button
+            class="platform-card platform-card-main"
+            type="button"
+            data-action="platform-bing"
+            data-platform-id="${escapeAttribute(bing.id)}"
+            aria-label="使用必应搜索当前关键词"
+          >
+            <h3>必应搜索</h3>
+          </button>
+        `
         : "";
 
       const platformCards = visiblePlatforms.map((platform) => {
-        const isFixedBing = bing && platform.id === bing.id;
-        const sortable = isSortingPlatforms && !isFixedBing;
+        const sortable = isSortingPlatforms;
         return `
           <article
             class="platform-card ${isSortingPlatforms ? "sorting" : ""} ${selectedSortPlatformId === platform.id ? "selected" : ""}"
             ${sortable ? `data-action="platform-sort-select" data-platform-id="${escapeAttribute(platform.id)}"` : ""}
           >
             <div class="platform-card-head">
-              <h3>${escapeHtml(platform.name === "必应" ? "必应搜索" : platform.name)}</h3>
-              ${isSortingPlatforms ? `<span class="sort-hint">${isFixedBing ? "固定" : (selectedSortPlatformId === platform.id ? "已选" : "选择")}</span>` : ""}
+              <h3>${escapeHtml(platform.name)}</h3>
+              ${isSortingPlatforms ? `<span class="sort-hint">${selectedSortPlatformId === platform.id ? "已选" : "选择"}</span>` : ""}
             </div>
             ${isSortingPlatforms ? "" : `
               <div class="platform-actions">
@@ -9302,10 +9467,10 @@
         `;
       }).join("");
 
-      const moreCard = !isSortingPlatforms && orderedSearchPlatforms.length > DEFAULT_VISIBLE_PLATFORM_COUNT
+      const moreCard = !isSortingPlatforms && sortablePlatforms.length > DEFAULT_VISIBLE_PLATFORM_COUNT
         ? `
           <button class="platform-card platform-card-more" type="button" data-action="toggle-more-platforms">
-            <h3>${showAllPlatforms ? "收起平台" : `更多平台`}</h3>
+            <h3>${showAllPlatforms ? "收起平台" : "更多平台"}</h3>
             <span class="sort-hint">${showAllPlatforms ? "回到常用入口" : `还有 ${hiddenCount} 个`}</span>
           </button>
         `
@@ -9320,11 +9485,11 @@
       const sortCard = `
         <button class="platform-card platform-card-sort-control ${isSortingPlatforms ? "active" : ""}" type="button" data-action="toggle-platform-sort">
           <h3>${isSortingPlatforms ? "完成排序" : "自定义排序"}</h3>
-          ${isSortingPlatforms ? "" : `<span class="sort-hint">调整平台顺序</span>`}
+          ${isSortingPlatforms ? "" : `<span class="sort-hint">必应固定，仅调整其他平台</span>`}
         </button>
       `;
 
-      elements.platformCards.innerHTML = sortBanner + platformCards + moreCard + addCard + sortCard;
+      elements.platformCards.innerHTML = sortBanner + bingCard + platformCards + moreCard + addCard + sortCard;
     }
 
     function renderFilters() {
@@ -9336,15 +9501,14 @@
       fillSelect(elements.historyStatusFilter, ["全部状态", ...SEARCH_STATUSES], "全部状态");
 
       const sourceOptions = getAllLaterSources();
+      const filterSourceOptions = getVisibleFilterSources(sourceOptions);
       if (elements.laterSource) fillSelect(elements.laterSource, sourceOptions, sourceOptions.includes("其他") ? "其他" : sourceOptions[0]);
-      fillSelect(elements.laterSourceFilter, ["全部来源", ...sourceOptions], "全部来源");
+      fillSelect(elements.laterSourceFilter, ["全部来源", ...filterSourceOptions], "全部来源");
       fillSelect(elements.laterStatusFilter, ["全部状态", ...LATER_STATUSES], "全部状态");
-      renderStatusFilterChips(elements.laterStatusChips, ["全部状态", ...LATER_STATUSES], elements.laterStatusFilter?.value || "全部状态", "later-status-chip");
       fillSelect(elements.laterRelatedFilter, getLaterRelatedFilterOptions().map((option) => option.label), "全部研究");
       syncLaterRelatedFilterValues();
-      fillSelect(elements.knowledgeSourceFilter, ["全部来源", ...sourceOptions], "全部来源");
+      fillSelect(elements.knowledgeSourceFilter, ["全部来源", ...filterSourceOptions], "全部来源");
       fillSelect(elements.knowledgeStatusFilter, ["全部状态", ...KNOWLEDGE_STATUSES], "全部状态");
-      renderStatusFilterChips(elements.knowledgeStatusChips, ["全部状态", ...KNOWLEDGE_STATUSES], elements.knowledgeStatusFilter?.value || "全部状态", "knowledge-status-chip");
     }
 
     function getAllLaterSources() {
@@ -9353,6 +9517,20 @@
         ...platforms.map((item) => item.name),
         ...laterItems.map((item) => item.source).filter(Boolean)
       ]);
+    }
+
+    function getVisibleFilterSources(sources = getAllLaterSources()) {
+      const hiddenSourceKeys = new Set([
+        "外部ai",
+        "豆包",
+        "豆包ai",
+        "deepseek",
+        "deepseekai"
+      ]);
+      return sources.filter((source) => {
+        const sourceKey = String(source || "").replace(/\s+/g, "").toLowerCase();
+        return !hiddenSourceKeys.has(sourceKey);
+      });
     }
 
     function fillSelect(select, options, selectedValue) {
@@ -10225,7 +10403,7 @@ function fillUrlTemplate(template, query, domain = "") {
       }
 
       const message = `有 ${pendingCount} 条收件箱内容待回顾。`;
-      setStatus(`${message} 可在“收件箱”点击“开始整理待回顾”，也可以“查看待回顾”或“随机回顾”。`);
+      setStatus(`${message} 可在“收件箱”点击“整理待回顾”，也可以“查看待回顾”或“随机回顾”。`);
       toast(message);
     }
 
@@ -11131,7 +11309,6 @@ function fillUrlTemplate(template, query, domain = "") {
       if (triageSessionState.active) renderLaterTriageModal();
       const sourceFilter = elements.laterSourceFilter.value || "全部来源";
       const statusFilter = elements.laterStatusFilter.value || "全部状态";
-      syncStatusFilterChips(elements.laterStatusChips, statusFilter);
       const relatedFilter = currentRelatedHistoryFilter || elements.laterRelatedFilter?.value || "全部研究";
       const textFilter = normalize(elements.laterTextFilter.value);
 
@@ -11319,7 +11496,6 @@ function fillUrlTemplate(template, query, domain = "") {
 
       const sourceFilter = elements.knowledgeSourceFilter?.value || "全部来源";
       const statusFilter = elements.knowledgeStatusFilter?.value || "全部状态";
-      syncStatusFilterChips(elements.knowledgeStatusChips, statusFilter);
       const textFilter = normalize(elements.knowledgeTextFilter?.value || "");
       const sort = elements.knowledgeSort?.value || "newest";
 
@@ -11632,6 +11808,11 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (action === "dismiss-backup-reminder") {
         dismissBackupReminder();
+        return;
+      }
+
+      if (action === "export-json-backup") {
+        await exportDataBackup();
         return;
       }
 
