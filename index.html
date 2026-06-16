@@ -2666,56 +2666,6 @@
     </section>
   </div>
 
-
-  <div class="modal-backdrop" id="aiAnswerModal" aria-hidden="true">
-    <section class="card modal ai-answer-modal" role="dialog" aria-modal="true" aria-labelledby="aiAnswerModalTitle">
-      <div class="modal-title-row">
-        <div>
-          <h2 id="aiAnswerModalTitle">保存 AI 回答</h2>
-          <p class="hint">从豆包 / DeepSeek / 其他 AI 手动复制回答后粘贴到这里，Info Dock 会用本地规则生成摘要并保存到收件箱。</p>
-        </div>
-        <button class="ghost-btn" type="button" id="closeAiAnswerModalBtn">关闭</button>
-      </div>
-
-      <label class="label">AI 来源
-        <select id="aiAnswerSource">
-          <option value="豆包 AI">豆包</option>
-          <option value="DeepSeek AI">DeepSeek</option>
-          <option value="其他 AI">其他 AI</option>
-        </select>
-      </label>
-
-      <label class="label">关联搜索历史
-        <select id="aiAnswerHistory"></select>
-      </label>
-
-      <label class="label">原始问题
-        <textarea id="aiAnswerQuestion" placeholder="会自动填充最近一次 AI 询问；也可以手动填写。"></textarea>
-      </label>
-
-      <label class="label">AI 原始回答
-        <textarea id="aiAnswerText" class="ai-answer-textarea" placeholder="把外部 AI 页面中的回答复制后粘贴到这里。"></textarea>
-      </label>
-
-      <div class="compact-edit-grid">
-        <label class="compact-field wide"><span>标题</span>
-          <input id="aiAnswerTitle" class="field" type="text" placeholder="自动生成，可手动修改" />
-        </label>
-        <label class="compact-field wide"><span>结论</span>
-          <textarea id="aiAnswerConclusion" placeholder="自动提取一句话结论，可手动修改"></textarea>
-        </label>
-        <label class="compact-field wide"><span>标签</span>
-          <input id="aiAnswerTags" class="field tag-edit-field" type="text" placeholder="#AI #AI回答 #豆包AI" />
-        </label>
-      </div>
-
-      <div class="actions">
-        <button class="ghost-btn" id="refreshAiAnswerSuggestionBtn" type="button">重新生成建议</button>
-        <button class="primary-btn" id="saveAiAnswerSubmitBtn" type="button">保存到收件箱</button>
-      </div>
-    </section>
-  </div>
-
   <div class="modal-backdrop" id="snapshotModal" aria-hidden="true">
     <section class="card modal" role="dialog" aria-modal="true" aria-labelledby="snapshotModalTitle">
       <div class="modal-title-row">
@@ -2772,10 +2722,8 @@
     const KNOWLEDGE_STATUS_SET = new Set(KNOWLEDGE_STATUSES);
     const RESEARCH_READ_STATUSES = new Set(["待整理", "已吸收"]);
     const RESEARCH_ORGANIZED_STATUSES = new Set(["已吸收"]);
-    const LATER_SOURCES_BASE = ["必应", "知乎", "微博", "小红书", "B站", "抖音", "播客", "GitHub", "微信/公众号", "快速笔记", "豆包 AI", "DeepSeek AI", "其他 AI", "其他"];
-    const AI_ANSWER_SOURCES = ["豆包 AI", "DeepSeek AI", "其他 AI"];
-    const AI_HISTORY_LINK_WINDOW_MS = 30 * 60 * 1000;
-    const AI_ANSWER_RECENT_MIN_LENGTH = 100;
+    const LATER_SOURCES_BASE = ["必应", "知乎", "微博", "小红书", "B站", "抖音", "播客", "GitHub", "微信/公众号", "快速笔记", "AI 回答", "外部 AI", "豆包 AI", "DeepSeek AI", "其他 AI", "其他"];
+    const AI_ANSWER_SOURCES = ["AI 回答", "外部 AI", "豆包 AI", "DeepSeek AI", "其他 AI"];
     const AI_ANSWER_FEATURE_MIN_LENGTH = 200;
 
     const CREATOR_SOURCE_PLATFORMS = ["B站", "小红书", "知乎", "微信公众号", "网站", "RSS", "其他"];
@@ -2827,11 +2775,11 @@
         name: "豆包",
         type: "ai",
         category: "ai-assistant",
-        goodFor: "AI 问答、资料初筛、写作和总结",
-        recommendation: "把问题写完整；AI询问 会通过 URL 带入问题，并复制问题作为兜底。",
+        goodFor: "外部 AI 对话、资料初筛、写作和总结",
+        recommendation: "用于外部 AI 对话；回答完成后复制结果回 Info Dock 存入收件箱。",
         domain: "doubao.com",
-        urlTemplate: "https://www.doubao.com/?q={query}",
-        mobileUrlTemplate: "https://www.doubao.com/?q={query}",
+        urlTemplate: "https://www.doubao.com/",
+        mobileUrlTemplate: "https://www.doubao.com/",
         appUrlTemplate: ""
       },
       {
@@ -2839,11 +2787,11 @@
         name: "DeepSeek",
         type: "ai",
         category: "ai-assistant",
-        goodFor: "AI 问答、推理、代码和资料分析",
-        recommendation: "把问题写完整；AI询问 会通过 URL 带入问题，并复制问题作为兜底。",
+        goodFor: "外部 AI 对话、推理、代码和资料分析",
+        recommendation: "用于外部 AI 对话；回答完成后复制结果回 Info Dock 存入收件箱。",
         domain: "deepseek.com",
-        urlTemplate: "https://chat.deepseek.com/?q={query}",
-        mobileUrlTemplate: "https://chat.deepseek.com/?q={query}",
+        urlTemplate: "https://chat.deepseek.com/",
+        mobileUrlTemplate: "https://chat.deepseek.com/",
         appUrlTemplate: ""
       },
       {
@@ -3007,17 +2955,6 @@
       newPlatformAppUrl: $("#newPlatformAppUrl"),
       cancelPlatformBtn: $("#cancelPlatformBtn"),
       savePlatformBtn: $("#savePlatformBtn"),
-      aiAnswerModal: $("#aiAnswerModal"),
-      closeAiAnswerModalBtn: $("#closeAiAnswerModalBtn"),
-      aiAnswerSource: $("#aiAnswerSource"),
-      aiAnswerHistory: $("#aiAnswerHistory"),
-      aiAnswerQuestion: $("#aiAnswerQuestion"),
-      aiAnswerText: $("#aiAnswerText"),
-      aiAnswerTitle: $("#aiAnswerTitle"),
-      aiAnswerConclusion: $("#aiAnswerConclusion"),
-      aiAnswerTags: $("#aiAnswerTags"),
-      refreshAiAnswerSuggestionBtn: $("#refreshAiAnswerSuggestionBtn"),
-      saveAiAnswerSubmitBtn: $("#saveAiAnswerSubmitBtn"),
       snapshotModal: $("#snapshotModal"),
       snapshotText: $("#snapshotText"),
       closeSnapshotModalBtn: $("#closeSnapshotModalBtn"),
@@ -3268,7 +3205,6 @@
     let pendingImportMode = "merge";
     let isSortingPlatforms = false;
     let selectedSortPlatformId = "";
-    let aiAnswerSuggestionState = { title: "", conclusion: "", tags: "", question: "" };
     const searchSnapshotFetchQueue = new Set();
 
     async function boot() {
@@ -3475,20 +3411,8 @@
 
     function bindEvents() {
       elements.quickNoteBtn.addEventListener("click", handleQuickNoteButtonClick);
-      if (elements.closeAiAnswerModalBtn) elements.closeAiAnswerModalBtn.addEventListener("click", closeAiAnswerModal);
-      if (elements.aiAnswerModal) elements.aiAnswerModal.addEventListener("click", (event) => {
-        if (event.target === elements.aiAnswerModal) closeAiAnswerModal();
-      });
       if (elements.creatorSourceModal) elements.creatorSourceModal.addEventListener("click", (event) => {
         if (event.target === elements.creatorSourceModal) closeCreatorSourceModal();
-      });
-      if (elements.aiAnswerHistory) elements.aiAnswerHistory.addEventListener("change", handleAiAnswerHistoryChange);
-      if (elements.aiAnswerSource) elements.aiAnswerSource.addEventListener("change", () => refreshAiAnswerSuggestions(false));
-      if (elements.aiAnswerQuestion) elements.aiAnswerQuestion.addEventListener("input", () => refreshAiAnswerSuggestions(false));
-      if (elements.aiAnswerText) elements.aiAnswerText.addEventListener("input", () => refreshAiAnswerSuggestions(false));
-      if (elements.refreshAiAnswerSuggestionBtn) elements.refreshAiAnswerSuggestionBtn.addEventListener("click", () => refreshAiAnswerSuggestions(true));
-      if (elements.saveAiAnswerSubmitBtn) elements.saveAiAnswerSubmitBtn.addEventListener("click", () => {
-        void saveAiAnswerToInbox();
       });
       if (elements.pwaInstallBtn) elements.pwaInstallBtn.addEventListener("click", handlePwaInstallClick);
       if (elements.pwaDismissBtn) elements.pwaDismissBtn.addEventListener("click", dismissPwaInstallPrompt);
@@ -3626,7 +3550,6 @@
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
           closeAddPlatformModal();
-          closeAiAnswerModal();
           closeSnapshotModal();
           closeCreatorSourceModal();
           closeItemActionSheet();
@@ -4226,61 +4149,20 @@
       void renderDataManagementPanels();
     }
 
-    function isAiHistoryItem(item = {}) {
-      const platformId = String(item.platformId || "").toLowerCase();
-      return platformId === "doubao"
-        || platformId === "deepseek"
-        || item.platformType === "ai"
-        || item.category === "ai-assistant"
-        || item.entranceType === "AI询问";
-    }
-
-    function getAiHistoryTime(item = {}) {
-      const date = new Date(item.time || item.createdAt || 0);
-      return Number.isNaN(date.getTime()) ? 0 : date.getTime();
-    }
-
-    function getAiHistoryCandidates() {
-      const sorted = historyItems
-        .filter(isAiHistoryItem)
-        .sort((a, b) => getAiHistoryTime(b) - getAiHistoryTime(a));
-      const now = Date.now();
-      const recentWindowMs = 30 * 60 * 1000;
-      const withinThirtyMinutes = sorted.filter((item) => {
-        const time = getAiHistoryTime(item);
-        return time > 0 && now - time <= recentWindowMs;
-      });
-      const optionMap = new Map();
-      [...withinThirtyMinutes, ...sorted.slice(0, 10)].forEach((item) => {
-        if (item?.id && !optionMap.has(item.id)) optionMap.set(item.id, item);
-      });
-      return {
-        defaultItem: withinThirtyMinutes[0] || sorted[0] || null,
-        options: Array.from(optionMap.values()),
-        hasRecentMatch: withinThirtyMinutes.length > 0
-      };
-    }
-
-    function getAiSourceFromHistory(historyItem = {}) {
-      const text = `${historyItem.platformId || ""} ${historyItem.platform || ""} ${historyItem.url || ""}`.toLowerCase();
-      if (text.includes("doubao") || text.includes("豆包")) return "豆包 AI";
-      if (text.includes("deepseek")) return "DeepSeek AI";
-      return "其他 AI";
-    }
-
     function normalizeAiAnswerSource(source) {
       const value = String(source || "").trim();
       if (/doubao|豆包/i.test(value)) return "豆包 AI";
       if (/deepseek/i.test(value)) return "DeepSeek AI";
+      if (/外部\s*AI|AI\s*回答/i.test(value)) return value.includes("回答") ? "AI 回答" : "外部 AI";
       if (AI_ANSWER_SOURCES.includes(value)) return value;
-      return "其他 AI";
+      return "外部 AI";
     }
 
     function getAiAnswerSourceTag(source) {
       const normalizedSource = normalizeAiAnswerSource(source);
       if (normalizedSource === "豆包 AI") return "#豆包AI";
       if (normalizedSource === "DeepSeek AI") return "#DeepSeekAI";
-      return "#其他AI";
+      return "";
     }
 
     function isLaterAiAnswer(item = {}) {
@@ -4289,49 +4171,59 @@
     }
 
     function getLaterAiAnswerText(item = {}) {
-      return [item.aiOriginalAnswer, item.bodyText, item.title, item.conclusion]
+      return [item.aiOriginalAnswer, item.bodyText, item.captureText, item.autoSummary, item.title, item.conclusion]
         .map((value) => String(value || "").trim())
         .find(Boolean) || "";
     }
 
-    function generateAiAnswerTitle(question, answer) {
-      const cleanQuestion = limitText(question, 56);
-      if (cleanQuestion) return `AI 回答：${cleanQuestion}`;
-      const firstLine = String(answer || "").split(/\r?\n/).map((line) => line.trim()).find(Boolean) || "AI 回答";
-      return limitText(firstLine, 64) || "AI 回答";
+    function getAiAnswerStructuredSummary(item = {}) {
+      const text = getLaterAiAnswerText(item);
+      const existingSummary = normalizeStructuredSummary(item.structuredSummary);
+      if (existingSummary && (
+        existingSummary.oneSentenceConclusion
+        || existingSummary.keyPoints?.length
+        || existingSummary.claimsToVerify?.length
+        || existingSummary.actionItems?.length
+      )) {
+        return existingSummary;
+      }
+      return text ? structureAiAnswer(text) : normalizeStructuredSummary({});
     }
 
-    function generateAiAnswerTags(source, question, answer) {
+    function buildAiAnswerAutoSummary(summary) {
+      const normalizedSummary = normalizeStructuredSummary(summary);
+      if (!normalizedSummary) return "";
+      const conclusion = normalizedSummary.oneSentenceConclusion || "";
+      const keyPoints = Array.isArray(normalizedSummary.keyPoints) ? normalizedSummary.keyPoints.slice(0, 3) : [];
+      return limitText([conclusion, ...keyPoints].filter(Boolean).join("；"), 260);
+    }
+
+    function generateAiAnswerTitle(answer, structuredSummary = null) {
+      const summary = normalizeStructuredSummary(structuredSummary) || structureAiAnswer(answer);
+      const conclusion = limitText(summary.oneSentenceConclusion || "", 80);
+      if (conclusion) return conclusion;
+      const firstLine = String(answer || "").split(/\r?\n/).map((line) => line.trim()).find(Boolean) || "AI 回答";
+      return limitText(firstLine, 80) || "AI 回答";
+    }
+
+    function generateAiAnswerTags(source, answer) {
       return normalizeTags([
         "#AI",
         "#AI回答",
         getAiAnswerSourceTag(source),
         ...suggestTags({
           kind: "later",
-          title: question,
+          title: answer,
           source,
           summary: answer
         })
       ]);
     }
 
-    function getRecentAiHistoryWithinWindow(windowMs = AI_HISTORY_LINK_WINDOW_MS) {
-      const now = Date.now();
-      return historyItems
-        .filter(isAiHistoryItem)
-        .map((item) => ({ item, time: getAiHistoryTime(item) }))
-        .filter(({ time }) => time > 0 && now - time <= windowMs)
-        .sort((a, b) => b.time - a.time)[0]?.item || null;
-    }
-
-    function isLikelyAiAnswer(text, recentAiHistory = null) {
+    function isLikelyAiAnswer(text) {
       const cleanText = String(text || "").trim();
       if (!cleanText) return false;
       const textLength = cleanText.length;
-      const recentTime = recentAiHistory ? getAiHistoryTime(recentAiHistory) : 0;
-      const hasRecentAiHistory = recentTime > 0 && Date.now() - recentTime <= AI_HISTORY_LINK_WINDOW_MS;
-
-      if (hasRecentAiHistory && textLength >= AI_ANSWER_RECENT_MIN_LENGTH) return true;
       if (textLength < AI_ANSWER_FEATURE_MIN_LENGTH) return false;
 
       return [
@@ -4339,180 +4231,6 @@
         /(^|\n)\s*(?:\d+[\.、)]|[-*•])\s+\S+/m,
         /总结|建议|步骤|注意|风险|作为\s*AI|根据我的理解|关键要点|行动项|待验证|结论|可以这样|以下是|首先|其次|最后|综上|summary|recommend|steps?|note|risk|action items?/i
       ].some((pattern) => pattern.test(cleanText));
-    }
-
-    function renderAiHistoryOptionLabel(item, hasRecentMatch) {
-      const timeLabel = formatTime(item.time || item.createdAt);
-      const windowLabel = hasRecentMatch && Date.now() - getAiHistoryTime(item) <= 30 * 60 * 1000 ? "最近30分钟" : "最近AI询问";
-      return `${windowLabel} · ${item.platform || "AI"} · ${timeLabel} · ${item.keyword || "未命名问题"}`;
-    }
-
-    function populateAiAnswerHistorySelect() {
-      if (!elements.aiAnswerHistory) return null;
-      const candidates = getAiHistoryCandidates();
-      elements.aiAnswerHistory.innerHTML = `<option value="">无关联</option>`;
-
-      candidates.options.forEach((item) => {
-        const option = document.createElement("option");
-        option.value = item.id;
-        option.textContent = renderAiHistoryOptionLabel(item, candidates.hasRecentMatch);
-        elements.aiAnswerHistory.appendChild(option);
-      });
-
-      if (candidates.defaultItem) {
-        elements.aiAnswerHistory.value = candidates.defaultItem.id;
-      } else {
-        elements.aiAnswerHistory.value = "";
-      }
-
-      return candidates.defaultItem;
-    }
-
-    function resetAiAnswerSuggestionState() {
-      aiAnswerSuggestionState = { title: "", conclusion: "", tags: "", question: "" };
-    }
-
-    function shouldReplaceAiSuggestionField(element, previousValue, force = false) {
-      if (force) return true;
-      const currentValue = String(element?.value || "").trim();
-      return !currentValue || currentValue === previousValue;
-    }
-
-    function refreshAiAnswerSuggestions(force = false) {
-      if (!elements.aiAnswerText || !elements.aiAnswerTitle || !elements.aiAnswerConclusion || !elements.aiAnswerTags) return;
-      const question = elements.aiAnswerQuestion?.value.trim() || "";
-      const answer = elements.aiAnswerText.value.trim();
-      const source = normalizeAiAnswerSource(elements.aiAnswerSource?.value || "其他 AI");
-      const structuredSummary = structureAiAnswer(answer);
-      const title = generateAiAnswerTitle(question, answer);
-      const conclusion = structuredSummary.oneSentenceConclusion || limitText(answer, 120);
-      const tags = formatTagsForEdit(generateAiAnswerTags(source, question, answer));
-
-      if (shouldReplaceAiSuggestionField(elements.aiAnswerTitle, aiAnswerSuggestionState.title, force)) {
-        elements.aiAnswerTitle.value = title;
-      }
-      if (shouldReplaceAiSuggestionField(elements.aiAnswerConclusion, aiAnswerSuggestionState.conclusion, force)) {
-        elements.aiAnswerConclusion.value = conclusion;
-      }
-      if (shouldReplaceAiSuggestionField(elements.aiAnswerTags, aiAnswerSuggestionState.tags, force)) {
-        elements.aiAnswerTags.value = tags;
-      }
-
-      aiAnswerSuggestionState = { title, conclusion, tags, question };
-    }
-
-    function handleAiAnswerHistoryChange() {
-      const selectedHistory = getHistoryById(elements.aiAnswerHistory?.value || "");
-      if (selectedHistory) {
-        if (elements.aiAnswerQuestion) elements.aiAnswerQuestion.value = selectedHistory.keyword || "";
-        if (elements.aiAnswerSource) elements.aiAnswerSource.value = getAiSourceFromHistory(selectedHistory);
-      } else if (elements.aiAnswerQuestion && !elements.aiAnswerQuestion.value.trim()) {
-        elements.aiAnswerQuestion.value = elements.searchInput?.value.trim() || "";
-      }
-      refreshAiAnswerSuggestions(true);
-    }
-
-    function openAiAnswerModal() {
-      if (!elements.aiAnswerModal) return;
-      resetAiAnswerSuggestionState();
-      const defaultHistory = populateAiAnswerHistorySelect();
-      const defaultQuestion = defaultHistory?.keyword || elements.searchInput?.value.trim() || "";
-      const defaultSource = defaultHistory ? getAiSourceFromHistory(defaultHistory) : "其他 AI";
-
-      if (elements.aiAnswerSource) elements.aiAnswerSource.value = defaultSource;
-      if (elements.aiAnswerQuestion) elements.aiAnswerQuestion.value = defaultQuestion;
-      if (elements.aiAnswerText) elements.aiAnswerText.value = "";
-      if (elements.aiAnswerTitle) elements.aiAnswerTitle.value = generateAiAnswerTitle(defaultQuestion, "");
-      if (elements.aiAnswerConclusion) elements.aiAnswerConclusion.value = "";
-      if (elements.aiAnswerTags) elements.aiAnswerTags.value = formatTagsForEdit(generateAiAnswerTags(defaultSource, defaultQuestion, ""));
-      aiAnswerSuggestionState = {
-        title: elements.aiAnswerTitle?.value || "",
-        conclusion: elements.aiAnswerConclusion?.value || "",
-        tags: elements.aiAnswerTags?.value || "",
-        question: defaultQuestion
-      };
-
-      elements.aiAnswerModal.classList.add("active");
-      elements.aiAnswerModal.setAttribute("aria-hidden", "false");
-      setTimeout(() => elements.aiAnswerText?.focus(), 0);
-      const candidates = getAiHistoryCandidates();
-      if (!candidates.options.length) {
-        toast("没有找到 AI 询问历史，也可以无关联保存。 ");
-      } else if (!candidates.hasRecentMatch) {
-        toast("未找到最近 30 分钟内的 AI 询问，已列出最近 10 条供选择。 ");
-      }
-    }
-
-    function closeAiAnswerModal() {
-      if (!elements.aiAnswerModal) return;
-      elements.aiAnswerModal.classList.remove("active");
-      elements.aiAnswerModal.setAttribute("aria-hidden", "true");
-    }
-
-    async function saveAiAnswerToInbox() {
-      const answer = elements.aiAnswerText?.value.trim() || "";
-      if (!answer) {
-        toast("请先粘贴 AI 原始回答。 ");
-        elements.aiAnswerText?.focus();
-        return;
-      }
-
-      const selectedHistoryId = elements.aiAnswerHistory?.value || "";
-      const relatedHistory = getHistoryById(selectedHistoryId);
-      const source = normalizeAiAnswerSource(elements.aiAnswerSource?.value || getAiSourceFromHistory(relatedHistory || {}));
-      const question = elements.aiAnswerQuestion?.value.trim() || relatedHistory?.keyword || "";
-      const structuredSummary = structureAiAnswer(answer);
-      const title = (elements.aiAnswerTitle?.value.trim() || generateAiAnswerTitle(question, answer)).slice(0, 120);
-      const conclusion = (elements.aiAnswerConclusion?.value.trim() || structuredSummary.oneSentenceConclusion || "").slice(0, 220);
-      const tags = normalizeTags([
-        ...generateAiAnswerTags(source, question, answer),
-        ...normalizeTags(elements.aiAnswerTags?.value || [])
-      ]);
-
-      const item = {
-        id: createId(),
-        title: title || "AI 回答",
-        url: relatedHistory?.url || "",
-        source,
-        reason: "保存的 AI 回答。",
-        autoSummary: "",
-        bodyText: "",
-        captureText: question,
-        saveContext: `手动保存 AI 回答${question ? `：${question}` : ""}`,
-        metadataFetched: false,
-        lastSummaryFetchAt: "",
-        lastSummaryFetchStatus: "",
-        lastSummaryFetchError: "",
-        lastMetadataFetchAt: "",
-        lastMetadataFetchStatus: "",
-        lastMetadataFetchError: "",
-        lastSuccessfulFetchAt: "",
-        tags,
-        estimate: estimateLaterItemTime({ title, source, bodyText: answer }),
-        status: "收件箱",
-        conclusion,
-        createdAt: new Date().toISOString(),
-        relatedHistoryId: relatedHistory?.id || "",
-        aiOriginalQuestion: question,
-        aiOriginalAnswer: answer,
-        structuredSummary
-      };
-
-      const normalizedItem = normalizeLaterItems([item])[0];
-      laterItems.unshift(normalizedItem);
-      await save(STORE_NAMES.later, laterItems);
-      await rebuildSearchIndex();
-      rebuildBacklinkIndex();
-      closeAiAnswerModal();
-      renderFilters();
-      activateTab("laterSection");
-      renderLater();
-      renderKnowledge();
-      renderCreatorSources();
-      renderGlobalSearchResults();
-      void renderDataManagementPanels();
-      focusRenderedItem(normalizedItem.id, "later");
-      toast("已保存 AI 回答到收件箱。 ");
     }
 
     function activateTab(tabId) {
@@ -5370,10 +5088,6 @@
       return platform.type === "ai" || platform.category === "ai-assistant";
     }
 
-    function isAiEntrance(platform = {}, entrance = {}) {
-      return isAiPlatform(platform) || entrance.entranceType === "AI询问" || entrance.category === "ai-assistant";
-    }
-
     function normalizeTargetSampleCount(value) {
       const number = Number.parseInt(value, 10);
       if (!Number.isFinite(number) || number < 0) return 0;
@@ -5541,7 +5255,6 @@
           lastOpenedAt: item.lastOpenedAt || "",
           titleEditedAt: item.titleEditedAt || "",
           relatedHistoryId: item.relatedHistoryId || "",
-          aiOriginalQuestion: item.aiOriginalQuestion || "",
           aiOriginalAnswer: item.aiOriginalAnswer || "",
           structuredSummary: normalizeStructuredSummary(item.structuredSummary)
         };
@@ -5619,11 +5332,13 @@
           item.saveContext,
           item.captureText,
           item.autoSummary || content.metaDescription || "",
-          getRelatedHistorySearchText(item.relatedHistoryId),
-          item.aiOriginalQuestion,
-          getStructuredSummarySearchText(item.structuredSummary)
+          getStructuredSummarySearchText(item.structuredSummary),
+          getRelatedHistorySearchText(item.relatedHistoryId)
         ].filter(Boolean).join(" "),
-        conclusion: item.conclusion,
+        conclusion: [
+          item.conclusion,
+          normalizeStructuredSummary(item.structuredSummary)?.oneSentenceConclusion || ""
+        ].filter(Boolean).join(" "),
         keyword: "",
         platform: item.source,
         note: "",
@@ -5634,7 +5349,6 @@
           item.saveContext,
           content.bodyText,
           content.snapshotText,
-          item.aiOriginalQuestion,
           item.aiOriginalAnswer,
           getStructuredSummarySearchText(item.structuredSummary),
           getRelatedHistorySearchText(item.relatedHistoryId)
@@ -7942,7 +7656,7 @@
       const platformCards = otherPlatforms.map((platform) => {
         const isAi = isAiPlatform(platform);
         const actionsHtml = isAi
-          ? `<button class="tiny-btn" type="button" data-action="platform-ai" data-platform-id="${escapeAttribute(platform.id)}">AI询问</button>`
+          ? `<button class="tiny-btn" type="button" data-action="platform-home" data-platform-id="${escapeAttribute(platform.id)}">打开主页</button>`
           : `
               <button class="tiny-btn" type="button" data-action="platform-web" data-platform-id="${escapeAttribute(platform.id)}">网页搜索</button>
               <button class="tiny-btn" type="button" data-action="platform-site" data-platform-id="${escapeAttribute(platform.id)}">Bing site</button>
@@ -8157,16 +7871,29 @@
       };
     }
 
-    function getAiEntrance(platform) {
-      const urlTemplate = platform.urlTemplate || platform.mobileUrlTemplate || "https://www.bing.com/search?q={query}";
-      return {
-        label: "AI询问",
-        entranceType: "AI询问",
-        description: "打开外部 AI 助手页面，通过 URL 带入当前问题，并复制问题作为兜底。",
-        urlTemplate,
-        domain: platform.domain || "",
-        category: platform.category || "ai-assistant"
-      };
+    function getPlatformHomeUrl(platform = {}) {
+      const rawUrl = String(platform.homeUrl || platform.url || platform.urlTemplate || platform.mobileUrlTemplate || "").trim();
+      if (!rawUrl) return "https://www.bing.com/";
+      const hadQueryPlaceholder = /\{query\}/.test(rawUrl);
+      const withoutPlaceholders = rawUrl
+        .replaceAll("{query}", "")
+        .replaceAll("{domain}", platform.domain || "");
+      try {
+        const parsed = new URL(withoutPlaceholders);
+        if (hadQueryPlaceholder || parsed.search || parsed.hash) return `${parsed.origin}/`;
+        return parsed.href;
+      } catch (error) {
+        return withoutPlaceholders || "https://www.bing.com/";
+      }
+    }
+
+    async function openPlatformHome(platformId) {
+      const platform = platforms.find((item) => item.id === platformId);
+      if (!platform) return;
+      const url = getPlatformHomeUrl(platform);
+      window.open(url, "_blank", "noopener,noreferrer");
+      setStatus(`已打开「${platform.name}」主页。外部 AI 对话完成后，可复制有价值的回答回 Info Dock 顶部搜索框并存入收件箱。`);
+      toast(`已打开 ${platform.name} 主页。`);
     }
 
     function getBingSiteEntrance(platform) {
@@ -8195,7 +7922,6 @@
       if (!platform) return;
       let entrance = getWebEntrance(platform);
       if (entranceKind === "site") entrance = getBingSiteEntrance(platform);
-      if (entranceKind === "ai" || isAiPlatform(platform)) entrance = getAiEntrance(platform);
       await executeEntrance(platform, entrance);
     }
 
@@ -8213,19 +7939,6 @@
       const renderedUrl = entrance.urlTemplate
         ? fillUrlTemplate(entrance.urlTemplate, keyword, entrance.domain || platform.domain)
         : "";
-      const aiEntrance = isAiEntrance(platform, entrance);
-      let aiCopySucceeded = false;
-      if (aiEntrance) {
-        aiCopySucceeded = copyTextBySelection(keyword);
-        if (!aiCopySucceeded && navigator.clipboard?.writeText) {
-          try {
-            await navigator.clipboard.writeText(keyword);
-            aiCopySucceeded = true;
-          } catch (error) {
-            aiCopySucceeded = false;
-          }
-        }
-      }
 
       const item = {
         id: createId(),
@@ -8263,13 +7976,7 @@
       window.open(renderedUrl, "_blank", "noopener,noreferrer");
       setStatus(`已记录：通过「${platform.name} / ${entrance.entranceType}」搜索「${keyword}」。已打开入口。`);
       toast(`已保存记录，并打开 ${entrance.label}。`);
-      if (aiEntrance) {
-        const copyStatus = aiCopySucceeded
-          ? "问题已复制。如果外部页面没有自动填入或自动发送，请手动粘贴并发送。"
-          : "浏览器阻止了剪贴板写入。如果外部页面没有自动填入或自动发送，请手动复制搜索框问题并发送。";
-        setStatus(`已记录：通过「${platform.name} / AI询问」询问「${keyword}」。已打开外部 AI 页面。${copyStatus}AI 对话页不会自动保存搜索快照。`);
-        toast(aiCopySucceeded ? "问题已复制，已打开外部 AI 页面。" : "已打开外部 AI 页面，请必要时手动粘贴问题。 ");
-      } else if (isAutoSearchSnapshotEnabled()) {
+      if (isAutoSearchSnapshotEnabled()) {
         queueAutomaticSearchSnapshot(item);
       } else {
         showSnapshotPrompt(item);
@@ -8904,7 +8611,10 @@ function fillUrlTemplate(template, query, domain = "") {
             <details class="compact-details">
               <summary>结构化摘要</summary>
               <div class="compact-details-body ai-summary-block">
-                ${item.aiOriginalQuestion ? `<p class="hint"><strong>原始问题：</strong>${escapeHtml(item.aiOriginalQuestion)}</p>` : ""}
+                <div class="ai-summary-section">
+                  <strong>一句话结论</strong>
+                  ${summary.oneSentenceConclusion ? `<p>${escapeHtml(summary.oneSentenceConclusion)}</p>` : `<p class="hint">暂无</p>`}
+                </div>
                 <div class="ai-summary-grid">
                   <div class="ai-summary-section">
                     <strong>关键要点</strong>
@@ -8936,9 +8646,30 @@ function fillUrlTemplate(template, query, domain = "") {
       return `
         <div class="ai-quick-triage-row" role="group" aria-label="AI 回答快捷处理">
           <span class="ai-quick-triage-label">AI 快捷处理</span>
+          <button class="tiny-btn" type="button" data-action="later-ai-fill-conclusion" data-id="${escapeAttribute(item.id)}">填入结论</button>
+          <button class="tiny-btn" type="button" data-action="later-ai-supplement-tags" data-id="${escapeAttribute(item.id)}">补标签</button>
           <button class="tiny-btn" type="button" data-action="later-ai-quick-status" data-id="${escapeAttribute(item.id)}" data-status="待整理">待整理</button>
           <button class="tiny-btn" type="button" data-action="later-ai-quick-status" data-id="${escapeAttribute(item.id)}" data-status="已吸收">已吸收</button>
           <button class="danger-btn" type="button" data-action="later-ai-quick-status" data-id="${escapeAttribute(item.id)}" data-status="已废弃">已废弃</button>
+        </div>
+      `;
+    }
+
+    function isWeakAiAnswerContext(item = {}) {
+      if (!isLaterAiAnswer(item)) return false;
+      const title = normalize(item.title);
+      const conclusion = normalize(item.conclusion);
+      const saveContext = normalize(item.saveContext);
+      const weakTitles = ["", "ai 回答", "ai回答", "保存的 ai 回答", "保存的ai回答", "外部 ai", "外部ai"];
+      const weakContexts = ["", normalize("直接粘贴保存的 AI 回答。"), normalize("从顶部搜索框粘贴保存的 AI 回答。"), normalize("保存的 AI 回答。")];
+      return weakTitles.includes(title) && !conclusion && weakContexts.includes(saveContext);
+    }
+
+    function renderAiAnswerContextNudge(item) {
+      if (!isWeakAiAnswerContext(item)) return "";
+      return `
+        <div class="conclusion-nudge-row ai-context-nudge-row">
+          <button class="tiny-btn" type="button" data-action="focus-ai-answer-context" data-id="${escapeAttribute(item.id)}">想不起来为什么保存？补一句说明</button>
         </div>
       `;
     }
@@ -8961,37 +8692,47 @@ function fillUrlTemplate(template, query, domain = "") {
       `;
     }
 
-    function focusLaterConclusionEditor(id) {
+    function focusLaterEditorField(id, selectors = []) {
       const card = document.querySelector(`[data-item-type="later"][data-item-id="${escapeCssSelectorValue(id)}"]`);
       if (!card) {
         toast("未找到这条内容，可能被当前筛选隐藏。");
-        return;
+        return null;
       }
       const details = card.querySelector(".compact-edit-details");
       if (details) details.open = true;
-      const textarea = card.querySelector(`textarea[data-action="later-conclusion"][data-id="${escapeCssSelectorValue(id)}"]`);
-      if (!textarea) return;
+      const field = selectors
+        .map((selector) => card.querySelector(selector))
+        .find(Boolean);
+      if (!field) return null;
       requestAnimationFrame(() => {
-        textarea.scrollIntoView({ behavior: "smooth", block: "center" });
-        textarea.focus();
+        field.scrollIntoView({ behavior: "smooth", block: "center" });
+        field.focus();
+        field.select?.();
       });
+      return field;
+    }
+
+    function focusLaterConclusionEditor(id) {
+      focusLaterEditorField(id, [
+        `textarea[data-action="later-conclusion"][data-id="${escapeCssSelectorValue(id)}"]`,
+        `input[data-action="later-title"][data-id="${escapeCssSelectorValue(id)}"]`,
+        `input[data-action="later-tags"][data-id="${escapeCssSelectorValue(id)}"]`
+      ]);
     }
 
     function focusLaterTitleEditor(id) {
-      const card = document.querySelector(`[data-item-type="later"][data-item-id="${escapeCssSelectorValue(id)}"]`);
-      if (!card) {
-        toast("未找到这条内容，可能被当前筛选隐藏。");
-        return;
-      }
-      const details = card.querySelector(".compact-edit-details");
-      if (details) details.open = true;
-      const input = card.querySelector(`input[data-action="later-title"][data-id="${escapeCssSelectorValue(id)}"]`);
-      if (!input) return;
-      requestAnimationFrame(() => {
-        input.scrollIntoView({ behavior: "smooth", block: "center" });
-        input.focus();
-        input.select?.();
-      });
+      focusLaterEditorField(id, [
+        `input[data-action="later-title"][data-id="${escapeCssSelectorValue(id)}"]`,
+        `textarea[data-action="later-conclusion"][data-id="${escapeCssSelectorValue(id)}"]`
+      ]);
+    }
+
+    function focusAiAnswerContextEditor(id) {
+      focusLaterEditorField(id, [
+        `textarea[data-action="later-conclusion"][data-id="${escapeCssSelectorValue(id)}"]`,
+        `input[data-action="later-title"][data-id="${escapeCssSelectorValue(id)}"]`,
+        `input[data-action="later-tags"][data-id="${escapeCssSelectorValue(id)}"]`
+      ]);
     }
 
     async function applyAiAnswerQuickStatus(id, status) {
@@ -9002,8 +8743,60 @@ function fillUrlTemplate(template, query, domain = "") {
         status,
         lastTriagedAt: new Date().toISOString()
       }, true);
-      renderGlobalSearchResults();
+      renderCreatorSources();
+      void renderDataManagementPanels();
       setStatus(`已将 AI 回答“${item.title || "未命名内容"}”标记为「${status}」。`);
+    }
+
+    async function fillAiAnswerConclusion(id) {
+      const item = laterItems.find((entry) => entry.id === id);
+      if (!item || !isLaterAiAnswer(item)) return;
+      const answerText = getLaterAiAnswerText(item);
+      if (!answerText) {
+        toast("没有可用于生成结论的 AI 回答正文。");
+        return;
+      }
+
+      const structuredSummary = getAiAnswerStructuredSummary(item);
+      const conclusion = limitText(structuredSummary.oneSentenceConclusion || "", 220);
+      if (!conclusion) {
+        toast("没有提取到可填入的结论。");
+        return;
+      }
+
+      const existingConclusion = String(item.conclusion || "").trim();
+      if (existingConclusion && existingConclusion !== conclusion) {
+        const shouldOverwrite = window.confirm("这条内容已经有结论。要用结构化摘要的一句话结论覆盖吗？");
+        if (!shouldOverwrite) return;
+      }
+
+      const patch = {
+        conclusion,
+        structuredSummary
+      };
+      if (!String(item.autoSummary || "").trim()) {
+        patch.autoSummary = buildAiAnswerAutoSummary(structuredSummary);
+      }
+      await updateLaterItem(id, patch, true);
+      renderCreatorSources();
+      void renderDataManagementPanels();
+      toast(existingConclusion ? "已按确认覆盖结论。" : "已填入结论。");
+    }
+
+    async function supplementAiAnswerTags(id) {
+      const item = laterItems.find((entry) => entry.id === id);
+      if (!item || !isLaterAiAnswer(item)) return;
+      const answerText = getLaterAiAnswerText(item);
+      const suggestedTags = generateAiAnswerTags(item.source || "外部 AI", answerText);
+      const nextTags = normalizeTags([...(item.tags || []), ...suggestedTags]);
+      if (formatTagsForEdit(nextTags) === formatTagsForEdit(item.tags || [])) {
+        toast("没有新的推荐标签可补充。");
+        return;
+      }
+      await updateLaterItem(id, { tags: nextTags }, true);
+      renderCreatorSources();
+      void renderDataManagementPanels();
+      toast("已补充 AI 回答推荐标签。");
     }
 
     function renderLater() {
@@ -9033,7 +8826,6 @@ function fillUrlTemplate(template, query, domain = "") {
           item.captureText,
           item.saveContext,
           item.bodyText,
-          item.aiOriginalQuestion,
           item.aiOriginalAnswer,
           getStructuredSummarySearchText(item.structuredSummary),
           normalizeTags(item.tags).join(" "),
@@ -9104,6 +8896,7 @@ function fillUrlTemplate(template, query, domain = "") {
             </div>
             ${renderAiAnswerBlock(item)}
             ${isAiAnswer ? renderAiAnswerQuickActions(item) : ""}
+            ${isAiAnswer ? renderAiAnswerContextNudge(item) : ""}
             ${renderTitleNudge(item)}
             ${renderConclusionNudge(item)}
             <details class="compact-details compact-edit-details">
@@ -9187,7 +8980,6 @@ function fillUrlTemplate(template, query, domain = "") {
           item.captureText,
           item.saveContext,
           item.bodyText,
-          item.aiOriginalQuestion,
           item.aiOriginalAnswer,
           getStructuredSummarySearchText(item.structuredSummary),
           relatedHistoryLabel
@@ -9247,6 +9039,8 @@ function fillUrlTemplate(template, query, domain = "") {
             ${item.saveContext ? `<details class="compact-details"><summary>保存上下文</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.saveContext, 520))}</p></details>` : ""}
             ${item.bodyText ? `<details class="compact-details"><summary>正文 / 元数据预览</summary><p class="metadata-preview">${escapeHtml(truncateMetadataText(item.bodyText, 520))}</p></details>` : ""}
             ${renderAiAnswerBlock(item)}
+            ${isLaterAiAnswer(item) ? renderAiAnswerQuickActions(item) : ""}
+            ${isLaterAiAnswer(item) ? renderAiAnswerContextNudge(item) : ""}
 
             <details class="compact-details compact-edit-details">
               <summary>编辑知识条目</summary>
@@ -9299,10 +9093,13 @@ function fillUrlTemplate(template, query, domain = "") {
       }
       const structuredSummary = structureAiAnswer(text);
       const patch = {
-        tags: normalizeTags([...(item.tags || []), "#AI", "#AI回答"]),
+        tags: normalizeTags([...(item.tags || []), ...generateAiAnswerTags(item.source || "外部 AI", text)]),
         aiOriginalAnswer: item.aiOriginalAnswer || text,
         structuredSummary
       };
+      if (!String(item.autoSummary || "").trim()) {
+        patch.autoSummary = buildAiAnswerAutoSummary(structuredSummary);
+      }
       if (!String(item.conclusion || "").trim() && structuredSummary.oneSentenceConclusion) {
         patch.conclusion = structuredSummary.oneSentenceConclusion;
       }
@@ -9323,27 +9120,6 @@ function fillUrlTemplate(template, query, domain = "") {
       }
       await updateLaterItem(id, { structuredSummary: structureAiAnswer(text) });
       toast("已重新生成本地 AI 摘要。");
-    }
-
-    async function linkRecentAiHistoryToLaterItem(id) {
-      const item = laterItems.find((entry) => entry.id === id);
-      if (!item) {
-        toast("未找到对应条目。");
-        return;
-      }
-      const recentHistory = getRecentAiHistoryWithinWindow(AI_HISTORY_LINK_WINDOW_MS);
-      if (!recentHistory) {
-        toast("最近 30 分钟内没有找到 AI 询问记录。");
-        return;
-      }
-      const source = getAiSourceFromHistory(recentHistory);
-      await updateLaterItem(id, {
-        relatedHistoryId: recentHistory.id,
-        aiOriginalQuestion: recentHistory.keyword || "",
-        source,
-        tags: normalizeTags([...(item.tags || []), "#AI", "#AI回答", getAiAnswerSourceTag(source)])
-      });
-      toast("已关联最近 30 分钟内的 AI 询问。");
     }
 
     function getItemActionSheetActions(itemType, item) {
@@ -9379,7 +9155,6 @@ function fillUrlTemplate(template, query, domain = "") {
 
         if (isAiAnswer) {
           actions.push({ action: "regenerate-later-ai-summary", label: "🤖 重新生成 AI 摘要" });
-          actions.push({ action: "link-recent-ai-history", label: "🔗 关联最近 AI 询问" });
         } else {
           actions.push({ action: "mark-later-ai-answer", label: "🤖 标记为 AI 回答" });
         }
@@ -9594,6 +9369,21 @@ function fillUrlTemplate(template, query, domain = "") {
         return;
       }
 
+      if (action === "later-ai-fill-conclusion") {
+        await fillAiAnswerConclusion(id);
+        return;
+      }
+
+      if (action === "later-ai-supplement-tags") {
+        await supplementAiAnswerTags(id);
+        return;
+      }
+
+      if (action === "focus-ai-answer-context") {
+        focusAiAnswerContextEditor(id);
+        return;
+      }
+
       if (action === "focus-later-conclusion") {
         focusLaterConclusionEditor(id);
         return;
@@ -9630,8 +9420,8 @@ function fillUrlTemplate(template, query, domain = "") {
         await runPlatformEntrance(node.dataset.platformId, "web");
       }
 
-      if (action === "platform-ai") {
-        await runPlatformEntrance(node.dataset.platformId, "ai");
+      if (action === "platform-home" || action === "platform-ai") {
+        await openPlatformHome(node.dataset.platformId);
       }
 
       if (action === "platform-site") {
@@ -9667,9 +9457,13 @@ function fillUrlTemplate(template, query, domain = "") {
       if (action === "history-repeat") {
         const item = historyItems.find((entry) => entry.id === id);
         if (!item) return;
-        elements.searchInput.value = item.keyword;
         const platform = platforms.find((entry) => entry.id === item.platformId) || platforms.find((entry) => entry.name === item.platform);
-        const entranceKind = item.entranceType === "AI询问" || isAiPlatform(platform) ? "ai" : (item.entranceType === "Bing site 搜索" ? "site" : "web");
+        if (platform && (item.entranceType === "AI询问" || isAiPlatform(platform))) {
+          await openPlatformHome(platform.id);
+          return;
+        }
+        elements.searchInput.value = item.keyword;
+        const entranceKind = item.entranceType === "Bing site 搜索" ? "site" : "web";
         if (platform) await runPlatformEntrance(platform.id, entranceKind);
       }
 
@@ -9737,11 +9531,6 @@ function fillUrlTemplate(template, query, domain = "") {
 
       if (action === "regenerate-later-ai-summary") {
         await regenerateLaterAiSummary(id);
-        return;
-      }
-
-      if (action === "link-recent-ai-history") {
-        await linkRecentAiHistoryToLaterItem(id);
         return;
       }
 
@@ -10602,27 +10391,25 @@ function fillUrlTemplate(template, query, domain = "") {
       return limitText(firstLine, 100) || "快速笔记";
     }
 
-    async function saveAiAnswerTextToInbox(answer, relatedHistory = null) {
-      const recentHistory = relatedHistory && Date.now() - getAiHistoryTime(relatedHistory) <= AI_HISTORY_LINK_WINDOW_MS
-        ? relatedHistory
-        : null;
-      const source = normalizeAiAnswerSource(recentHistory ? getAiSourceFromHistory(recentHistory) : "其他 AI");
-      const question = recentHistory?.keyword || "";
-      const structuredSummary = structureAiAnswer(answer);
-      const title = generateAiAnswerTitle(question, answer).slice(0, 120) || "AI 回答";
+    async function saveAiAnswerTextToInbox(answer) {
+      const cleanAnswer = String(answer || "").trim();
+      const source = normalizeAiAnswerSource("外部 AI");
+      const structuredSummary = structureAiAnswer(cleanAnswer);
+      const title = generateAiAnswerTitle(cleanAnswer, structuredSummary).slice(0, 120) || "AI 回答";
+      const autoSummary = buildAiAnswerAutoSummary(structuredSummary);
       const conclusion = (structuredSummary.oneSentenceConclusion || "").slice(0, 220);
-      const tags = generateAiAnswerTags(source, question, answer);
+      const tags = generateAiAnswerTags(source, cleanAnswer);
 
       const item = {
         id: createId(),
         title,
-        url: recentHistory?.url || "",
+        url: "",
         source,
         reason: "保存的 AI 回答。",
-        autoSummary: "",
-        bodyText: "",
-        captureText: question,
-        saveContext: recentHistory ? `关联最近 AI 询问：${question}` : "保存的 AI 回答。",
+        autoSummary,
+        bodyText: cleanAnswer,
+        captureText: cleanAnswer,
+        saveContext: "直接粘贴保存的 AI 回答。",
         metadataFetched: false,
         lastSummaryFetchAt: "",
         lastSummaryFetchStatus: "",
@@ -10632,13 +10419,11 @@ function fillUrlTemplate(template, query, domain = "") {
         lastMetadataFetchError: "",
         lastSuccessfulFetchAt: "",
         tags,
-        estimate: estimateLaterItemTime({ title, source, bodyText: answer }),
+        estimate: estimateLaterItemTime({ title, source, bodyText: cleanAnswer }),
         status: "收件箱",
         conclusion,
         createdAt: new Date().toISOString(),
-        relatedHistoryId: recentHistory?.id || "",
-        aiOriginalQuestion: question,
-        aiOriginalAnswer: answer,
+        aiOriginalAnswer: cleanAnswer,
         structuredSummary
       };
 
@@ -10656,14 +10441,13 @@ function fillUrlTemplate(template, query, domain = "") {
       void renderDataManagementPanels();
       focusRenderedItem(normalizedItem.id, "later");
       elements.searchInput.value = "";
-      toast(recentHistory ? "已保存 AI 回答到收件箱，并关联最近 AI 询问。" : "已保存 AI 回答到收件箱。 ");
+      toast("已保存 AI 回答到收件箱。 ");
       return true;
     }
 
     async function saveTextQuickNote(inputText) {
-      const recentAiHistory = getRecentAiHistoryWithinWindow();
-      if (isLikelyAiAnswer(inputText, recentAiHistory)) {
-        return saveAiAnswerTextToInbox(inputText, recentAiHistory);
+      if (isLikelyAiAnswer(inputText)) {
+        return saveAiAnswerTextToInbox(inputText);
       }
 
       const title = generateQuickNoteTitle(inputText);
