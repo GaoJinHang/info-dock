@@ -104,12 +104,6 @@
       letter-spacing: -0.06em;
     }
 
-    .subtitle {
-      margin: 6px 0 0;
-      color: var(--muted);
-      line-height: 1.65;
-      max-width: 760px;
-    }
 
     .pill {
       display: inline-flex;
@@ -175,6 +169,7 @@
 
     .search-input {
       width: 100%;
+      min-width: 0;
       min-height: 58px;
       padding: 0 18px;
       border: 1px solid var(--line);
@@ -186,7 +181,8 @@
       transition: border 0.18s ease, box-shadow 0.18s ease;
     }
 
-    .copy-search-btn {
+    .copy-search-btn,
+    .saved-search-btn {
       min-height: 58px;
       padding: 0 18px;
       border: 1px solid var(--line);
@@ -194,11 +190,66 @@
       color: var(--muted);
       background: white;
       font-weight: 650;
+      white-space: nowrap;
     }
 
-    .copy-search-btn:hover {
+    .copy-search-btn:hover,
+    .saved-search-btn:hover {
       color: var(--primary);
       border-color: var(--primary);
+    }
+
+    .saved-search-btn {
+      min-width: max-content;
+      position: relative;
+    }
+
+    .saved-search-label-short {
+      display: none;
+    }
+
+    .saved-search-state {
+      display: inline;
+      color: inherit;
+    }
+
+    .saved-search-btn.has-saved-match {
+      color: var(--ok);
+      border-color: rgba(22, 163, 74, 0.32);
+      background: var(--ok-soft);
+    }
+
+    .saved-search-btn.no-saved-match {
+      color: var(--muted);
+      border-color: var(--line);
+      background: #f8fafc;
+    }
+
+    .saved-search-pulse {
+      animation: saved-search-pulse 0.46s ease-out 1;
+    }
+
+    @keyframes saved-search-pulse {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.035); }
+      100% { transform: scale(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .saved-search-pulse {
+        animation: none;
+      }
+    }
+
+    .saved-search-hint {
+      margin-top: -4px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--muted);
+      background: rgba(248, 250, 252, 0.96);
+      font-size: 12.5px;
+      line-height: 1.5;
     }
 
     .quick-note-label-short {
@@ -901,31 +952,6 @@
       gap: 10px;
     }
 
-    .platform-dock-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      color: var(--muted);
-      font-size: 12.5px;
-      line-height: 1.5;
-    }
-
-    .platform-dock-head strong {
-      display: block;
-      color: var(--text);
-      font-size: 14px;
-    }
-
-    .platform-dock-head span {
-      display: inline-block;
-    }
-
-    .platform-scroll-hint {
-      color: var(--primary);
-      font-weight: 750;
-      white-space: nowrap;
-    }
 
     .platform-sort-banner {
       grid-column: 1 / -1;
@@ -2276,12 +2302,6 @@
         letter-spacing: -0.045em;
       }
 
-      .subtitle {
-        margin-top: 4px;
-        max-width: 100%;
-        font-size: 13px;
-        line-height: 1.55;
-      }
 
       .pill {
         align-self: flex-start;
@@ -2389,7 +2409,8 @@
       }
 
       .search-input,
-      .copy-search-btn {
+      .copy-search-btn,
+      .saved-search-btn {
         min-height: 46px;
       }
 
@@ -2402,8 +2423,14 @@
         font-size: 14px;
       }
 
-      .copy-search-btn {
-        padding: 0 12px;
+      .copy-search-btn,
+      .saved-search-btn {
+        padding: 0 10px;
+      }
+
+      .saved-search-hint {
+        margin-top: -2px;
+        font-size: 12px;
       }
 
 
@@ -2415,15 +2442,6 @@
         min-width: 0;
       }
 
-      .platform-dock-head {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 4px;
-      }
-
-      .platform-scroll-hint {
-        display: inline-flex;
-      }
 
       .platforms-grid {
         display: grid;
@@ -2740,18 +2758,32 @@
 
     @media (max-width: 720px) {
       .search-row {
-        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr) auto auto;
         align-items: stretch;
+        gap: 6px;
       }
 
       .search-input {
         min-width: 0;
       }
 
-      .copy-search-btn {
+      .copy-search-btn,
+      .saved-search-btn {
         width: auto;
         min-width: max-content;
         white-space: nowrap;
+      }
+
+      .saved-search-label-full {
+        display: none;
+      }
+
+      .saved-search-label-short {
+        display: inline;
+      }
+
+      .saved-search-state {
+        display: none;
       }
 
       .quick-note-label-full {
@@ -2882,7 +2914,6 @@
           <div class="logo">ID</div>
           <div>
             <h1>Info Dock</h1>
-            <p class="subtitle">输入关键词后直接选择平台入口；搜索历史和收件箱默认只保存在本机浏览器。</p>
           </div>
         </div>
         <div class="pill" id="storageBadge">本地保存：检测中</div>
@@ -2891,10 +2922,16 @@
       <section class="card search-card" aria-label="统一搜索入口">
         <div class="search-main">
           <div class="search-row">
-            <input id="searchInput" class="search-input" type="search" placeholder="搜索或保存AI回答、链接" autocomplete="off" enterkeyhint="search" />
+            <input id="searchInput" class="search-input" type="search" placeholder="搜索或保存AI回答、链接、笔记" autocomplete="off" enterkeyhint="search" />
+            <button class="ghost-btn saved-search-btn" id="savedSearchBtn" type="button" aria-label="搜索已保存内容">
+              <span class="saved-search-label-full">📂 已存内容</span>
+              <span class="saved-search-label-short" aria-hidden="true">📂 已存</span>
+              <span class="saved-search-state" aria-hidden="true"></span>
+            </button>
             <button class="ghost-btn copy-search-btn" id="quickNoteBtn" type="button" aria-label="存入收件箱"><span class="quick-note-label-full">📥 存入收件箱</span><span class="quick-note-label-short" aria-hidden="true">📥 存入</span></button>
           </div>
         </div>
+        <div id="savedSearchHint" class="saved-search-hint hidden" aria-live="polite"></div>
         <div id="localSearchDropdown" class="local-search-dropdown hidden" role="listbox" aria-label="本地搜索结果"></div>
         <div class="global-search-box hidden" aria-label="全文搜索" aria-hidden="true">
           <input id="globalSearchInput" class="field global-search-input" type="search" placeholder="🔍 搜索所有内容：标题、标签、备注、正文" autocomplete="off" tabindex="-1" />
@@ -2904,13 +2941,6 @@
       </section>
 
       <section class="card platform-dock" id="platformDock" aria-label="平台入口">
-        <div class="platform-dock-head">
-          <div>
-            <strong>网页搜索平台</strong>
-            <span>点击平台按钮，使用当前输入框内容进行外部搜索。</span>
-          </div>
-          <span class="platform-scroll-hint">移动端可横向滑动查看更多</span>
-        </div>
         <div class="platforms-grid" id="platformCards"></div>
       </section>
 
@@ -3465,6 +3495,10 @@
     const DEFAULT_VISIBLE_PLATFORM_COUNT = 6;
     const LOCAL_SEARCH_MIN_QUERY_LENGTH = 2;
     const LOCAL_SEARCH_MAX_RESULTS = 10;
+    const SAVED_SEARCH_PRECHECK_DELAY_MS = 600;
+    const SAVED_SEARCH_RECENT_LIMIT = 8;
+    const SEARCH_PLACEHOLDER_DESKTOP = "搜索或保存AI回答、链接、笔记";
+    const SEARCH_PLACEHOLDER_MOBILE = "搜索或保存AI、链接";
 
     const STORAGE_KEYS = {
       platforms: "infoDock.platforms.v1",
@@ -3488,6 +3522,8 @@
 
     const elements = {
       searchInput: $("#searchInput"),
+      savedSearchBtn: $("#savedSearchBtn"),
+      savedSearchHint: $("#savedSearchHint"),
       quickNoteBtn: $("#quickNoteBtn"),
       statusMsg: $("#statusMsg"),
       localSearchDropdown: $("#localSearchDropdown"),
@@ -3838,6 +3874,8 @@
     let selectedSortPlatformId = "";
     let showAllPlatforms = false;
     let localSearchDebounceTimer = 0;
+    let savedSearchPrecheckTimer = 0;
+    let currentSavedSearchMatchState = "idle";
     let currentLocalSearchResults = [];
     let afterItemUpdateRefreshTimer = 0;
     let afterItemUpdateRefreshOptions = { renderHistory: false, renderLater: false, renderKnowledge: false, renderCreatorSources: false, renderDataPanels: false, renderFilters: false };
@@ -4066,7 +4104,11 @@
     }
 
     function bindEvents() {
+      updateSearchInputPlaceholder();
+      updateSavedSearchButtonState("idle");
+      window.addEventListener("resize", updateSearchInputPlaceholder);
       elements.quickNoteBtn.addEventListener("click", handleQuickNoteButtonClick);
+      if (elements.savedSearchBtn) elements.savedSearchBtn.addEventListener("click", handleSavedSearchButtonClick);
       if (elements.creatorSourceModal) elements.creatorSourceModal.addEventListener("click", (event) => {
         if (event.target === elements.creatorSourceModal) closeCreatorSourceModal();
       });
@@ -4083,19 +4125,19 @@
         elements.globalSearchInput.addEventListener("focus", renderGlobalSearchResults);
       }
 
-      elements.searchInput.addEventListener("input", scheduleLocalSearchDropdown);
-      elements.searchInput.addEventListener("focus", scheduleLocalSearchDropdown);
+      elements.searchInput.addEventListener("input", handleSavedSearchInputChange);
+      elements.searchInput.addEventListener("blur", handleSavedSearchInputBlur);
       elements.searchInput.addEventListener("keydown", async (event) => {
         if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) return;
         if (event.key === "Enter") {
           event.preventDefault();
-          renderLocalSearchDropdown();
+          renderLocalSearchDropdown({ force: true });
+          elements.searchInput?.focus();
           if (isLocalSearchDropdownVisible() && currentLocalSearchResults.length) {
             openLocalSearchResult(currentLocalSearchResults[0]);
             return;
           }
-          setStatus("本地暂无匹配结果。可以点击下方平台卡片继续进行外部网页搜索。");
-          toast("本地暂无匹配结果，请点击平台卡片搜索网页。");
+          showSavedSearchHint();
         }
       });
 
@@ -4207,6 +4249,7 @@
         void handleGlobalClick(event);
         if (elements.searchInput && !event.target.closest(".search-card")) {
           hideLocalSearchDropdown();
+          hideSavedSearchHint();
         }
       });
       document.addEventListener("input", (event) => {
@@ -5671,11 +5714,46 @@
     }
 
     function getBackupReminderMessage(info = getBackupAgeInfo()) {
-      if (!info.lastExport || info.ageDays === null) return "建议先导出一份 JSON 存档。";
-      if (info.ageDays >= BACKUP_REMINDER_THRESHOLD_DAYS) {
-        return `您已经 ${info.ageDays} 天没有备份数据了，建议导出一份 JSON 存档。`;
+      if (!info.lastExport || info.ageDays === null) return "上次备份：从未";
+      if (info.ageDays > BACKUP_REMINDER_THRESHOLD_DAYS) {
+        return `上次备份：${info.relativeLabel}，建议备份`;
       }
       return "";
+    }
+
+    function getCompactBackupLabel(info = getBackupAgeInfo()) {
+      const base = `上次备份：${info.relativeLabel}`;
+      return info.ageDays !== null && info.ageDays > BACKUP_REMINDER_THRESHOLD_DAYS
+        ? `${base}，建议备份`
+        : base;
+    }
+
+    function isCreatedAfterTimestamp(value, timestamp) {
+      if (!timestamp) return false;
+      const createdAt = new Date(value || "").getTime();
+      return !Number.isNaN(createdAt) && createdAt > timestamp;
+    }
+
+    function getBackupChangeStats(info = getBackupAgeInfo()) {
+      const timestamp = info.timestamp || 0;
+      const hasValidBackupTime = Boolean(info.lastExport && timestamp);
+      const newInboxCount = hasValidBackupTime
+        ? laterItems.filter((item) => !KNOWLEDGE_STATUS_SET.has(item.status) && isCreatedAfterTimestamp(item.createdAt, timestamp)).length
+        : 0;
+      const newKnowledgeCount = hasValidBackupTime
+        ? laterItems.filter((item) => KNOWLEDGE_STATUS_SET.has(item.status) && isCreatedAfterTimestamp(item.createdAt, timestamp)).length
+        : 0;
+      const newSourceCount = hasValidBackupTime
+        ? creatorSources.filter((source) => isCreatedAfterTimestamp(source.createdAt, timestamp)).length
+        : 0;
+      return {
+        totalRecords: historyItems.length + laterItems.length + creatorSources.length,
+        inboxCount: laterItems.filter((item) => !KNOWLEDGE_STATUS_SET.has(item.status)).length,
+        knowledgeCount: laterItems.filter((item) => KNOWLEDGE_STATUS_SET.has(item.status)).length,
+        newInboxCount,
+        newKnowledgeCount,
+        newSourceCount
+      };
     }
 
     function loadBackupReminderDismissedAt() {
@@ -5693,13 +5771,9 @@
 
     function renderExternalAiBackupReminder(info = getBackupAgeInfo()) {
       if (!elements.externalAiBackupReminder) return;
-      const message = getBackupReminderMessage(info);
-      const specificTime = info.lastExport ? `（${info.specificLabel}）` : "";
-      elements.externalAiBackupReminder.textContent = message
-        ? `JSON 备份提醒：${message}`
-        : `JSON 备份：上次备份 ${info.relativeLabel}${specificTime}`;
+      elements.externalAiBackupReminder.textContent = getCompactBackupLabel(info);
       if (elements.externalAiBackupPanel) {
-        elements.externalAiBackupPanel.classList.toggle("warning", Boolean(message));
+        elements.externalAiBackupPanel.classList.toggle("warning", Boolean(getBackupReminderMessage(info)));
       }
     }
 
@@ -5851,6 +5925,7 @@
       const persisted = await checkPersistentStorage();
       const backupInfo = getBackupAgeInfo();
       const backupReminderMessage = getBackupReminderMessage(backupInfo);
+      const backupStats = getBackupChangeStats(backupInfo);
       const backupAgeHint = `上次备份：${backupInfo.relativeLabel}；具体时间：${backupInfo.specificLabel}`;
       updateSettingsBackupReminderUi(backupInfo);
       const sampleCounts = getSampleDataCounts();
@@ -5858,9 +5933,10 @@
         ? `<button class="tiny-btn ghost-btn" type="button" data-action="clear-sample-data">清除示例数据</button>`
         : `<button class="tiny-btn ghost-btn" type="button" data-action="load-sample-data">加载示例数据，快速体验</button>`;
       elements.dataBackupSummary.innerHTML = `
-        <div>记录：${historyItems.length} 条搜索历史，${laterItems.length} 条收件箱，${platforms.length} 个搜索平台，${creatorSources.length} 个信息源。</div>
+        <div>记录：共 ${backupStats.totalRecords} 条；${historyItems.length} 条搜索历史，${backupStats.inboxCount} 条收件箱，${backupStats.knowledgeCount} 条知识库，${platforms.length} 个搜索平台，${creatorSources.length} 个信息源。</div>
         <div>快照：${contents.length} 个，估算 ${formatBytes(byteSize(contents))}。</div>
         <div>${backupAgeHint}。</div>
+        <div>自上次备份以来新增：${backupStats.newInboxCount} 条收件箱，${backupStats.newKnowledgeCount} 条知识库，${backupStats.newSourceCount} 个信息源。</div>
         ${backupReminderMessage ? `<div class="backup-warning-note"><span>${escapeHtml(backupReminderMessage)}</span>${isBackupReminderThrottled() ? `<span>今日已提醒</span>` : `<button class="tiny-btn ghost-btn" type="button" data-action="dismiss-backup-reminder">稍后提醒</button>`}</div>` : ""}
         <div>持久化存储：${persisted === true ? "已开启" : persisted === false ? "未开启或浏览器未授予" : "当前浏览器不支持检测"}。</div>
         <div class="sample-data-toolbar"><span><strong>新用户示例</strong>：${sampleCounts.later || sampleCounts.sources ? `当前有 ${sampleCounts.later} 条示例收件箱 / ${sampleCounts.sources} 个示例信息源。` : "可加载 #示例 #可删除 数据，不会覆盖真实数据。"}</span>${sampleActionHtml}</div>
@@ -6434,7 +6510,7 @@
       });
 
       renderGlobalSearchResults();
-      renderLocalSearchDropdown();
+      scheduleSavedSearchPrecheck();
     }
 
     function getHistoryById(id) {
@@ -6899,50 +6975,252 @@
       return grouped.slice(0, maxResults);
     }
 
+    function getSavedLocalTypeForItem(item, recent = false) {
+      const isKnowledge = KNOWLEDGE_STATUS_SET.has(item?.status);
+      return isKnowledge
+        ? { key: "knowledge", label: recent ? "最近知识库" : "知识库", tab: "knowledgeSection", focusType: "later", order: 2 }
+        : { key: "inbox", label: recent ? "最近收件箱" : "收件箱", tab: "laterSection", focusType: "later", order: 1 };
+    }
+
+    function searchSavedContent(query, maxResults = LOCAL_SEARCH_MAX_RESULTS) {
+      const cleanQuery = String(query || "").trim();
+      if (cleanQuery.length < LOCAL_SEARCH_MIN_QUERY_LENGTH) return [];
+      const seen = new Set();
+      const ranked = searchEngine.search(cleanQuery)
+        .filter((result) => result.itemType === "later")
+        .map((result) => {
+          const item = laterItems.find((entry) => entry.id === result.id);
+          if (!item) return null;
+          return {
+            ...result,
+            localType: getSavedLocalTypeForItem(item)
+          };
+        })
+        .filter(Boolean)
+        .filter((result) => {
+          if (seen.has(result.id)) return false;
+          seen.add(result.id);
+          return ["inbox", "knowledge"].includes(result.localType.key);
+        })
+        .sort((a, b) => {
+          if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
+          return a.localType.order - b.localType.order;
+        });
+
+      const grouped = [];
+      ["inbox", "knowledge"].forEach((key) => {
+        ranked.filter((result) => result.localType.key === key).forEach((result) => grouped.push(result));
+      });
+      return grouped.slice(0, maxResults);
+    }
+
+    function getRecentSavedContent(maxResults = SAVED_SEARCH_RECENT_LIMIT) {
+      return laterItems
+        .map((item) => ({
+          ...buildLaterSearchDoc(item, {}),
+          localType: getSavedLocalTypeForItem(item, true)
+        }))
+        .sort((a, b) => {
+          const aTime = new Date(a.createdAt || 0).getTime();
+          const bTime = new Date(b.createdAt || 0).getTime();
+          return (Number.isNaN(bTime) ? 0 : bTime) - (Number.isNaN(aTime) ? 0 : aTime);
+        })
+        .slice(0, maxResults);
+    }
+
+    function countSavedContentMatches(query) {
+      return searchSavedContent(query, LOCAL_SEARCH_MAX_RESULTS).length;
+    }
+
     function isLocalSearchDropdownVisible() {
       return Boolean(elements.localSearchDropdown && !elements.localSearchDropdown.classList.contains("hidden"));
     }
 
     function hideLocalSearchDropdown() {
       currentLocalSearchResults = [];
+      window.clearTimeout(localSearchDebounceTimer);
       if (!elements.localSearchDropdown) return;
       elements.localSearchDropdown.innerHTML = "";
       elements.localSearchDropdown.classList.add("hidden");
     }
 
-    function scheduleLocalSearchDropdown() {
-      window.clearTimeout(localSearchDebounceTimer);
-      localSearchDebounceTimer = window.setTimeout(renderLocalSearchDropdown, 160);
+    function hideSavedSearchHint() {
+      if (!elements.savedSearchHint) return;
+      elements.savedSearchHint.textContent = "";
+      elements.savedSearchHint.classList.add("hidden");
+      elements.savedSearchHint.closest(".search-card")?.classList.remove("saved-search-hint-active");
     }
 
-    function renderLocalSearchDropdown() {
+    function showSavedSearchHint() {
+      if (!elements.savedSearchHint) return;
+      const query = elements.searchInput?.value?.trim() || "";
+      if (!query) {
+        hideSavedSearchHint();
+        return;
+      }
+      elements.savedSearchHint.textContent = "没有找到已保存内容。可继续网页搜索，或点「📥 存入」保存。";
+      elements.savedSearchHint.classList.remove("hidden");
+      elements.savedSearchHint.closest(".search-card")?.classList.add("saved-search-hint-active");
+    }
+
+    function updateSearchInputPlaceholder() {
+      if (!elements.searchInput) return;
+      const isMobile = window.matchMedia("(max-width: 720px)").matches;
+      elements.searchInput.placeholder = isMobile ? SEARCH_PLACEHOLDER_MOBILE : SEARCH_PLACEHOLDER_DESKTOP;
+    }
+
+    function updateSavedSearchButtonState(state = "idle", count = 0) {
+      if (!elements.savedSearchBtn) return;
+      const fullLabel = elements.savedSearchBtn.querySelector(".saved-search-label-full");
+      const shortLabel = elements.savedSearchBtn.querySelector(".saved-search-label-short");
+      const stateLabel = elements.savedSearchBtn.querySelector(".saved-search-state");
+      elements.savedSearchBtn.classList.remove("has-saved-match", "no-saved-match");
+      if (fullLabel) fullLabel.textContent = "📂 已存内容";
+      if (shortLabel) shortLabel.textContent = "📂 已存";
+      if (stateLabel) stateLabel.textContent = "";
+
+      if (state === "match") {
+        if (stateLabel) stateLabel.textContent = " · 有匹配";
+        if (shortLabel) shortLabel.textContent = `📂已存${Math.min(count, 99)}`;
+        elements.savedSearchBtn.classList.add("has-saved-match");
+        if (currentSavedSearchMatchState !== "match") {
+          elements.savedSearchBtn.classList.remove("saved-search-pulse");
+          void elements.savedSearchBtn.offsetWidth;
+          elements.savedSearchBtn.classList.add("saved-search-pulse");
+          window.setTimeout(() => elements.savedSearchBtn?.classList.remove("saved-search-pulse"), 520);
+        }
+      }
+
+      if (state === "none") {
+        if (stateLabel) stateLabel.textContent = " · 未匹配";
+        if (shortLabel) shortLabel.textContent = "📂已存0";
+        elements.savedSearchBtn.classList.add("no-saved-match");
+      }
+
+      currentSavedSearchMatchState = state;
+    }
+
+    function scheduleLocalSearchDropdown() {
+      window.clearTimeout(localSearchDebounceTimer);
+      localSearchDebounceTimer = window.setTimeout(() => renderLocalSearchDropdown({ force: true }), 160);
+    }
+
+    function scheduleSavedSearchPrecheck() {
+      window.clearTimeout(savedSearchPrecheckTimer);
+      const query = elements.searchInput?.value?.trim() || "";
+      if (!query) {
+        updateSavedSearchButtonState("idle");
+        hideSavedSearchHint();
+        return;
+      }
+      if (query.length < LOCAL_SEARCH_MIN_QUERY_LENGTH) {
+        updateSavedSearchButtonState("idle");
+        hideSavedSearchHint();
+        return;
+      }
+      savedSearchPrecheckTimer = window.setTimeout(() => {
+        const latestQuery = elements.searchInput?.value?.trim() || "";
+        if (latestQuery !== query || latestQuery.length < LOCAL_SEARCH_MIN_QUERY_LENGTH) return;
+        const matchCount = countSavedContentMatches(latestQuery);
+        updateSavedSearchButtonState(matchCount ? "match" : "none", matchCount);
+        if (matchCount) hideSavedSearchHint();
+        else showSavedSearchHint();
+      }, SAVED_SEARCH_PRECHECK_DELAY_MS);
+    }
+
+    function handleSavedSearchInputChange() {
+      hideSavedSearchHint();
+      const query = elements.searchInput?.value?.trim() || "";
+      if (!query) {
+        updateSavedSearchButtonState("idle");
+        if (isLocalSearchDropdownVisible()) renderLocalSearchDropdown({ force: true });
+        return;
+      }
+      scheduleSavedSearchPrecheck();
+      if (isLocalSearchDropdownVisible()) scheduleLocalSearchDropdown();
+    }
+
+    function handleSavedSearchInputBlur(event) {
+      const query = elements.searchInput?.value?.trim() || "";
+      const nextTarget = event.relatedTarget;
+      if (!nextTarget || !nextTarget.closest?.(".search-card")) return;
+      if (!query || query.length < LOCAL_SEARCH_MIN_QUERY_LENGTH) return;
+      window.setTimeout(() => {
+        if (document.activeElement === elements.searchInput) return;
+        if (countSavedContentMatches(query) === 0) showSavedSearchHint();
+      }, SAVED_SEARCH_PRECHECK_DELAY_MS);
+    }
+
+    function handleSavedSearchButtonClick() {
+      if (isLocalSearchDropdownVisible()) {
+        hideLocalSearchDropdown();
+        hideSavedSearchHint();
+        elements.searchInput?.focus();
+        return;
+      }
+      renderLocalSearchDropdown({ force: true });
+      elements.searchInput?.focus();
+    }
+
+    function renderLocalSearchDropdown(options = {}) {
       if (!elements.localSearchDropdown || !elements.searchInput) return;
+      if (!options.force) return;
       const query = elements.searchInput.value.trim();
       const panel = elements.localSearchDropdown;
 
       if (!query) {
-        hideLocalSearchDropdown();
+        const recentResults = getRecentSavedContent(SAVED_SEARCH_RECENT_LIMIT);
+        currentLocalSearchResults = recentResults;
+        panel.classList.remove("hidden");
+        hideSavedSearchHint();
+
+        if (!recentResults.length) {
+          panel.innerHTML = `<p class="local-search-empty">还没有已保存内容。</p>`;
+          return;
+        }
+
+        const groups = new Map();
+        recentResults.forEach((result) => {
+          const key = result.localType.key;
+          if (!groups.has(key)) groups.set(key, { label: result.localType.label, items: [] });
+          groups.get(key).items.push(result);
+        });
+
+        panel.innerHTML = Array.from(groups.values()).map((group) => `
+          <div class="local-search-section">
+            <div class="local-search-section-title">${escapeHtml(group.label)}</div>
+            ${group.items.map((result) => renderLocalSearchResultItem(result, "")).join("")}
+          </div>
+        `).join("") + `
+          <div class="local-search-footer">
+            <span>Enter 打开第一条已保存结果。</span>
+            <span>最近 ${recentResults.length} 条</span>
+          </div>
+        `;
         return;
       }
 
       if (query.length < LOCAL_SEARCH_MIN_QUERY_LENGTH) {
         currentLocalSearchResults = [];
-        panel.innerHTML = `<p class="local-search-empty">继续输入至少 ${LOCAL_SEARCH_MIN_QUERY_LENGTH} 个字符，可搜索本地历史、收件箱、知识库、信息源和研究内容。</p>`;
+        hideSavedSearchHint();
+        panel.innerHTML = `<p class="local-search-empty">输入至少 ${LOCAL_SEARCH_MIN_QUERY_LENGTH} 个字符，可搜索已保存的收件箱和知识库。</p>`;
         panel.classList.remove("hidden");
         return;
       }
 
-      const results = searchLocalContent(query, LOCAL_SEARCH_MAX_RESULTS);
+      const results = searchSavedContent(query, LOCAL_SEARCH_MAX_RESULTS);
       currentLocalSearchResults = results;
       panel.classList.remove("hidden");
 
       if (!results.length) {
-        panel.innerHTML = `
-          <p class="local-search-empty">本地暂无匹配结果。可以点击下方平台卡片继续进行外部网页搜索。</p>
-        `;
+        panel.innerHTML = `<p class="local-search-empty">没有找到已保存内容。</p>`;
+        showSavedSearchHint();
+        updateSavedSearchButtonState("none");
         return;
       }
 
+      hideSavedSearchHint();
+      updateSavedSearchButtonState("match", results.length);
       const groups = new Map();
       results.forEach((result) => {
         const key = result.localType.key;
@@ -6957,7 +7235,7 @@
         </div>
       `).join("") + `
         <div class="local-search-footer">
-          <span>Enter 打开第一条本地结果；没有本地结果时，请点击下方平台搜索网页。</span>
+          <span>Enter 打开第一条已保存结果。</span>
           <span>最多显示 ${LOCAL_SEARCH_MAX_RESULTS} 条</span>
         </div>
       `;
@@ -7024,6 +7302,7 @@
       if (!result) return;
       const localType = result.localType || getLocalSearchResultType(result);
       hideLocalSearchDropdown();
+      hideSavedSearchHint();
       clearFiltersForLocalJump(localType.key);
 
       if (localType.key === "knowledge") {
@@ -7053,11 +7332,14 @@
     }
 
     function openLocalSearchResultById(id, itemType, localTypeKey) {
+      const isSavedSearchType = ["inbox", "knowledge"].includes(localTypeKey);
       const result = currentLocalSearchResults.find((entry) =>
         entry.id === id && entry.itemType === itemType && entry.localType?.key === localTypeKey
-      ) || searchLocalContent(elements.searchInput?.value || "", LOCAL_SEARCH_MAX_RESULTS).find((entry) =>
+      ) || (isSavedSearchType ? searchSavedContent(elements.searchInput?.value || "", LOCAL_SEARCH_MAX_RESULTS).find((entry) =>
+        entry.id === id && entry.itemType === itemType && entry.localType?.key === localTypeKey
+      ) : searchLocalContent(elements.searchInput?.value || "", LOCAL_SEARCH_MAX_RESULTS).find((entry) =>
         entry.id === id && entry.itemType === itemType
-      ) || { id, itemType, localType: getLocalSearchResultType({ id, itemType }) };
+      )) || { id, itemType, localType: getLocalSearchResultType({ id, itemType }) };
       openLocalSearchResult(result);
     }
 
