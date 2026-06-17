@@ -958,6 +958,10 @@
       align-items: stretch;
     }
 
+    .platform-scroll-row {
+      display: contents;
+    }
+
     .platform-card {
       min-height: 62px;
       padding: 9px;
@@ -2227,10 +2231,13 @@
         padding-bottom: calc(112px + env(safe-area-inset-bottom));
       }
 
-      .brand-row,
       .form-title {
         align-items: stretch;
         flex-direction: column;
+      }
+
+      .hero {
+        gap: 0;
       }
 
       .item-head {
@@ -2238,12 +2245,23 @@
       }
 
       .brand-row {
-        gap: 10px;
+        align-items: center;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 8px;
+        min-width: 0;
+        margin-bottom: 10px;
       }
 
       .brand {
         align-items: flex-start;
         gap: 10px;
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+
+      .brand > div {
+        min-width: 0;
       }
 
       .logo {
@@ -2303,7 +2321,7 @@
         top: 8px;
         padding: 12px;
         gap: 10px;
-        border-radius: 18px;
+        border-radius: 18px 18px 0 0;
       }
 
       .local-search-dropdown {
@@ -2313,10 +2331,27 @@
         max-height: min(420px, 58vh);
       }
 
+      .external-ai-card {
+        margin-top: 12px;
+      }
+
       .external-ai-row {
         align-items: flex-start;
         flex-direction: column;
         gap: 4px;
+      }
+
+      .external-ai-links {
+        gap: 8px;
+      }
+
+      .external-ai-link {
+        min-height: 36px;
+        padding: 0 8px;
+        border-radius: 999px;
+        background: var(--primary-soft);
+        font-size: 15px;
+        font-weight: 900;
       }
 
       .external-ai-hint {
@@ -2363,6 +2398,10 @@
         padding: 0 13px;
       }
 
+      .search-input::placeholder {
+        font-size: 14px;
+      }
+
       .copy-search-btn {
         padding: 0 12px;
       }
@@ -2370,6 +2409,10 @@
 
       .platform-dock {
         padding: 10px;
+        margin-top: -1px;
+        border-radius: 0 0 18px 18px;
+        box-shadow: none;
+        min-width: 0;
       }
 
       .platform-dock-head {
@@ -2383,9 +2426,21 @@
       }
 
       .platforms-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+        overflow: visible;
+        padding: 0;
+        min-width: 0;
+      }
+
+      .platform-scroll-row {
         display: flex;
         gap: 8px;
+        max-width: 100%;
+        min-width: 0;
         overflow-x: auto;
+        overflow-y: hidden;
         padding: 0 2px 6px;
         scroll-snap-type: x proximity;
         -webkit-overflow-scrolling: touch;
@@ -2400,10 +2455,12 @@
       }
 
       .platform-sort-banner {
-        flex: 0 0 260px;
+        width: 100%;
       }
 
       .platform-card-main {
+        width: 100%;
+        flex: none;
         min-height: 50px;
         padding: 0 14px;
         display: flex;
@@ -2429,9 +2486,13 @@
       }
 
       #storageBadge {
-        align-self: flex-start;
-        max-width: 100%;
-        margin-left: 0;
+        align-self: center;
+        flex-shrink: 0;
+        max-width: min(44vw, 148px);
+        margin-left: auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
         font-size: 12px;
       }
 
@@ -2789,6 +2850,18 @@
       }
     }
 
+
+    @media (max-width: 360px) {
+      .search-input::placeholder {
+        font-size: 13px;
+      }
+
+      #storageBadge {
+        max-width: min(46vw, 132px);
+        padding-inline: 8px;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -2818,7 +2891,7 @@
       <section class="card search-card" aria-label="统一搜索入口">
         <div class="search-main">
           <div class="search-row">
-            <input id="searchInput" class="search-input" type="search" placeholder="今天我要找什么？" autocomplete="off" enterkeyhint="search" />
+            <input id="searchInput" class="search-input" type="search" placeholder="搜索或保存AI回答、链接" autocomplete="off" enterkeyhint="search" />
             <button class="ghost-btn copy-search-btn" id="quickNoteBtn" type="button" aria-label="存入收件箱"><span class="quick-note-label-full">📥 存入收件箱</span><span class="quick-note-label-short" aria-hidden="true">📥 存入</span></button>
           </div>
         </div>
@@ -2841,10 +2914,10 @@
         <div class="platforms-grid" id="platformCards"></div>
       </section>
 
-      <section class="card external-ai-card" aria-label="外部 AI 与数据备份提示">
-        <div class="external-ai-row" aria-label="外部 AI 快捷入口">
+      <section class="card external-ai-card" aria-label="快捷入口与数据备份提示">
+        <div class="external-ai-row" aria-label="快捷入口">
           <div class="external-ai-links">
-            <span>外部 AI：</span>
+            <span>快捷入口：</span>
             <button class="external-ai-link" type="button" data-action="external-ai-home" data-platform-id="doubao">豆包</button>
             <span aria-hidden="true">·</span>
             <button class="external-ai-link" type="button" data-action="external-ai-home" data-platform-id="deepseek">DeepSeek</button>
@@ -2853,7 +2926,6 @@
         </div>
         <div class="external-ai-backup-panel" id="externalAiBackupPanel" aria-live="polite">
           <span class="external-ai-backup-message" id="externalAiBackupReminder">正在读取 JSON 备份状态…</span>
-          <button class="tiny-btn ghost-btn" type="button" data-action="export-json-backup">导出 JSON</button>
         </div>
       </section>
 </header>
@@ -3314,6 +3386,56 @@
         appUrlTemplate: ""
       },
       {
+        id: "xiaohongshu",
+        name: "小红书",
+        goodFor: "消费体验、生活方式、踩坑和清单",
+        recommendation: "短词 + 场景词：避坑 / 攻略 / 真实",
+        domain: "xiaohongshu.com",
+        urlTemplate: "https://www.xiaohongshu.com/search_result?keyword={query}",
+        mobileUrlTemplate: "https://www.xiaohongshu.com/search_result?keyword={query}",
+        appUrlTemplate: "xhsdiscover://search/result?keyword={query}"
+      },
+      {
+        id: "bilibili",
+        name: "B站",
+        goodFor: "教程、测评、长视频攻略和案例演示",
+        recommendation: "教程式：攻略 / 教程 / 2026",
+        domain: "bilibili.com",
+        urlTemplate: "https://search.bilibili.com/all?keyword={query}",
+        mobileUrlTemplate: "https://m.bilibili.com/search?keyword={query}",
+        appUrlTemplate: "bilibili://search?keyword={query}"
+      },
+      {
+        id: "zhihu",
+        name: "知乎",
+        goodFor: "经验判断、长回答、观点交叉验证",
+        recommendation: "问题式：怎么选 / 有哪些坑",
+        domain: "zhihu.com",
+        urlTemplate: "https://www.zhihu.com/search?type=content&q={query}",
+        mobileUrlTemplate: "https://www.zhihu.com/search?type=content&q={query}",
+        appUrlTemplate: "zhihu://search?q={query}"
+      },
+      {
+        id: "douyin",
+        name: "抖音",
+        goodFor: "短视频体验、口语化建议、地点和生活场景",
+        recommendation: "口语短词：哪里方便 / 怎么避坑",
+        domain: "douyin.com",
+        urlTemplate: "https://www.douyin.com/search/{query}",
+        mobileUrlTemplate: "https://so.douyin.com/s?keyword={query}",
+        appUrlTemplate: "snssdk1128://search?keyword={query}"
+      },
+      {
+        id: "weibo",
+        name: "微博",
+        goodFor: "实时反馈、舆情、活动和突发信息",
+        recommendation: "短词 + 时间 / 地点 / 事件名",
+        domain: "weibo.com",
+        urlTemplate: "https://s.weibo.com/weibo?q={query}",
+        mobileUrlTemplate: "https://m.weibo.cn/search?containerid=100103type%3D1%26q%3D{query}",
+        appUrlTemplate: "sinaweibo://searchall?q={query}"
+      },
+      {
         id: "doubao",
         name: "豆包",
         type: "ai",
@@ -3336,56 +3458,6 @@
         urlTemplate: "https://chat.deepseek.com/",
         mobileUrlTemplate: "https://chat.deepseek.com/",
         appUrlTemplate: ""
-      },
-      {
-        id: "zhihu",
-        name: "知乎",
-        goodFor: "经验判断、长回答、观点交叉验证",
-        recommendation: "问题式：怎么选 / 有哪些坑",
-        domain: "zhihu.com",
-        urlTemplate: "https://www.zhihu.com/search?type=content&q={query}",
-        mobileUrlTemplate: "https://www.zhihu.com/search?type=content&q={query}",
-        appUrlTemplate: "zhihu://search?q={query}"
-      },
-      {
-        id: "weibo",
-        name: "微博",
-        goodFor: "实时反馈、舆情、活动和突发信息",
-        recommendation: "短词 + 时间 / 地点 / 事件名",
-        domain: "weibo.com",
-        urlTemplate: "https://s.weibo.com/weibo?q={query}",
-        mobileUrlTemplate: "https://m.weibo.cn/search?containerid=100103type%3D1%26q%3D{query}",
-        appUrlTemplate: "sinaweibo://searchall?q={query}"
-      },
-      {
-        id: "xiaohongshu",
-        name: "小红书",
-        goodFor: "消费体验、生活方式、踩坑和清单",
-        recommendation: "短词 + 场景词：避坑 / 攻略 / 真实",
-        domain: "xiaohongshu.com",
-        urlTemplate: "https://www.xiaohongshu.com/search_result?keyword={query}",
-        mobileUrlTemplate: "https://www.xiaohongshu.com/search_result?keyword={query}",
-        appUrlTemplate: "xhsdiscover://search/result?keyword={query}"
-      },
-      {
-        id: "bilibili",
-        name: "B站",
-        goodFor: "教程、测评、长视频攻略和案例演示",
-        recommendation: "教程式：攻略 / 教程 / 2026",
-        domain: "bilibili.com",
-        urlTemplate: "https://search.bilibili.com/all?keyword={query}",
-        mobileUrlTemplate: "https://m.bilibili.com/search?keyword={query}",
-        appUrlTemplate: "bilibili://search?keyword={query}"
-      },
-      {
-        id: "douyin",
-        name: "抖音",
-        goodFor: "短视频体验、口语化建议、地点和生活场景",
-        recommendation: "口语短词：哪里方便 / 怎么避坑",
-        domain: "douyin.com",
-        urlTemplate: "https://www.douyin.com/search/{query}",
-        mobileUrlTemplate: "https://so.douyin.com/s?keyword={query}",
-        appUrlTemplate: "snssdk1128://search?keyword={query}"
       }
     ];
 
@@ -5332,7 +5404,7 @@
         storageMode = "indexedDB";
         await InfoDockDB.open();
         await migrateLocalStorageToIndexedDBIfNeeded();
-        elements.storageBadge.textContent = "本地保存：已启用 IndexedDB";
+        elements.storageBadge.textContent = "本地保存：已启用";
         elements.storageBadge.classList.add("status-ok");
         elements.storageBadge.classList.remove("status-warn");
       } catch (error) {
@@ -6023,12 +6095,12 @@
       try {
         localStorage.setItem("infoDock.storageTest", "1");
         localStorage.removeItem("infoDock.storageTest");
-        elements.storageBadge.textContent = "本地保存：已降级 localStorage";
+        elements.storageBadge.textContent = "本地保存：基础可用";
         elements.storageBadge.classList.add("status-warn");
         elements.storageBadge.classList.remove("status-ok");
         toast("IndexedDB 不可用，已临时降级到 localStorage。 ");
       } catch (error) {
-        elements.storageBadge.textContent = "本地保存：不可用";
+        elements.storageBadge.textContent = "本地保存：未启用";
         elements.storageBadge.classList.add("status-warn");
         elements.storageBadge.classList.remove("status-ok");
         toast("当前浏览器禁用了本地存储，刷新后数据可能丢失。 ");
@@ -9489,7 +9561,16 @@
         </button>
       `;
 
-      elements.platformCards.innerHTML = sortBanner + bingCard + platformCards + moreCard + addCard + sortCard;
+      const scrollRow = `
+        <div class="platform-scroll-row">
+          ${platformCards}
+          ${moreCard}
+          ${addCard}
+          ${sortCard}
+        </div>
+      `;
+
+      elements.platformCards.innerHTML = sortBanner + bingCard + scrollRow;
     }
 
     function renderFilters() {
