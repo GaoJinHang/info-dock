@@ -2894,6 +2894,217 @@
       }
     }
 
+
+    /* UI/layout refinement: search priority, compact inbox entry, grouped settings. */
+    .saved-search-label-icon,
+    .quick-note-label-icon {
+      display: none;
+    }
+
+    .search-row .copy-search-btn,
+    .search-row .saved-search-btn {
+      min-height: 58px;
+    }
+
+    .inbox-external-tools-entry {
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .inbox-external-tools-entry > div {
+      min-width: 0;
+    }
+
+    .inbox-external-tools-entry .hint {
+      margin: 3px 0 0;
+    }
+
+    .inbox-external-tools-entry > button {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
+    .settings-panel {
+      gap: 10px;
+    }
+
+    .settings-group {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(248, 250, 252, 0.72);
+      overflow: clip;
+    }
+
+    .settings-group > summary {
+      min-height: 54px;
+      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }
+
+    .settings-group > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .settings-group > summary::after {
+      content: "⌄";
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1;
+      transform: rotate(-90deg);
+      transition: transform 0.18s ease;
+    }
+
+    .settings-group[open] > summary::after {
+      transform: rotate(0deg);
+    }
+
+    .settings-group > summary span {
+      min-width: 0;
+      display: grid;
+      gap: 2px;
+    }
+
+    .settings-group > summary strong {
+      font-size: 15px;
+    }
+
+    .settings-group > summary small {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.45;
+    }
+
+    .settings-group-content {
+      padding: 0 12px 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .settings-group[open] > summary {
+      border-bottom: 1px solid rgba(230, 233, 239, 0.8);
+      margin-bottom: 12px;
+    }
+
+    .settings-group .settings-subpanel {
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow: none;
+    }
+
+    .settings-actions {
+      align-items: center;
+    }
+
+    @media (max-width: 760px) {
+      .search-row .copy-search-btn,
+      .search-row .saved-search-btn {
+        min-height: 46px;
+      }
+
+      .settings-panel .settings-actions {
+        justify-content: flex-start;
+      }
+
+      .settings-panel .settings-actions button,
+      .settings-panel .settings-actions a {
+        flex: 0 1 auto;
+        width: auto;
+        min-width: 0;
+        min-height: 40px;
+        padding-inline: 12px;
+      }
+
+      .settings-panel {
+        padding: 12px;
+      }
+
+      .settings-group > summary {
+        min-height: 50px;
+        padding: 10px 12px;
+      }
+
+      .settings-group-content {
+        padding: 0 9px 9px;
+        gap: 8px;
+      }
+
+      .settings-group[open] > summary {
+        margin-bottom: 9px;
+      }
+
+      .settings-group .settings-subpanel {
+        padding: 12px;
+      }
+
+      .inbox-external-tools-entry {
+        padding: 10px 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .search-row {
+        grid-template-columns: minmax(0, 1fr) 42px 42px;
+        gap: 4px;
+      }
+
+      .copy-search-btn,
+      .saved-search-btn {
+        width: 42px;
+        min-width: 42px;
+        max-width: 42px;
+        padding: 0;
+        border-radius: 14px;
+        overflow: hidden;
+      }
+
+      .saved-search-label-full,
+      .saved-search-label-short,
+      .quick-note-label-full,
+      .quick-note-label-short,
+      .saved-search-state {
+        display: none;
+      }
+
+      .saved-search-label-icon,
+      .quick-note-label-icon {
+        display: inline;
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .search-input {
+        padding-inline: 11px;
+      }
+
+      .inbox-external-tools-entry {
+        align-items: flex-start;
+      }
+
+      .inbox-external-tools-entry .hint {
+        display: none;
+      }
+
+      .inbox-external-tools-entry > button {
+        min-height: 40px;
+        padding-inline: 10px;
+      }
+
+      .settings-panel .settings-actions button,
+      .settings-panel .settings-actions a {
+        font-size: 13px;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -2926,9 +3137,10 @@
             <button class="ghost-btn saved-search-btn" id="savedSearchBtn" type="button" aria-label="搜索已保存内容">
               <span class="saved-search-label-full">📂 已存内容</span>
               <span class="saved-search-label-short" aria-hidden="true">📂 已存</span>
+              <span class="saved-search-label-icon" aria-hidden="true">📂</span>
               <span class="saved-search-state" aria-hidden="true"></span>
             </button>
-            <button class="ghost-btn copy-search-btn" id="quickNoteBtn" type="button" aria-label="存入收件箱"><span class="quick-note-label-full">📥 存入收件箱</span><span class="quick-note-label-short" aria-hidden="true">📥 存入</span></button>
+            <button class="ghost-btn copy-search-btn" id="quickNoteBtn" type="button" aria-label="存入收件箱"><span class="quick-note-label-full">📥 存入收件箱</span><span class="quick-note-label-short" aria-hidden="true">📥 存入</span><span class="quick-note-label-icon" aria-hidden="true">📥</span></button>
           </div>
         </div>
         <div id="savedSearchHint" class="saved-search-hint hidden" aria-live="polite"></div>
@@ -2982,18 +3194,12 @@
     </section>
 
     <section id="laterSection" class="section" aria-label="收件箱">
-      <div class="card later-form">
-        <div class="form-title">
-          <h2>从外部页面一键加入</h2>
-          <button class="ghost-btn" id="copyBookmarkletBtn" type="button">复制收藏脚本</button>
+      <div class="card inbox-external-tools-entry" aria-label="外部保存工具入口">
+        <div>
+          <strong>从外部页面保存</strong>
+          <p class="hint">PWA 分享目标与桌面书签工具说明已移至设置页。</p>
         </div>
-        <p class="hint"><strong>Android 推荐：</strong>用支持 Web Share Target 的浏览器通过 HTTPS 安装 Info Dock PWA。安装后，在网页中点系统分享按钮，若系统已注册分享目标，会出现 Info Dock 并保存到收件箱。</p>
-        <p class="hint"><strong>通用兜底：</strong>如果 Edge / 华为浏览器安装成功但分享面板仍没有 Info Dock，说明浏览器没有完成系统分享目标注册；复制链接后回到 Info Dock，点击顶部搜索框右侧的 📥 存入收件箱。</p>
-        <p class="hint"><strong>桌面 / 高级备用：</strong>下面的书签工具更适合电脑浏览器书签栏；手机端不再推荐把它作为主方案。</p>
-        <div class="actions">
-          <a class="primary-btn" id="bookmarkletLink" href="#">桌面书签工具：加入 Info Dock</a>
-        </div>
-        <p class="hint">说明：PWA 分享目标和书签工具默认只保存页面标题、链接和来源；正文、摘要和元数据会沿用现有后台抓取能力。</p>
+        <button class="ghost-btn" id="openExternalSaveSettingsBtn" type="button">外部保存说明</button>
       </div>
 
       <div class="card review-panel" id="reviewPanel" aria-label="收件箱整理与待回顾">
@@ -3090,97 +3296,152 @@
         <div class="form-title">
           <div>
             <h2>⚙️ 设置</h2>
-            <p class="hint">配置用于网页正文、搜索快照、B站 API 等跨域请求的 CORS 代理。</p>
+            <p class="hint">按数据安全、外部保存、自动化与高级选项集中管理 Info Dock。</p>
           </div>
-        </div>
-        <div class="settings-subpanel" aria-label="PWA 安装和分享目标">
-          <h3>📲 PWA 安装 / 分享目标</h3>
-          <p class="hint">荣耀 / 华为手机上，“能安装 PWA”不等于“浏览器一定会把 PWA 注册成系统分享目标”。本版已把分享目标改为独立入口 + POST multipart/form-data，并更换 PWA 身份，避免继续沿用旧 manifest。</p>
-          <ol class="install-steps">
-            <li>先删除桌面旧 Info Dock 和浏览器应用管理里的旧安装记录，再从 HTTPS 页面安装本版。</li>
-            <li>安装后请完全退出安装浏览器和外部网页 App，再重新打开目标网页测试系统分享面板。</li>
-            <li>若 Edge / 华为浏览器仍没有 Info Dock，说明该浏览器安装方式没有完成 Web Share Target 系统注册；网页代码不能直接强制写入系统分享面板。</li>
-          </ol>
-          <div class="actions settings-actions">
-            <button class="primary-btn" id="manualPwaInstallBtn" type="button">手动安装 PWA</button>
-            <button class="ghost-btn" id="resetPwaInstallDismissBtn" type="button">刷新安装状态</button>
-          </div>
-          <p class="hint proxy-status" id="pwaInstallStatus" aria-live="polite"></p>
-        </div>
-        <div class="settings-subpanel" aria-label="数据备份与恢复">
-          <h3>📦 数据备份与恢复</h3>
-          <p class="hint">导出会包含平台、搜索历史、收件箱和内容快照。导入前会先下载一份当前数据备份，避免误覆盖。</p>
-          <div class="data-health-card" id="dataBackupSummary">正在读取数据安全状态…</div>
-          <div class="actions settings-actions">
-            <button class="primary-btn" id="exportDataBtn" type="button">导出完整 JSON</button>
-            <button class="ghost-btn" id="importMergeBtn" type="button">导入并合并</button>
-            <button class="ghost-btn" id="importReplaceBtn" type="button">导入并覆盖</button>
-            <button class="ghost-btn" id="persistStorageBtn" type="button">保护本地数据</button>
-          </div>
-          <input class="hidden-file-input" id="dataImportInput" type="file" accept="application/json,.json" />
-          <p class="hint proxy-status" id="dataBackupStatus" aria-live="polite"></p>
         </div>
 
-        <div class="settings-subpanel" aria-label="存储空间和快照清理">
-          <h3>📱 存储空间与快照清理</h3>
-          <p class="hint">快照用于全文搜索和收件箱摘要。清理只处理内容快照，不会删除平台、搜索历史、收件箱条目、备注、结论或标签。</p>
-          <div class="storage-stat-grid" id="storageStatsGrid">
-            <div class="storage-stat"><strong>—</strong><span>正在统计</span></div>
-          </div>
-          <div class="actions settings-actions">
-            <button class="ghost-btn" id="refreshStorageStatsBtn" type="button">刷新统计</button>
-            <button class="ghost-btn" id="cleanupOrphanSnapshotsBtn" type="button">清理孤儿快照</button>
-            <button class="ghost-btn" id="cleanupOldSnapshotsBtn" type="button">清理 30 天前快照</button>
-            <button class="danger-btn" id="clearBodySnapshotsBtn" type="button">清空正文快照</button>
-          </div>
-          <p class="hint proxy-status" id="storageManageStatus" aria-live="polite"></p>
-        </div>
+        <details class="settings-group" id="dataSafetySettingsPanel" open>
+          <summary>
+            <span><strong>1. 数据安全</strong><small>备份恢复、存储空间与快照清理</small></span>
+          </summary>
+          <div class="settings-group-content">
+            <div class="settings-subpanel" aria-label="数据备份与恢复">
+              <h3>📦 数据备份与恢复</h3>
+              <p class="hint">导出会包含平台、搜索历史、收件箱和内容快照。导入前会先下载一份当前数据备份，避免误覆盖。</p>
+              <div class="data-health-card" id="dataBackupSummary">正在读取数据安全状态…</div>
+              <div class="actions settings-actions">
+                <button class="primary-btn" id="exportDataBtn" type="button">导出完整 JSON</button>
+                <button class="ghost-btn" id="importMergeBtn" type="button">导入并合并</button>
+                <button class="ghost-btn" id="importReplaceBtn" type="button">导入并覆盖</button>
+                <button class="ghost-btn" id="persistStorageBtn" type="button">保护本地数据</button>
+              </div>
+              <input class="hidden-file-input" id="dataImportInput" type="file" accept="application/json,.json" />
+              <p class="hint proxy-status" id="dataBackupStatus" aria-live="polite"></p>
+            </div>
 
-        <div class="settings-subpanel" aria-label="搜索自动化设置">
-          <h3>🔎 搜索自动化</h3>
-          <p class="hint">自动保存搜索结果页摘要默认关闭，避免未经确认静默抓取搜索。启用后，每次搜索都会在打开搜索页后，通过当前 CORS 代理后台请求该搜索结果页，并只保存纯文本摘要用于全文搜索。</p>
-          <label class="label setting-toggle">
-            <input id="autoSearchSnapshotEnabled" type="checkbox" />
-            <span>自动保存搜索结果页纯文本摘要</span>
-          </label>
-          <label class="label">摘要最大长度
-            <input id="autoSearchSnapshotMaxLength" class="field" type="number" min="200" max="2000" step="100" placeholder="2000" />
-          </label>
-          <label class="label setting-toggle">
-            <input id="autoBasicTagsEnabled" type="checkbox" />
-            <span>自动应用基础标签（新搜索、收件箱、快速笔记和外部分享导入时写入，可手动增删）</span>
-          </label>
-          <div class="actions settings-actions">
-            <button class="primary-btn" id="saveSearchAutomationSettingsBtn" type="button">保存搜索自动化设置</button>
+            <div class="settings-subpanel" aria-label="存储空间和快照清理">
+              <h3>📱 存储空间与快照清理</h3>
+              <p class="hint">快照用于全文搜索和收件箱摘要。清理只处理内容快照，不会删除平台、搜索历史、收件箱条目、备注、结论或标签。</p>
+              <div class="storage-stat-grid" id="storageStatsGrid">
+                <div class="storage-stat"><strong>—</strong><span>正在统计</span></div>
+              </div>
+              <div class="actions settings-actions">
+                <button class="ghost-btn" id="refreshStorageStatsBtn" type="button">刷新统计</button>
+                <button class="ghost-btn" id="cleanupOrphanSnapshotsBtn" type="button">清理孤儿快照</button>
+                <button class="ghost-btn" id="cleanupOldSnapshotsBtn" type="button">清理 30 天前快照</button>
+                <button class="danger-btn" id="clearBodySnapshotsBtn" type="button">清空正文快照</button>
+              </div>
+              <p class="hint proxy-status" id="storageManageStatus" aria-live="polite"></p>
+            </div>
           </div>
-          <p class="hint proxy-status" id="searchAutomationStatus" aria-live="polite"></p>
-        </div>
+        </details>
 
-        <div class="settings-subpanel" aria-label="回顾设置">
-          <h3>🔁 回顾提醒</h3>
-          <p class="hint">待回顾默认只统计状态为收件箱/待读，且创建时间超过阈值天数的收件箱条目。应用内提醒只会在页面打开时提示，不承诺页面关闭后准时通知。</p>
-          <label class="label">待回顾阈值天数
-            <input id="reviewThresholdDaysInput" class="field" type="number" min="1" max="365" step="1" placeholder="3" />
-          </label>
-          <label class="label setting-toggle">
-            <input id="reviewReminderEnabled" type="checkbox" />
-            <span>开启应用内回顾提醒（每天最多提示一次）</span>
-          </label>
-          <div class="actions settings-actions">
-            <button class="primary-btn" id="saveReviewSettingsBtn" type="button">保存回顾设置</button>
+        <details class="settings-group" id="externalSaveToolsPanel">
+          <summary>
+            <span><strong>2. 外部保存工具</strong><small>PWA 安装、分享目标与桌面书签工具</small></span>
+          </summary>
+          <div class="settings-group-content">
+            <div class="settings-subpanel" aria-label="PWA 安装和分享目标">
+              <h3>📲 PWA 安装 / 分享目标</h3>
+              <p class="hint">荣耀 / 华为手机上，“能安装 PWA”不等于“浏览器一定会把 PWA 注册成系统分享目标”。本版已把分享目标改为独立入口 + POST multipart/form-data，并更换 PWA 身份，避免继续沿用旧 manifest。</p>
+              <ol class="install-steps">
+                <li>先删除桌面旧 Info Dock 和浏览器应用管理里的旧安装记录，再从 HTTPS 页面安装本版。</li>
+                <li>安装后请完全退出安装浏览器和外部网页 App，再重新打开目标网页测试系统分享面板。</li>
+                <li>若 Edge / 华为浏览器仍没有 Info Dock，说明该浏览器安装方式没有完成 Web Share Target 系统注册；网页代码不能直接强制写入系统分享面板。</li>
+              </ol>
+              <div class="actions settings-actions">
+                <button class="primary-btn" id="manualPwaInstallBtn" type="button">手动安装 PWA</button>
+                <button class="ghost-btn" id="resetPwaInstallDismissBtn" type="button">刷新安装状态</button>
+              </div>
+              <p class="hint proxy-status" id="pwaInstallStatus" aria-live="polite"></p>
+            </div>
+
+            <div class="settings-subpanel" aria-label="桌面书签工具和外部导入方式">
+              <h3>🔖 桌面书签工具 / 导入方式</h3>
+              <p class="hint"><strong>Android 推荐：</strong>用支持 Web Share Target 的浏览器通过 HTTPS 安装 Info Dock PWA。安装后，在网页中点系统分享按钮，若系统已注册分享目标，会出现 Info Dock 并保存到收件箱。</p>
+              <p class="hint"><strong>通用兜底：</strong>如果 Edge / 华为浏览器安装成功但分享面板仍没有 Info Dock，说明浏览器没有完成系统分享目标注册；复制链接后回到 Info Dock，点击顶部搜索框右侧的 📥 存入收件箱。</p>
+              <p class="hint"><strong>桌面 / 高级备用：</strong>下面的书签工具更适合电脑浏览器书签栏；手机端不再推荐把它作为主方案。</p>
+              <div class="actions settings-actions">
+                <button class="ghost-btn" id="copyBookmarkletBtn" type="button">复制收藏脚本</button>
+                <a class="primary-btn" id="bookmarkletLink" href="#">桌面书签工具：加入 Info Dock</a>
+              </div>
+              <p class="hint">说明：PWA 分享目标和书签工具默认只保存页面标题、链接和来源；正文、摘要和元数据会沿用现有后台抓取能力。</p>
+            </div>
           </div>
-          <p class="hint proxy-status" id="reviewSettingsStatus" aria-live="polite"></p>
-        </div>
+        </details>
 
-        <label class="label">CORS 代理地址
-          <input id="proxyUrlInput" class="field" type="url" placeholder="https://你的worker.workers.dev" />
-        </label>
-        <div class="actions settings-actions">
-          <button class="ghost-btn" id="testProxyBtn" type="button">测试</button>
-          <button class="primary-btn" id="saveProxyBtn" type="button">保存</button>
-          <button class="ghost-btn" id="resetProxyBtn" type="button">重置为默认代理</button>
-        </div>
-        <p class="hint proxy-status" id="proxyStatus" aria-live="polite"></p>
+        <details class="settings-group" id="automationReviewSettingsPanel">
+          <summary>
+            <span><strong>3. 自动化与回顾</strong><small>搜索自动化、基础标签与回顾提醒</small></span>
+          </summary>
+          <div class="settings-group-content">
+            <div class="settings-subpanel" aria-label="搜索自动化设置">
+              <h3>🔎 搜索自动化与基础标签</h3>
+              <p class="hint">自动保存搜索结果页摘要默认关闭，避免未经确认静默抓取搜索。启用后，每次搜索都会在打开搜索页后，通过当前 CORS 代理后台请求该搜索结果页，并只保存纯文本摘要用于全文搜索。</p>
+              <label class="label setting-toggle">
+                <input id="autoSearchSnapshotEnabled" type="checkbox" />
+                <span>自动保存搜索结果页纯文本摘要</span>
+              </label>
+              <label class="label">摘要最大长度
+                <input id="autoSearchSnapshotMaxLength" class="field" type="number" min="200" max="2000" step="100" placeholder="2000" />
+              </label>
+              <label class="label setting-toggle">
+                <input id="autoBasicTagsEnabled" type="checkbox" />
+                <span>自动应用基础标签（新搜索、收件箱、快速笔记和外部分享导入时写入，可手动增删）</span>
+              </label>
+              <div class="actions settings-actions">
+                <button class="primary-btn" id="saveSearchAutomationSettingsBtn" type="button">保存搜索自动化设置</button>
+              </div>
+              <p class="hint proxy-status" id="searchAutomationStatus" aria-live="polite"></p>
+            </div>
+
+            <div class="settings-subpanel" aria-label="回顾设置">
+              <h3>🔁 回顾提醒</h3>
+              <p class="hint">待回顾默认只统计状态为收件箱/待读，且创建时间超过阈值天数的收件箱条目。应用内提醒只会在页面打开时提示，不承诺页面关闭后准时通知。</p>
+              <label class="label">待回顾阈值天数
+                <input id="reviewThresholdDaysInput" class="field" type="number" min="1" max="365" step="1" placeholder="3" />
+              </label>
+              <label class="label setting-toggle">
+                <input id="reviewReminderEnabled" type="checkbox" />
+                <span>开启应用内回顾提醒（每天最多提示一次）</span>
+              </label>
+              <div class="actions settings-actions">
+                <button class="primary-btn" id="saveReviewSettingsBtn" type="button">保存回顾设置</button>
+              </div>
+              <p class="hint proxy-status" id="reviewSettingsStatus" aria-live="polite"></p>
+            </div>
+          </div>
+        </details>
+
+        <details class="settings-group" id="advancedSettingsPanel">
+          <summary>
+            <span><strong>4. 高级设置</strong><small>CORS 代理配置与连接测试</small></span>
+          </summary>
+          <div class="settings-group-content">
+            <div class="settings-subpanel" aria-label="CORS 代理设置">
+              <h3>🌐 CORS 代理</h3>
+              <p class="hint">配置用于网页正文、搜索快照、B站 API 等跨域请求的 CORS 代理。</p>
+              <label class="label">CORS 代理地址
+                <input id="proxyUrlInput" class="field" type="url" placeholder="https://你的worker.workers.dev" />
+              </label>
+              <div class="actions settings-actions">
+                <button class="ghost-btn" id="testProxyBtn" type="button">测试</button>
+                <button class="primary-btn" id="saveProxyBtn" type="button">保存</button>
+                <button class="ghost-btn" id="resetProxyBtn" type="button">重置为默认代理</button>
+              </div>
+              <p class="hint proxy-status" id="proxyStatus" aria-live="polite"></p>
+            </div>
+
+            <div class="settings-subpanel" aria-label="小红书网页搜索入口检测">
+              <h3>🔎 小红书搜索入口检测</h3>
+              <p class="hint">使用固定中性词通过当前 CORS 代理检查网页搜索入口，不会上传搜索框中的用户关键词，也不会阻塞正常搜索。</p>
+              <div class="actions settings-actions">
+                <button class="ghost-btn" id="checkXhsSearchTemplateBtn" type="button">立即检测</button>
+              </div>
+              <p class="hint proxy-status" id="xhsSearchTemplateStatus" aria-live="polite"></p>
+            </div>
+          </div>
+        </details>
       </div>
     </section>
   </main>
@@ -3407,6 +3668,7 @@
     const DEFAULT_PLATFORMS = [
       {
         id: "bing",
+        sortOrder: 0,
         name: "必应",
         goodFor: "全网资料、官方页面、跨平台验证",
         recommendation: "组合词 + 年份 + 真实评价",
@@ -3417,16 +3679,18 @@
       },
       {
         id: "xiaohongshu",
+        sortOrder: 1,
         name: "小红书",
         goodFor: "消费体验、生活方式、踩坑和清单",
         recommendation: "短词 + 场景词：避坑 / 攻略 / 真实",
         domain: "xiaohongshu.com",
-        urlTemplate: "https://www.xiaohongshu.com/search_result?keyword={query}",
-        mobileUrlTemplate: "https://www.xiaohongshu.com/search_result?keyword={query}",
+        urlTemplate: "https://www.xiaohongshu.com/search_result?keyword={query}&type=51",
+        mobileUrlTemplate: "https://www.xiaohongshu.com/search_result?keyword={query}&type=51",
         appUrlTemplate: "xhsdiscover://search/result?keyword={query}"
       },
       {
         id: "bilibili",
+        sortOrder: 2,
         name: "B站",
         goodFor: "教程、测评、长视频攻略和案例演示",
         recommendation: "教程式：攻略 / 教程 / 2026",
@@ -3437,6 +3701,7 @@
       },
       {
         id: "zhihu",
+        sortOrder: 3,
         name: "知乎",
         goodFor: "经验判断、长回答、观点交叉验证",
         recommendation: "问题式：怎么选 / 有哪些坑",
@@ -3447,6 +3712,7 @@
       },
       {
         id: "douyin",
+        sortOrder: 4,
         name: "抖音",
         goodFor: "短视频体验、口语化建议、地点和生活场景",
         recommendation: "口语短词：哪里方便 / 怎么避坑",
@@ -3457,6 +3723,7 @@
       },
       {
         id: "weibo",
+        sortOrder: 5,
         name: "微博",
         goodFor: "实时反馈、舆情、活动和突发信息",
         recommendation: "短词 + 时间 / 地点 / 事件名",
@@ -3467,6 +3734,7 @@
       },
       {
         id: "doubao",
+        sortOrder: 6,
         name: "豆包",
         type: "ai",
         category: "ai-assistant",
@@ -3479,6 +3747,7 @@
       },
       {
         id: "deepseek",
+        sortOrder: 7,
         name: "DeepSeek",
         type: "ai",
         category: "ai-assistant",
@@ -3540,6 +3809,7 @@
       historyList: $("#historyList"),
       bookmarkletLink: $("#bookmarkletLink"),
       copyBookmarkletBtn: $("#copyBookmarkletBtn"),
+      openExternalSaveSettingsBtn: $("#openExternalSaveSettingsBtn"),
       laterSourceFilter: $("#laterSourceFilter"),
       laterStatusFilter: $("#laterStatusFilter"),
       laterStatusChips: $("#laterStatusChips"),
@@ -3635,6 +3905,8 @@
       saveProxyBtn: $("#saveProxyBtn"),
       resetProxyBtn: $("#resetProxyBtn"),
       proxyStatus: $("#proxyStatus"),
+      checkXhsSearchTemplateBtn: $("#checkXhsSearchTemplateBtn"),
+      xhsSearchTemplateStatus: $("#xhsSearchTemplateStatus"),
       toast: $("#toast"),
       storageBadge: $("#storageBadge"),
       pwaInstallPrompt: $("#pwaInstallPrompt"),
@@ -3854,8 +4126,17 @@
     const DEFAULT_CORS_PROXY = "https://api.allorigins.win/raw?url=";
     const FALLBACK_CORS_PROXIES = ["https://corsproxy.io/?url="];
     const PROXY_TEST_URL = "https://www.bing.com";
+    const XHS_SEARCH_TEMPLATE_CANDIDATES = [
+      "https://www.xiaohongshu.com/search_result?keyword={query}&type=51",
+      "https://www.xiaohongshu.com/search_result?keyword={query}"
+    ];
+    const XHS_SEARCH_TEMPLATE_HEALTH_KEY = "xhsSearchTemplateHealth";
+    const XHS_SEARCH_TEMPLATE_HEALTH_TTL_MS = 24 * 60 * 60 * 1000;
+    const XHS_SEARCH_TEMPLATE_CHECK_QUERY = "美食";
     let proxyUrl = DEFAULT_CORS_PROXY;
     let hasCustomProxyUrl = false;
+    let xhsSearchTemplateHealth = null;
+    let xhsSearchTemplateHealthPromise = null;
     let searchAutomationSettings = { ...DEFAULT_SEARCH_AUTOMATION_SETTINGS };
     let reviewSettings = { ...DEFAULT_REVIEW_SETTINGS };
     let reviewFilterActive = false;
@@ -3916,6 +4197,10 @@
       rebuildBacklinkIndex();
       renderAll();
       bindEvents();
+      renderXiaohongshuSearchTemplateHealth();
+      window.setTimeout(() => {
+        void checkXiaohongshuSearchTemplates();
+      }, 1200);
       await handleSharedData();
       await consumeIncomingLaterItem();
       setTimeout(checkReviewReminderOnStartup, 700);
@@ -4145,6 +4430,17 @@
         button.addEventListener("click", () => activateTab(button.dataset.tab));
       });
 
+      if (elements.openExternalSaveSettingsBtn) {
+        elements.openExternalSaveSettingsBtn.addEventListener("click", () => {
+          activateTab("settingsSection");
+          const panel = $("#externalSaveToolsPanel");
+          if (panel) panel.open = true;
+          window.requestAnimationFrame(() => {
+            panel?.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+        });
+      }
+
       [elements.historyPlatformFilter, elements.historyStatusFilter, elements.historyTextFilter, elements.historySort]
         .forEach((control) => control.addEventListener("input", renderHistory));
 
@@ -4216,6 +4512,9 @@
       });
       if (elements.saveProxyBtn) elements.saveProxyBtn.addEventListener("click", saveProxySettings);
       if (elements.resetProxyBtn) elements.resetProxyBtn.addEventListener("click", resetProxySettings);
+      if (elements.checkXhsSearchTemplateBtn) elements.checkXhsSearchTemplateBtn.addEventListener("click", () => {
+        void checkXiaohongshuSearchTemplates({ force: true });
+      });
       if (elements.saveSearchAutomationSettingsBtn) elements.saveSearchAutomationSettingsBtn.addEventListener("click", saveSearchAutomationSettingsFromForm);
       if (elements.saveReviewSettingsBtn) elements.saveReviewSettingsBtn.addEventListener("click", saveReviewSettingsFromForm);
       if (elements.exportDataBtn) elements.exportDataBtn.addEventListener("click", () => {
@@ -5126,7 +5425,10 @@
         try { return new URL(source.profileUrl).hostname.replace(/^www\./i, ""); } catch (error) { return ""; }
       })();
       if (source.platform === "B站") return `https://search.bilibili.com/all?keyword=${encoded}`;
-      if (source.platform === "小红书") return `https://www.xiaohongshu.com/search_result?keyword=${encoded}`;
+      if (source.platform === "小红书") {
+        const template = getCachedHealthyXiaohongshuSearchTemplate() || XHS_SEARCH_TEMPLATE_CANDIDATES[0];
+        return fillUrlTemplate(template, cleanQuery, "xiaohongshu.com");
+      }
       if (source.platform === "知乎") return `https://www.zhihu.com/search?type=content&q=${encoded}`;
       if (source.platform === "微信公众号") return `https://weixin.sogou.com/weixin?type=2&query=${encoded}`;
       if ((source.platform === "网站" || source.type === "website") && profileHost) return `https://www.bing.com/search?q=${encodeURIComponent(`site:${profileHost} ${cleanQuery}`)}`;
@@ -5475,7 +5777,10 @@
       const migratedHistory = loadFromLocalStorage(STORAGE_KEYS.history, []);
       const migratedLater = loadFromLocalStorage(STORAGE_KEYS.later, []);
 
-      await InfoDockDB.replaceAll(STORE_NAMES.platforms, Array.isArray(migratedPlatforms) ? migratedPlatforms : []);
+      await InfoDockDB.replaceAll(
+        STORE_NAMES.platforms,
+        normalizePlatforms(Array.isArray(migratedPlatforms) ? migratedPlatforms : [])
+      );
       await InfoDockDB.replaceAll(STORE_NAMES.history, Array.isArray(migratedHistory) ? migratedHistory : []);
       await InfoDockDB.replaceAll(STORE_NAMES.later, Array.isArray(migratedLater) ? migratedLater : []);
       console.info("已将 localStorage 数据迁移到 IndexedDB。 ");
@@ -5495,11 +5800,15 @@
     }
 
     async function save(storeName, value) {
+      const persistValue = storeName === STORE_NAMES.platforms
+        ? applyPlatformSortOrders(value)
+        : value;
+
       if (storageMode === "indexedDB") {
-        await InfoDockDB.replaceAll(storeName, value);
+        await InfoDockDB.replaceAll(storeName, persistValue);
         return;
       }
-      saveToLocalStorage(localStorageKeyForStore(storeName), value);
+      saveToLocalStorage(localStorageKeyForStore(storeName), persistValue);
     }
 
     async function saveContentSnapshot(content) {
@@ -5668,6 +5977,7 @@
     }
 
     async function persistCoreData() {
+      platforms = applyPlatformSortOrders(platforms);
       await save(STORE_NAMES.platforms, platforms);
       await save(STORE_NAMES.history, historyItems);
       await save(STORE_NAMES.later, laterItems);
@@ -6183,17 +6493,40 @@
       }
     }
 
+    function normalizePlatformSortOrder(value) {
+      if (value === null || value === undefined || value === "") return null;
+      const order = Number(value);
+      return Number.isFinite(order) && order >= 0 ? Math.floor(order) : null;
+    }
+
+    function applyPlatformSortOrders(items) {
+      const list = Array.isArray(items) ? items.filter(Boolean) : [];
+      const bing = list.find((item) => item.id === "bing")
+        || list.find((item) => normalizePlatformName(item.name) === "必应")
+        || null;
+      const ordered = bing
+        ? [bing, ...list.filter((item) => item !== bing)]
+        : [...list];
+
+      return ordered.map((item, index) => ({
+        ...item,
+        sortOrder: index
+      }));
+    }
+
     function normalizePlatforms(rawPlatforms) {
-      const raw = Array.isArray(rawPlatforms) ? rawPlatforms : [];
+      const raw = Array.isArray(rawPlatforms) ? rawPlatforms.filter(Boolean) : [];
       const defaultIds = new Set(DEFAULT_PLATFORMS.map((item) => item.id));
       const defaultNames = new Set(DEFAULT_PLATFORMS.map((item) => item.name));
+      const hasSavedSortOrder = raw.some((item) => normalizePlatformSortOrder(item?.sortOrder) !== null);
 
-      const normalizedDefaults = DEFAULT_PLATFORMS.map((defaultPlatform) => {
-        const saved = raw.find((item) =>
+      const normalizedDefaults = DEFAULT_PLATFORMS.map((defaultPlatform, defaultIndex) => {
+        const rawIndex = raw.findIndex((item) =>
           item &&
           (item.id === defaultPlatform.id || normalizePlatformName(item.name) === defaultPlatform.name)
         );
-        return normalizePlatformConfig({
+        const saved = rawIndex >= 0 ? raw[rawIndex] : null;
+        const platform = normalizePlatformConfig({
           ...defaultPlatform,
           ...(saved || {}),
           id: defaultPlatform.id,
@@ -6201,40 +6534,95 @@
           goodFor: saved?.goodFor || defaultPlatform.goodFor,
           recommendation: saved?.recommendation || defaultPlatform.recommendation,
           domain: saved?.domain || defaultPlatform.domain,
-          mobileUrlTemplate: getMigratedDefaultAiUrlTemplate(defaultPlatform, saved?.mobileUrlTemplate, "mobileUrlTemplate") || saved?.mobileUrlTemplate || defaultPlatform.mobileUrlTemplate,
+          mobileUrlTemplate: getMigratedDefaultSearchUrlTemplate(defaultPlatform, saved?.mobileUrlTemplate, "mobileUrlTemplate") || saved?.mobileUrlTemplate || defaultPlatform.mobileUrlTemplate,
           appUrlTemplate: saved?.appUrlTemplate || defaultPlatform.appUrlTemplate,
-          urlTemplate: getMigratedDefaultAiUrlTemplate(defaultPlatform, saved?.urlTemplate, "urlTemplate") || saved?.urlTemplate || defaultPlatform.urlTemplate
+          urlTemplate: getMigratedDefaultSearchUrlTemplate(defaultPlatform, saved?.urlTemplate, "urlTemplate") || saved?.urlTemplate || defaultPlatform.urlTemplate
         });
+        return {
+          platform,
+          defaultIndex,
+          rawIndex,
+          isSaved: Boolean(saved),
+          savedSortOrder: normalizePlatformSortOrder(saved?.sortOrder),
+          isDefault: true
+        };
       });
 
       const custom = raw
-        .filter((item) => {
+        .map((item, rawIndex) => ({ item, rawIndex }))
+        .filter(({ item }) => {
           if (!item || !item.name) return false;
           const normalizedName = normalizePlatformName(item.name);
           return !defaultIds.has(item.id) && !defaultNames.has(normalizedName);
         })
-        .map((item) => normalizePlatformConfig(item));
+        .map(({ item, rawIndex }) => ({
+          platform: normalizePlatformConfig(item),
+          defaultIndex: Number.MAX_SAFE_INTEGER,
+          rawIndex,
+          isSaved: true,
+          savedSortOrder: normalizePlatformSortOrder(item.sortOrder),
+          isDefault: false
+        }));
 
-      const allPlatforms = [...normalizedDefaults, ...custom];
-      const bing = allPlatforms.find((item) => item.id === "bing") || allPlatforms.find((item) => item.name === "必应");
-      const ordered = [];
+      const entries = [...normalizedDefaults, ...custom];
+      const bingEntry = entries.find(({ platform }) => platform.id === "bing")
+        || entries.find(({ platform }) => normalizePlatformName(platform.name) === "必应")
+        || null;
+      const nonBingEntries = entries.filter((entry) => entry !== bingEntry);
 
-      raw.forEach((saved) => {
-        if (!saved) return;
-        const savedName = normalizePlatformName(saved.name);
-        const match = allPlatforms.find((item) => item.id === saved.id || item.name === savedName);
-        if (match && match !== bing && !ordered.some((item) => item.id === match.id)) {
-          ordered.push(match);
-        }
-      });
+      const byLegacyOrder = (a, b) => {
+        if (a.isDefault !== b.isDefault) return a.isDefault ? -1 : 1;
+        if (a.isDefault && b.isDefault) return a.defaultIndex - b.defaultIndex;
+        return a.rawIndex - b.rawIndex;
+      };
 
-      allPlatforms.forEach((item) => {
-        if (item !== bing && !ordered.some((entry) => entry.id === item.id)) {
-          ordered.push(item);
-        }
-      });
+      let orderedEntries;
+      if (hasSavedSortOrder) {
+        const persisted = nonBingEntries
+          .filter((entry) => entry.savedSortOrder !== null)
+          .sort((a, b) =>
+            a.savedSortOrder - b.savedSortOrder
+            || a.rawIndex - b.rawIndex
+            || a.defaultIndex - b.defaultIndex
+          );
+        const legacySaved = nonBingEntries
+          .filter((entry) => entry.isSaved && entry.savedSortOrder === null)
+          .sort(byLegacyOrder);
+        const newDefaults = nonBingEntries
+          .filter((entry) => !entry.isSaved)
+          .sort((a, b) => a.defaultIndex - b.defaultIndex);
+        orderedEntries = [...persisted, ...legacySaved, ...newDefaults];
+      } else {
+        const legacySavedDefaults = nonBingEntries
+          .filter((entry) => entry.isSaved && entry.isDefault)
+          .sort((a, b) => a.defaultIndex - b.defaultIndex);
+        const legacyCustom = nonBingEntries
+          .filter((entry) => entry.isSaved && !entry.isDefault)
+          .sort((a, b) => a.rawIndex - b.rawIndex);
+        const newDefaults = nonBingEntries
+          .filter((entry) => !entry.isSaved)
+          .sort((a, b) => a.defaultIndex - b.defaultIndex);
+        orderedEntries = [...legacySavedDefaults, ...legacyCustom, ...newDefaults];
+      }
 
-      return bing ? [bing, ...ordered] : ordered;
+      const orderedPlatforms = [
+        ...(bingEntry ? [bingEntry.platform] : []),
+        ...orderedEntries.map((entry) => entry.platform)
+      ];
+
+      return applyPlatformSortOrders(orderedPlatforms);
+    }
+
+    function getMigratedDefaultSearchUrlTemplate(defaultPlatform, savedTemplate, fieldName = "urlTemplate") {
+      const aiTemplate = getMigratedDefaultAiUrlTemplate(defaultPlatform, savedTemplate, fieldName);
+      if (aiTemplate) return aiTemplate;
+      if (!defaultPlatform || defaultPlatform.id !== "xiaohongshu") return "";
+
+      const cleanSavedTemplate = String(savedTemplate || "").trim();
+      const legacyXhsTemplate = "https://www.xiaohongshu.com/search_result?keyword={query}";
+      return !cleanSavedTemplate || cleanSavedTemplate === legacyXhsTemplate
+        ? (defaultPlatform[fieldName] || defaultPlatform.urlTemplate || XHS_SEARCH_TEMPLATE_CANDIDATES[0])
+        : "";
     }
 
     function getMigratedDefaultAiUrlTemplate(defaultPlatform, savedTemplate, fieldName = "urlTemplate") {
@@ -6266,6 +6654,7 @@
       const name = normalizePlatformName(platform.name || "未命名平台");
       return {
         id: platform.id || createId(),
+        sortOrder: normalizePlatformSortOrder(platform.sortOrder),
         name,
         type: normalizePlatformLightField(platform.type),
         category: normalizePlatformLightField(platform.category),
@@ -9995,7 +10384,9 @@
       selectedSortPlatformId = "";
       if (isSortingPlatforms) showAllPlatforms = true;
       renderPlatformCards();
-      toast(isSortingPlatforms ? "已进入排序模式：依次点击两个非必应平台卡片即可互换位置，完成后点“完成排序”。" : "已完成平台排序。");
+      toast(isSortingPlatforms
+        ? "已进入排序模式：依次点击两个非必应平台卡片即可互换，互换后会立即保存。"
+        : "已退出排序模式；成功互换的顺序均已保存。");
     }
 
     async function selectPlatformForSwap(platformId) {
@@ -10014,34 +10405,219 @@
         return;
       }
 
-      await swapPlatforms(selectedSortPlatformId, platformId);
+      const saved = await swapPlatforms(selectedSortPlatformId, platformId);
       selectedSortPlatformId = "";
       renderPlatformCards();
       renderFilters();
-      toast("已互换两个平台的位置。");
+      if (saved) toast("已保存排序。");
     }
 
     async function swapPlatforms(firstId, secondId) {
       const firstIndex = platforms.findIndex((platform) => platform.id === firstId);
       const secondIndex = platforms.findIndex((platform) => platform.id === secondId);
 
-      if (firstIndex <= 0 || secondIndex <= 0 || firstIndex === secondIndex) return;
+      if (firstIndex <= 0 || secondIndex <= 0 || firstIndex === secondIndex) return false;
 
+      const previousPlatforms = platforms;
       const nextPlatforms = [...platforms];
       const temp = nextPlatforms[firstIndex];
       nextPlatforms[firstIndex] = nextPlatforms[secondIndex];
       nextPlatforms[secondIndex] = temp;
+      platforms = applyPlatformSortOrders(nextPlatforms);
 
-      platforms = nextPlatforms;
-      await save(STORE_NAMES.platforms, platforms);
+      try {
+        await save(STORE_NAMES.platforms, platforms);
+        return true;
+      } catch (error) {
+        console.warn("保存平台排序失败：", error);
+        platforms = previousPlatforms;
+        toast("排序保存失败，请检查本地存储权限");
+        return false;
+      }
+    }
+
+    function normalizeXiaohongshuSearchTemplateHealth(value) {
+      if (!value || typeof value !== "object") return null;
+      const template = XHS_SEARCH_TEMPLATE_CANDIDATES.includes(value.template) ? value.template : "";
+      const checkedAt = String(value.checkedAt || "");
+      return {
+        template: template || XHS_SEARCH_TEMPLATE_CANDIDATES[0],
+        checkedAt,
+        ok: Boolean(value.ok && template),
+        error: String(value.error || "")
+      };
+    }
+
+    function readXiaohongshuSearchTemplateHealth() {
+      if (xhsSearchTemplateHealth) return xhsSearchTemplateHealth;
+      try {
+        const raw = localStorage.getItem(XHS_SEARCH_TEMPLATE_HEALTH_KEY);
+        xhsSearchTemplateHealth = normalizeXiaohongshuSearchTemplateHealth(raw ? JSON.parse(raw) : null);
+      } catch (error) {
+        console.warn("读取小红书搜索入口检测缓存失败：", error);
+        xhsSearchTemplateHealth = null;
+      }
+      return xhsSearchTemplateHealth;
+    }
+
+    function writeXiaohongshuSearchTemplateHealth(value) {
+      xhsSearchTemplateHealth = normalizeXiaohongshuSearchTemplateHealth(value);
+      if (!xhsSearchTemplateHealth) return;
+      try {
+        localStorage.setItem(XHS_SEARCH_TEMPLATE_HEALTH_KEY, JSON.stringify(xhsSearchTemplateHealth));
+      } catch (error) {
+        console.warn("保存小红书搜索入口检测缓存失败：", error);
+      }
+    }
+
+    function isFreshXiaohongshuSearchTemplateHealth(value) {
+      const checkedAt = new Date(value?.checkedAt || 0).getTime();
+      return Boolean(checkedAt && Date.now() - checkedAt < XHS_SEARCH_TEMPLATE_HEALTH_TTL_MS);
+    }
+
+    function getCachedHealthyXiaohongshuSearchTemplate() {
+      const health = readXiaohongshuSearchTemplateHealth();
+      return health?.ok && XHS_SEARCH_TEMPLATE_CANDIDATES.includes(health.template)
+        ? health.template
+        : "";
+    }
+
+    function renderXiaohongshuSearchTemplateHealth({ checking = false } = {}) {
+      if (!elements.xhsSearchTemplateStatus) return;
+      const status = elements.xhsSearchTemplateStatus;
+      status.classList.remove("status-ok", "status-warn");
+
+      if (checking) {
+        status.textContent = "正在通过当前 CORS 代理检测小红书网页搜索入口…";
+        return;
+      }
+
+      const health = readXiaohongshuSearchTemplateHealth();
+      if (!health?.checkedAt) {
+        status.textContent = "尚未检测。没有缓存时，小红书会使用默认 type=51 网页模板，并保留 Bing site 搜索兜底。";
+        return;
+      }
+
+      const checkedAtText = formatTime(health.checkedAt);
+      if (health.ok) {
+        const templateLabel = health.template.includes("type=51") ? "type=51 主模板" : "备用网页模板";
+        status.textContent = `最近检测：${checkedAtText}；${templateLabel}可用。`;
+        status.classList.add("status-ok");
+        return;
+      }
+
+      status.textContent = `最近检测：${checkedAtText}；小红书网页搜索入口可能已变化，将保留 Bing site 搜索兜底${health.error ? `。${health.error}` : "。"}`;
+      status.classList.add("status-warn");
+    }
+
+    function looksLikeUsableXiaohongshuSearchResponse(content) {
+      const value = String(content || "").trim();
+      if (!value) return false;
+      const sample = value.slice(0, 6000);
+      return !/(?:404\s*not\s*found|page\s*not\s*found|页面不存在|链接已失效)/i.test(sample);
+    }
+
+    async function checkXiaohongshuSearchTemplates({ force = false } = {}) {
+      const cached = readXiaohongshuSearchTemplateHealth();
+      if (!force && cached && isFreshXiaohongshuSearchTemplateHealth(cached)) {
+        renderXiaohongshuSearchTemplateHealth();
+        return cached;
+      }
+
+      if (xhsSearchTemplateHealthPromise) return xhsSearchTemplateHealthPromise;
+
+      xhsSearchTemplateHealthPromise = (async () => {
+        if (elements.checkXhsSearchTemplateBtn) elements.checkXhsSearchTemplateBtn.disabled = true;
+        renderXiaohongshuSearchTemplateHealth({ checking: true });
+
+        const errors = [];
+        for (const template of XHS_SEARCH_TEMPLATE_CANDIDATES) {
+          const targetUrl = fillUrlTemplate(template, XHS_SEARCH_TEMPLATE_CHECK_QUERY, "xiaohongshu.com");
+          try {
+            const content = await fetchViaProxy(targetUrl, {
+              timeoutMs: 8000,
+              maxRetries: 0,
+              maxProxyCandidates: 2,
+              dedupe: false,
+              accept: "text/html,application/xhtml+xml,text/plain,*/*"
+            });
+            if (!looksLikeUsableXiaohongshuSearchResponse(content)) {
+              throw new Error("入口返回内容不可用");
+            }
+
+            const result = {
+              template,
+              checkedAt: new Date().toISOString(),
+              ok: true,
+              error: ""
+            };
+            writeXiaohongshuSearchTemplateHealth(result);
+            renderXiaohongshuSearchTemplateHealth();
+            return result;
+          } catch (error) {
+            errors.push(error?.message || String(error));
+          }
+        }
+
+        const result = {
+          template: XHS_SEARCH_TEMPLATE_CANDIDATES[0],
+          checkedAt: new Date().toISOString(),
+          ok: false,
+          error: errors.filter(Boolean).join("；").slice(0, 240) || "检测请求失败"
+        };
+        writeXiaohongshuSearchTemplateHealth(result);
+        renderXiaohongshuSearchTemplateHealth();
+        return result;
+      })();
+
+      try {
+        return await xhsSearchTemplateHealthPromise;
+      } finally {
+        xhsSearchTemplateHealthPromise = null;
+        if (elements.checkXhsSearchTemplateBtn) elements.checkXhsSearchTemplateBtn.disabled = false;
+      }
+    }
+
+    function isHttpSearchUrl(value) {
+      try {
+        const parsed = new URL(String(value || "").trim(), window.location.href);
+        return parsed.protocol === "http:" || parsed.protocol === "https:";
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function isSafeWebSearchTemplate(template, domain = "") {
+      const value = String(template || "").trim();
+      if (!value) return false;
+      return isHttpSearchUrl(fillUrlTemplate(value, XHS_SEARCH_TEMPLATE_CHECK_QUERY, domain));
+    }
+
+    function isXiaohongshuPlatform(platform = {}) {
+      return platform.id === "xiaohongshu"
+        || normalizePlatformName(platform.name) === "小红书"
+        || /(^|\.)xiaohongshu\.com$/i.test(cleanDomain(platform.domain || ""));
+    }
+
+    function getBestSearchUrlTemplate(platform = {}) {
+      if (isXiaohongshuPlatform(platform)) {
+        return getCachedHealthyXiaohongshuSearchTemplate() || XHS_SEARCH_TEMPLATE_CANDIDATES[0];
+      }
+
+      const preferredTemplates = isMobileViewport()
+        ? [platform.mobileUrlTemplate, platform.urlTemplate]
+        : [platform.urlTemplate, platform.mobileUrlTemplate];
+
+      return preferredTemplates.find((template) => isSafeWebSearchTemplate(template, platform.domain || "")) || "";
     }
 
     function getWebEntrance(platform) {
-      const urlTemplate = platform.urlTemplate || platform.mobileUrlTemplate || "https://www.bing.com/search?q={query}";
+      const urlTemplate = getBestSearchUrlTemplate(platform);
+      if (!urlTemplate) return getBingSiteEntrance(platform);
       return {
         label: "网页搜索",
         entranceType: "网页搜索",
-        description: "使用该平台的网页搜索入口。",
+        description: "使用该平台的浏览器网页搜索入口。",
         urlTemplate,
         domain: platform.domain || ""
       };
@@ -10122,9 +10698,29 @@
         return;
       }
 
-      const renderedUrl = entrance.urlTemplate
-        ? fillUrlTemplate(entrance.urlTemplate, keyword, entrance.domain || platform.domain)
+      let activeEntrance = entrance;
+      let renderedUrl = activeEntrance.urlTemplate
+        ? fillUrlTemplate(activeEntrance.urlTemplate, keyword, activeEntrance.domain || platform.domain)
         : "";
+
+      if (!isHttpSearchUrl(renderedUrl)) {
+        activeEntrance = getBingSiteEntrance(platform);
+        renderedUrl = fillUrlTemplate(activeEntrance.urlTemplate, keyword, activeEntrance.domain || platform.domain);
+      }
+
+      let popupBlocked = false;
+      try {
+        const openedWindow = window.open(renderedUrl, "_blank", "noopener,noreferrer");
+        popupBlocked = openedWindow === null;
+      } catch (error) {
+        console.warn("打开搜索页失败：", error);
+        popupBlocked = true;
+      }
+
+      if (popupBlocked) {
+        toast("浏览器阻止了新标签页，请点备用链接打开");
+        setStatusWithFallbackLink("浏览器阻止了新标签页。", renderedUrl);
+      }
 
       const item = {
         id: createId(),
@@ -10132,9 +10728,9 @@
         platform: platform.name,
         platformId: platform.id,
         platformType: platform.type || "",
-        category: entrance.category || platform.category || "",
-        entranceType: entrance.entranceType,
-        entranceLabel: entrance.label,
+        category: activeEntrance.category || platform.category || "",
+        entranceType: activeEntrance.entranceType,
+        entranceLabel: activeEntrance.label,
         time: new Date().toISOString(),
         status: "未处理",
         solved: false,
@@ -10146,7 +10742,7 @@
           title: keyword,
           url: renderedUrl,
           source: platform.name,
-          summary: entrance.entranceType
+          summary: activeEntrance.entranceType
         }),
         hasSnapshot: false,
         lastSnapshotFetchAt: "",
@@ -10155,13 +10751,30 @@
       };
 
       historyItems.unshift(item);
-      await save(STORE_NAMES.history, historyItems);
-      await rebuildSearchIndex();
-      rebuildBacklinkIndex();
+      try {
+        await save(STORE_NAMES.history, historyItems);
+      } catch (error) {
+        console.warn("搜索已打开，但历史保存失败：", error);
+        historyItems = historyItems.filter((entry) => entry.id !== item.id);
+        toast("搜索已打开，但历史保存失败");
+        if (!popupBlocked) {
+          setStatus(`已打开「${platform.name} / ${activeEntrance.entranceType}」，但历史保存失败。`);
+        }
+        return;
+      }
 
-      window.open(renderedUrl, "_blank", "noopener,noreferrer");
-      setStatus(`已记录：通过「${platform.name} / ${entrance.entranceType}」搜索「${keyword}」。已打开入口。`);
-      toast(`已保存记录，并打开 ${entrance.label}。`);
+      try {
+        await rebuildSearchIndex();
+        rebuildBacklinkIndex();
+      } catch (error) {
+        console.warn("搜索历史已保存，但索引刷新失败：", error);
+      }
+
+      if (!popupBlocked) {
+        setStatus(`已记录：通过「${platform.name} / ${activeEntrance.entranceType}」搜索「${keyword}」。已打开入口。`);
+        toast(`已保存记录，并打开 ${activeEntrance.label}。`);
+      }
+
       if (isAutoSearchSnapshotEnabled()) {
         queueAutomaticSearchSnapshot(item);
       } else {
@@ -13142,16 +13755,20 @@ function fillUrlTemplate(template, query, domain = "") {
         return;
       }
 
-      platforms.push({
-        id: createId(),
-        name,
-        goodFor: "自定义信息源",
-        recommendation: recommendation || "先用精准关键词，再用复制兜底",
-        domain,
-        urlTemplate,
-        mobileUrlTemplate,
-        appUrlTemplate
-      });
+      platforms = applyPlatformSortOrders([
+        ...platforms,
+        {
+          id: createId(),
+          sortOrder: platforms.length,
+          name,
+          goodFor: "自定义信息源",
+          recommendation: recommendation || "先用精准关键词，再用复制兜底",
+          domain,
+          urlTemplate,
+          mobileUrlTemplate,
+          appUrlTemplate
+        }
+      ]);
 
       await save(STORE_NAMES.platforms, platforms);
       renderAll();
@@ -13667,6 +14284,17 @@ function fillUrlTemplate(template, query, domain = "") {
 
     function setStatus(message) {
       elements.statusMsg.textContent = message;
+    }
+
+    function setStatusWithFallbackLink(message, url, label = "点备用链接打开") {
+      if (!elements.statusMsg) return;
+      elements.statusMsg.replaceChildren(document.createTextNode(`${message} `));
+      const link = document.createElement("a");
+      link.href = url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = label;
+      elements.statusMsg.appendChild(link);
     }
 
     function toast(message) {
