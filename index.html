@@ -3449,7 +3449,12 @@
 
             <div class="settings-subpanel" aria-label="小红书网页搜索入口检测">
               <h3>🔎 小红书搜索入口检测</h3>
-              <p class="hint">使用固定中性词通过当前 CORS 代理检查网页搜索入口，不会上传搜索框中的用户关键词，也不会阻塞正常搜索。</p>
+              <p class="hint">使用固定中性词通过当前 CORS 代理检查网页搜索入口，不会发送搜索框中的用户当前关键词，也不会阻塞正常搜索。</p>
+              <label class="label setting-toggle">
+                <input id="autoUpdateXhsSearchTemplateEnabled" type="checkbox" />
+                <span>自动更新小红书搜索模板</span>
+              </label>
+              <p class="hint">开启后仅在检测缓存过期时后台刷新；关闭后不会自动检测，但不会删除上一次成功模板。“立即检测”仍可手动运行。</p>
               <div class="actions settings-actions">
                 <button class="ghost-btn" id="checkXhsSearchTemplateBtn" type="button">立即检测</button>
               </div>
@@ -3699,8 +3704,8 @@
         goodFor: "消费体验、生活方式、踩坑和清单",
         recommendation: "短词 + 场景词：避坑 / 攻略 / 真实",
         domain: "xiaohongshu.com",
-        urlTemplate: "https://www.xiaohongshu.com/search_result/?keyword={query}&m_source=pinpai&source=web_explore_feed&type=51",
-        mobileUrlTemplate: "https://www.xiaohongshu.com/search_result/?keyword={query}&m_source=pinpai&source=web_explore_feed&type=51",
+        urlTemplate: "https://www.xiaohongshu.com/search_result?keyword={query}",
+        mobileUrlTemplate: "https://www.xiaohongshu.com/search_result?keyword={query}",
         appUrlTemplate: "xhsdiscover://search/result?keyword={query}"
       },
       {
@@ -3928,6 +3933,7 @@
       saveProxyBtn: $("#saveProxyBtn"),
       resetProxyBtn: $("#resetProxyBtn"),
       proxyStatus: $("#proxyStatus"),
+      autoUpdateXhsSearchTemplateEnabled: $("#autoUpdateXhsSearchTemplateEnabled"),
       checkXhsSearchTemplateBtn: $("#checkXhsSearchTemplateBtn"),
       xhsSearchTemplateStatus: $("#xhsSearchTemplateStatus"),
       toast: $("#toast"),
@@ -4135,6 +4141,7 @@
     const PROXY_FETCH_MAX_CANDIDATES = 2;
     const PROXY_STORAGE_KEY = "infoDock.proxyUrl";
     const SEARCH_AUTOMATION_SETTINGS_KEY = "infoDock.searchAutomationSettings.v1";
+    const XHS_SEARCH_TEMPLATE_AUTO_UPDATE_KEY = "infoDock.xhsSearchTemplateAutoUpdate.v1";
     const DEFAULT_SEARCH_AUTOMATION_SETTINGS = {
       autoSearchSnapshot: false,
       searchSnapshotMaxLength: 2000,
@@ -4150,17 +4157,33 @@
     const FALLBACK_CORS_PROXIES = ["https://corsproxy.io/?url="];
     const PROXY_TEST_URL = "https://www.bing.com";
     const XHS_SEARCH_TEMPLATE_CANDIDATES = [
-      "https://www.xiaohongshu.com/search_result/?keyword={query}&m_source=pinpai&source=web_explore_feed&type=51",
+      "https://www.xiaohongshu.com/search_result?keyword={query}",
       "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_explore_feed&type=51",
       "https://www.xiaohongshu.com/search_result/?keyword={query}&type=51"
     ];
-    const XHS_SEARCH_TEMPLATE_HEALTH_KEY = "xhsSearchTemplateHealth.v3.generalSearch";
+    const XHS_SEARCH_TEMPLATE_HEALTH_KEY = "xhsSearchTemplateHealth.v4.resilientSearch";
     const XHS_SEARCH_TEMPLATE_HEALTH_TTL_MS = 24 * 60 * 60 * 1000;
+    const XHS_SEARCH_TEMPLATE_FAILURE_RETRY_MS = 3 * 60 * 60 * 1000;
     const XHS_SEARCH_TEMPLATE_CHECK_QUERY = "美食";
+    const XHS_SEARCH_TEMPLATE_HEALTH_STATUSES = new Set(["unchecked", "healthy", "degraded", "failed"]);
+    const MANAGED_XHS_SEARCH_TEMPLATES = [
+      ...XHS_SEARCH_TEMPLATE_CANDIDATES,
+      "https://www.xiaohongshu.com/search_result?keyword={query}&type=51",
+      "https://www.xiaohongshu.com/search_result/?keyword={query}&type=51",
+      "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_explore_feed&type=51",
+      "https://www.xiaohongshu.com/search_result/?keyword={query}&m_source=pinpai&source=web_explore_feed&type=51",
+      "https://www.xiaohongshu.com/search_result?keyword={query}&m_source=pinpai&source=web_explore_feed&type=51",
+      "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_note_detail_r10&type=54",
+      "https://www.xiaohongshu.com/search_result?keyword={query}&source=web_note_detail_r10&type=54",
+      "https://www.xiaohongshu.com/search_result/?keyword={query}&type=54",
+      "https://www.xiaohongshu.com/search_result?keyword={query}&type=54"
+    ];
+    const MANAGED_XHS_SEARCH_TEMPLATE_SET = new Set(MANAGED_XHS_SEARCH_TEMPLATES.map(normalizeXhsSearchTemplateForComparison));
     let proxyUrl = DEFAULT_CORS_PROXY;
     let hasCustomProxyUrl = false;
     let xhsSearchTemplateHealth = null;
     let xhsSearchTemplateHealthPromise = null;
+    let xhsSearchTemplateAutoUpdateEnabled = true;
     let searchAutomationSettings = { ...DEFAULT_SEARCH_AUTOMATION_SETTINGS };
     let reviewSettings = { ...DEFAULT_REVIEW_SETTINGS };
     let reviewFilterActive = false;
@@ -4209,6 +4232,7 @@
       await initializeStorage();
       loadProxySettings();
       loadSearchAutomationSettings();
+      loadXhsSearchTemplateAutoUpdateSetting();
       loadReviewSettings();
 
       platforms = normalizePlatforms(await load(STORE_NAMES.platforms, DEFAULT_PLATFORMS));
@@ -4223,7 +4247,7 @@
       bindEvents();
       renderXiaohongshuSearchTemplateHealth();
       window.setTimeout(() => {
-        void checkXiaohongshuSearchTemplates();
+        scheduleXiaohongshuSearchTemplateBackgroundCheck("startup");
       }, 1200);
       await handleSharedData();
       await consumeIncomingLaterItem();
@@ -4536,9 +4560,16 @@
       });
       if (elements.saveProxyBtn) elements.saveProxyBtn.addEventListener("click", saveProxySettings);
       if (elements.resetProxyBtn) elements.resetProxyBtn.addEventListener("click", resetProxySettings);
+      if (elements.autoUpdateXhsSearchTemplateEnabled) {
+        elements.autoUpdateXhsSearchTemplateEnabled.addEventListener("change", saveXhsSearchTemplateAutoUpdateSettingFromForm);
+      }
       if (elements.checkXhsSearchTemplateBtn) elements.checkXhsSearchTemplateBtn.addEventListener("click", () => {
-        void checkXiaohongshuSearchTemplates({ force: true });
+        checkXiaohongshuSearchTemplates({ force: true }).catch((error) => {
+          console.warn("手动检测小红书搜索入口失败：", error);
+          renderXiaohongshuSearchTemplateHealth();
+        });
       });
+      document.addEventListener("visibilitychange", handleXhsSearchTemplateVisibilityChange);
       if (elements.saveSearchAutomationSettingsBtn) elements.saveSearchAutomationSettingsBtn.addEventListener("click", saveSearchAutomationSettingsFromForm);
       if (elements.saveReviewSettingsBtn) elements.saveReviewSettingsBtn.addEventListener("click", saveReviewSettingsFromForm);
       if (elements.exportDataBtn) elements.exportDataBtn.addEventListener("click", () => {
@@ -5450,7 +5481,7 @@
       })();
       if (source.platform === "B站") return `https://search.bilibili.com/all?keyword=${encoded}`;
       if (source.platform === "小红书") {
-        const template = getCachedHealthyXiaohongshuSearchTemplate() || XHS_SEARCH_TEMPLATE_CANDIDATES[0];
+        const template = getBestAutoXiaohongshuSearchTemplate();
         return fillUrlTemplate(template, cleanQuery, "xiaohongshu.com");
       }
       if (source.platform === "知乎") return `https://www.zhihu.com/search?type=content&q=${encoded}`;
@@ -6643,14 +6674,7 @@
       if (!defaultPlatform || defaultPlatform.id !== "xiaohongshu") return "";
 
       const cleanSavedTemplate = String(savedTemplate || "").trim();
-      const legacyXhsTemplates = new Set([
-        "https://www.xiaohongshu.com/search_result?keyword={query}",
-        "https://www.xiaohongshu.com/search_result?keyword={query}&type=51",
-        "https://www.xiaohongshu.com/search_result/?keyword={query}&type=51",
-        "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_note_detail_r10&type=54",
-        "https://www.xiaohongshu.com/search_result/?keyword={query}&type=54"
-      ]);
-      return !cleanSavedTemplate || legacyXhsTemplates.has(cleanSavedTemplate)
+      return !cleanSavedTemplate || isManagedDefaultXhsTemplate(cleanSavedTemplate)
         ? (defaultPlatform[fieldName] || defaultPlatform.urlTemplate || XHS_SEARCH_TEMPLATE_CANDIDATES[0])
         : "";
     }
@@ -10531,15 +10555,77 @@
       }
     }
 
+    function normalizeXhsSearchTemplateForComparison(template) {
+      return String(template || "")
+        .trim()
+        .replace(/^(https?:\/\/)(?:www\.)?xiaohongshu\.com\/search_result\/\?/i, "$1www.xiaohongshu.com/search_result?")
+        .replace(/^(https?:\/\/)(?:www\.)?xiaohongshu\.com\/search_result\?/i, "$1www.xiaohongshu.com/search_result?")
+        .replace(/#.*$/, "")
+        .replace(/\/+$/, "");
+    }
+
+    function isManagedDefaultXhsTemplate(template) {
+      const normalized = normalizeXhsSearchTemplateForComparison(template);
+      return Boolean(normalized && MANAGED_XHS_SEARCH_TEMPLATE_SET.has(normalized));
+    }
+
+    function isAllowedXhsSearchTemplate(template) {
+      const value = String(template || "").trim();
+      if (!value || !value.includes("{query}")) return false;
+      try {
+        const parsed = new URL(fillUrlTemplate(value, XHS_SEARCH_TEMPLATE_CHECK_QUERY, "xiaohongshu.com"));
+        const hostname = parsed.hostname.toLowerCase().replace(/\.+$/, "");
+        const pathname = parsed.pathname.replace(/\/+/g, "/");
+        return (parsed.protocol === "http:" || parsed.protocol === "https:")
+          && (hostname === "xiaohongshu.com" || hostname.endsWith(".xiaohongshu.com"))
+          && (pathname === "/search_result" || pathname === "/search_result/");
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function pickSafeXhsTemplate(value) {
+      const template = String(value || "").trim();
+      return isAllowedXhsSearchTemplate(template) ? template : "";
+    }
+
+    function normalizeXhsIsoString(value) {
+      const text = String(value || "").trim();
+      if (!text) return "";
+      return Number.isFinite(new Date(text).getTime()) ? text : "";
+    }
+
     function normalizeXiaohongshuSearchTemplateHealth(value) {
       if (!value || typeof value !== "object") return null;
-      const template = XHS_SEARCH_TEMPLATE_CANDIDATES.includes(value.template) ? value.template : "";
-      const checkedAt = String(value.checkedAt || "");
+
+      const legacyTemplate = pickSafeXhsTemplate(value.template);
+      const activeTemplate = pickSafeXhsTemplate(value.activeTemplate || legacyTemplate);
+      const lastKnownGoodTemplate = pickSafeXhsTemplate(value.lastKnownGoodTemplate || (value.ok ? legacyTemplate : ""));
+      const lastCheckedAt = normalizeXhsIsoString(value.lastCheckedAt || value.checkedAt);
+      const lastSuccessAt = normalizeXhsIsoString(value.lastSuccessAt || (value.ok ? (value.checkedAt || value.lastCheckedAt) : ""));
+      const lastError = String(value.lastError || value.error || "").trim().slice(0, 240);
+
+      let status = XHS_SEARCH_TEMPLATE_HEALTH_STATUSES.has(value.status) ? value.status : "unchecked";
+      if (value.ok === true && (activeTemplate || lastKnownGoodTemplate)) status = "healthy";
+      if (!lastCheckedAt && status !== "healthy") status = "unchecked";
+      if (status === "healthy" && !(activeTemplate || lastKnownGoodTemplate)) status = "unchecked";
+      if (status === "failed" && lastKnownGoodTemplate) status = "degraded";
+      if (status === "degraded" && !lastKnownGoodTemplate) status = "failed";
+
+      const effectiveLastKnownGood = status === "healthy"
+        ? (lastKnownGoodTemplate || activeTemplate)
+        : lastKnownGoodTemplate;
+      const effectiveActive = status === "healthy"
+        ? (activeTemplate || effectiveLastKnownGood)
+        : (effectiveLastKnownGood || "");
+
       return {
-        template: template || XHS_SEARCH_TEMPLATE_CANDIDATES[0],
-        checkedAt,
-        ok: Boolean(value.ok && template),
-        error: String(value.error || "")
+        activeTemplate: effectiveActive,
+        lastKnownGoodTemplate: effectiveLastKnownGood,
+        lastCheckedAt,
+        lastSuccessAt: status === "healthy" ? (lastSuccessAt || lastCheckedAt) : lastSuccessAt,
+        status,
+        lastError
       };
     }
 
@@ -10565,55 +10651,173 @@
       }
     }
 
-    function isFreshXiaohongshuSearchTemplateHealth(value) {
-      const checkedAt = new Date(value?.checkedAt || 0).getTime();
-      return Boolean(checkedAt && Date.now() - checkedAt < XHS_SEARCH_TEMPLATE_HEALTH_TTL_MS);
+    function isXhsSearchTemplateAutoUpdateEnabled() {
+      return xhsSearchTemplateAutoUpdateEnabled !== false;
     }
 
-    function getCachedHealthyXiaohongshuSearchTemplate() {
+    function loadXhsSearchTemplateAutoUpdateSetting() {
+      try {
+        const raw = localStorage.getItem(XHS_SEARCH_TEMPLATE_AUTO_UPDATE_KEY);
+        xhsSearchTemplateAutoUpdateEnabled = raw == null ? true : raw !== "false";
+      } catch (error) {
+        console.warn("读取小红书搜索模板自动更新设置失败：", error);
+        xhsSearchTemplateAutoUpdateEnabled = true;
+      }
+    }
+
+    function renderXhsSearchTemplateAutoUpdateSetting() {
+      if (elements.autoUpdateXhsSearchTemplateEnabled) {
+        elements.autoUpdateXhsSearchTemplateEnabled.checked = isXhsSearchTemplateAutoUpdateEnabled();
+      }
+    }
+
+    function saveXhsSearchTemplateAutoUpdateSettingFromForm() {
+      try {
+        xhsSearchTemplateAutoUpdateEnabled = elements.autoUpdateXhsSearchTemplateEnabled
+          ? Boolean(elements.autoUpdateXhsSearchTemplateEnabled.checked)
+          : true;
+        localStorage.setItem(XHS_SEARCH_TEMPLATE_AUTO_UPDATE_KEY, xhsSearchTemplateAutoUpdateEnabled ? "true" : "false");
+        renderXiaohongshuSearchTemplateHealth();
+        toast(xhsSearchTemplateAutoUpdateEnabled ? "已开启小红书搜索模板自动更新。" : "已关闭小红书搜索模板自动更新。仍可手动立即检测。");
+      } catch (error) {
+        console.warn("保存小红书搜索模板自动更新设置失败：", error);
+        toast("保存小红书搜索模板自动更新设置失败。 ");
+      }
+    }
+
+    function getXhsSearchTemplateRetryInterval(value) {
+      const health = normalizeXiaohongshuSearchTemplateHealth(value);
+      return health?.status === "failed" || health?.status === "degraded"
+        ? XHS_SEARCH_TEMPLATE_FAILURE_RETRY_MS
+        : XHS_SEARCH_TEMPLATE_HEALTH_TTL_MS;
+    }
+
+    function isFreshXiaohongshuSearchTemplateHealth(value) {
+      const health = normalizeXiaohongshuSearchTemplateHealth(value);
+      const checkedAt = new Date(health?.lastCheckedAt || 0).getTime();
+      return Boolean(checkedAt && Date.now() - checkedAt < getXhsSearchTemplateRetryInterval(health));
+    }
+
+    function getBestAutoXiaohongshuSearchTemplate() {
       const health = readXiaohongshuSearchTemplateHealth();
-      return health?.ok && XHS_SEARCH_TEMPLATE_CANDIDATES.includes(health.template)
-        ? health.template
-        : "";
+      return pickSafeXhsTemplate(health?.lastKnownGoodTemplate) || XHS_SEARCH_TEMPLATE_CANDIDATES[0];
+    }
+
+    function getXhsTemplateLabel(template) {
+      const normalized = normalizeXhsSearchTemplateForComparison(template);
+      const candidateIndex = XHS_SEARCH_TEMPLATE_CANDIDATES.findIndex((item) => normalizeXhsSearchTemplateForComparison(item) === normalized);
+      if (candidateIndex === 0) return "最简通用模板";
+      if (candidateIndex > 0) return `候选模板 ${candidateIndex + 1}`;
+      return "用户自定义模板";
+    }
+
+    function truncateXhsHealthError(error) {
+      const text = String(error || "").replace(/\s+/g, " ").trim();
+      return text.length > 140 ? `${text.slice(0, 140)}…` : text;
     }
 
     function renderXiaohongshuSearchTemplateHealth({ checking = false } = {}) {
       if (!elements.xhsSearchTemplateStatus) return;
+      renderXhsSearchTemplateAutoUpdateSetting();
+
       const status = elements.xhsSearchTemplateStatus;
       status.classList.remove("status-ok", "status-warn");
 
+      const builtInXhsPlatform = platforms.find((platform) => platform.id === "xiaohongshu") || null;
+      const explicitTemplate = builtInXhsPlatform ? getExplicitUserXhsTemplate(builtInXhsPlatform) : "";
+      const autoEnabled = isXhsSearchTemplateAutoUpdateEnabled();
+
       if (checking) {
-        status.textContent = "正在通过当前 CORS 代理检测小红书网页搜索入口…";
+        status.textContent = "正在通过当前 CORS 代理检测小红书网页搜索入口；检测使用固定中性词，不会发送当前搜索关键词…";
         return;
       }
 
       const health = readXiaohongshuSearchTemplateHealth();
-      if (!health?.checkedAt) {
-        status.textContent = "尚未检测。没有缓存时，小红书会使用默认 type=51 通用网页搜索模板，并保留 Bing site 搜索兜底。";
+      const checkedAtText = health?.lastCheckedAt ? formatTime(health.lastCheckedAt) : "";
+      const successAtText = health?.lastSuccessAt ? formatTime(health.lastSuccessAt) : "";
+      const errorText = truncateXhsHealthError(health?.lastError || "");
+      const suffixes = [];
+      if (!autoEnabled) suffixes.push("自动更新已关闭，不会在启动、页面恢复或搜索前后台检测");
+      if (explicitTemplate) suffixes.push(`内置小红书已配置安全的${getXhsTemplateLabel(explicitTemplate)}，自动模板不会覆盖它`);
+      const suffix = suffixes.length ? ` ${suffixes.join("；")}。` : "";
+
+      if (!health?.lastCheckedAt) {
+        status.textContent = `尚未检测。当前会使用未验证的最简通用模板打开网页搜索；Bing site 入口仍可用。${suffix}`;
+        if (!autoEnabled) status.classList.add("status-warn");
         return;
       }
 
-      const checkedAtText = formatTime(health.checkedAt);
-      if (health.ok) {
-        const templateLabel = health.template.includes("type=51") ? "type=51 通用网页搜索模板" : "备用网页模板";
-        status.textContent = `最近检测：${checkedAtText}；${templateLabel}可用。`;
+      if (health.status === "healthy") {
+        status.textContent = `检测成功：${checkedAtText}；当前自动模板为${getXhsTemplateLabel(health.activeTemplate)}，可用。${suffix}`;
         status.classList.add("status-ok");
         return;
       }
 
-      status.textContent = `最近检测：${checkedAtText}；小红书网页搜索入口可能已变化，将保留 Bing site 搜索兜底${health.error ? `。${health.error}` : "。"}`;
+      if (health.status === "degraded") {
+        status.textContent = `本次检测失败：${checkedAtText}；正在继续使用上一次成功模板（${successAtText || "时间未知"}，${getXhsTemplateLabel(health.lastKnownGoodTemplate)}）。${errorText ? `原因：${errorText}。` : ""}${suffix}`;
+        status.classList.add("status-warn");
+        return;
+      }
+
+      status.textContent = `检测失败：${checkedAtText}；没有成功历史，当前使用未验证的最简通用模板，Bing site 入口仍可用。${errorText ? `原因：${errorText}。` : ""}${suffix}`;
       status.classList.add("status-warn");
     }
 
     function looksLikeUsableXiaohongshuSearchResponse(content) {
       const value = String(content || "").trim();
-      if (!value) return false;
-      const sample = value.slice(0, 6000);
-      return !/(?:404\s*not\s*found|page\s*not\s*found|页面不存在|页面不见了|你访问的页面不见了|返回上一页|链接已失效)/i.test(sample);
+      if (!value) return { usable: false, reason: "空响应" };
+      if (value.length < 180) return { usable: false, reason: "响应过短" };
+
+      const sample = value.slice(0, 30000);
+      const normalized = sample.replace(/\s+/g, " ");
+      const rejectChecks = [
+        { pattern: /(?:404\s*not\s*found|page\s*not\s*found|not\s*found|页面不存在|页面不见了|你访问的页面不见了|返回上一页|链接已失效)/i, reason: "页面不存在或链接失效" },
+        { pattern: /(?:access\s*denied|forbidden|request\s*blocked|拒绝访问|访问被拒绝|权限不足)/i, reason: "访问被拒绝" },
+        { pattern: /(?:访问频繁|操作频繁|请求过于频繁|too\s*many\s*requests|rate\s*limit|429)/i, reason: "访问频繁" },
+        { pattern: /(?:安全验证|验证你是真人|人机验证|请完成验证|captcha|recaptcha|hcaptcha|验证码|滑块验证)/i, reason: "需要安全验证" },
+        { pattern: /(?:proxy\s*error|cors\s*error|bad\s*gateway|gateway\s*time-?out|service\s*unavailable|upstream\s*error|allorigins\s*error|corsproxy)/i, reason: "代理返回错误页" }
+      ];
+      for (const check of rejectChecks) {
+        if (check.pattern.test(normalized)) return { usable: false, reason: check.reason };
+      }
+
+      const positivePatterns = [
+        /小红书|xiaohongshu|rednote/i,
+        /xhs-pc-web|xhs-web|sns-web|edith\.xiaohongshu|ci\.xiaohongshu|fe\.xiaohongshu|xhscdn|sns-img/i,
+        /search_result|web_explore_feed|search_result\?|keyword=|searchFeeds|searchPage/i,
+        /__INITIAL_STATE__|__INITIAL_SSR_STATE__|initialState|hydration|window\.__/i
+      ];
+      let positiveScore = positivePatterns.reduce((score, pattern) => score + (pattern.test(sample) ? 1 : 0), 0);
+
+      try {
+        const doc = parseHTML(value);
+        const title = doc?.querySelector?.("title")?.textContent || "";
+        const metas = Array.from(doc?.querySelectorAll?.("meta[name],meta[property]") || [])
+          .map((node) => `${node.getAttribute("name") || ""} ${node.getAttribute("property") || ""} ${node.getAttribute("content") || ""}`)
+          .join(" ");
+        const scriptAndLinkHosts = Array.from(doc?.querySelectorAll?.("script[src],link[href]") || [])
+          .map((node) => node.getAttribute("src") || node.getAttribute("href") || "")
+          .join(" ");
+        const appRoots = doc?.querySelector?.("#app, #root, [id*=app], [class*=xhs], [class*=search]") ? " app-root" : "";
+        const docEvidence = `${title} ${metas} ${scriptAndLinkHosts} ${appRoots}`;
+        if (/小红书|xiaohongshu|rednote/i.test(docEvidence)) positiveScore += 1;
+        if (/xhs-pc-web|xhs-web|xhscdn|sns-web|fe\.xiaohongshu|ci\.xiaohongshu|edith\.xiaohongshu/i.test(docEvidence)) positiveScore += 1;
+        if (/search_result|搜索|search/i.test(docEvidence)) positiveScore += 1;
+      } catch (error) {
+        console.warn("解析小红书检测响应失败：", error);
+      }
+
+      if (!positiveScore) return { usable: false, reason: "缺少小红书页面特征" };
+      if (!/(xiaohongshu|小红书|rednote|xhs|xhscdn)/i.test(sample)) return { usable: false, reason: "不像小红书页面" };
+      return { usable: true, reason: "ok" };
     }
 
     async function checkXiaohongshuSearchTemplates({ force = false } = {}) {
       const cached = readXiaohongshuSearchTemplateHealth();
+      if (!force && !isXhsSearchTemplateAutoUpdateEnabled()) {
+        renderXiaohongshuSearchTemplateHealth();
+        return cached;
+      }
       if (!force && cached && isFreshXiaohongshuSearchTemplateHealth(cached)) {
         renderXiaohongshuSearchTemplateHealth();
         return cached;
@@ -10627,6 +10831,10 @@
 
         const errors = [];
         for (const template of XHS_SEARCH_TEMPLATE_CANDIDATES) {
+          if (!isAllowedXhsSearchTemplate(template)) {
+            errors.push(`${getXhsTemplateLabel(template)}：模板不安全`);
+            continue;
+          }
           const targetUrl = fillUrlTemplate(template, XHS_SEARCH_TEMPLATE_CHECK_QUERY, "xiaohongshu.com");
           try {
             const content = await fetchViaProxy(targetUrl, {
@@ -10636,29 +10844,38 @@
               dedupe: false,
               accept: "text/html,application/xhtml+xml,text/plain,*/*"
             });
-            if (!looksLikeUsableXiaohongshuSearchResponse(content)) {
-              throw new Error("入口返回内容不可用");
+            const verdict = looksLikeUsableXiaohongshuSearchResponse(content);
+            if (!verdict.usable) {
+              throw new Error(verdict.reason || "入口返回内容不可用");
             }
 
+            const now = new Date().toISOString();
             const result = {
-              template,
-              checkedAt: new Date().toISOString(),
-              ok: true,
-              error: ""
+              activeTemplate: template,
+              lastKnownGoodTemplate: template,
+              lastCheckedAt: now,
+              lastSuccessAt: now,
+              status: "healthy",
+              lastError: ""
             };
             writeXiaohongshuSearchTemplateHealth(result);
             renderXiaohongshuSearchTemplateHealth();
             return result;
           } catch (error) {
-            errors.push(error?.message || String(error));
+            errors.push(`${getXhsTemplateLabel(template)}：${error?.message || String(error)}`);
           }
         }
 
+        const previous = normalizeXiaohongshuSearchTemplateHealth(cached || xhsSearchTemplateHealth);
+        const lastKnownGoodTemplate = pickSafeXhsTemplate(previous?.lastKnownGoodTemplate);
+        const now = new Date().toISOString();
         const result = {
-          template: XHS_SEARCH_TEMPLATE_CANDIDATES[0],
-          checkedAt: new Date().toISOString(),
-          ok: false,
-          error: errors.filter(Boolean).join("；").slice(0, 240) || "检测请求失败"
+          activeTemplate: lastKnownGoodTemplate || "",
+          lastKnownGoodTemplate,
+          lastCheckedAt: now,
+          lastSuccessAt: previous?.lastSuccessAt || "",
+          status: lastKnownGoodTemplate ? "degraded" : "failed",
+          lastError: errors.filter(Boolean).join("；").slice(0, 240) || "检测请求失败"
         };
         writeXiaohongshuSearchTemplateHealth(result);
         renderXiaohongshuSearchTemplateHealth();
@@ -10667,10 +10884,31 @@
 
       try {
         return await xhsSearchTemplateHealthPromise;
+      } catch (error) {
+        console.warn("检测小红书搜索入口失败：", error);
+        renderXiaohongshuSearchTemplateHealth();
+        throw error;
       } finally {
         xhsSearchTemplateHealthPromise = null;
         if (elements.checkXhsSearchTemplateBtn) elements.checkXhsSearchTemplateBtn.disabled = false;
       }
+    }
+
+    function scheduleXiaohongshuSearchTemplateBackgroundCheck(reason = "background") {
+      if (!isXhsSearchTemplateAutoUpdateEnabled()) {
+        renderXiaohongshuSearchTemplateHealth();
+        return;
+      }
+      const cached = readXiaohongshuSearchTemplateHealth();
+      if (cached && isFreshXiaohongshuSearchTemplateHealth(cached)) return;
+      checkXiaohongshuSearchTemplates({ force: false, reason }).catch((error) => {
+        console.warn("后台检测小红书搜索入口失败：", error);
+      });
+    }
+
+    function handleXhsSearchTemplateVisibilityChange() {
+      if (document.visibilityState !== "visible") return;
+      scheduleXiaohongshuSearchTemplateBackgroundCheck("visibilitychange");
     }
 
     function isHttpSearchUrl(value) {
@@ -10688,15 +10926,30 @@
       return isHttpSearchUrl(fillUrlTemplate(value, XHS_SEARCH_TEMPLATE_CHECK_QUERY, domain));
     }
 
+    function isBuiltInXiaohongshuPlatform(platform = {}) {
+      return platform.id === "xiaohongshu";
+    }
+
     function isXiaohongshuPlatform(platform = {}) {
-      return platform.id === "xiaohongshu"
+      return isBuiltInXiaohongshuPlatform(platform)
         || normalizePlatformName(platform.name) === "小红书"
         || /(^|\.)xiaohongshu\.com$/i.test(cleanDomain(platform.domain || ""));
     }
 
+    function getExplicitUserXhsTemplate(platform = {}) {
+      if (!isBuiltInXiaohongshuPlatform(platform)) return "";
+      const preferredTemplates = isMobileViewport()
+        ? [platform.mobileUrlTemplate, platform.urlTemplate]
+        : [platform.urlTemplate, platform.mobileUrlTemplate];
+      return preferredTemplates.find((template) => {
+        const value = String(template || "").trim();
+        return value && !isManagedDefaultXhsTemplate(value) && isAllowedXhsSearchTemplate(value);
+      }) || "";
+    }
+
     function getBestSearchUrlTemplate(platform = {}) {
-      if (isXiaohongshuPlatform(platform)) {
-        return getCachedHealthyXiaohongshuSearchTemplate() || XHS_SEARCH_TEMPLATE_CANDIDATES[0];
+      if (isBuiltInXiaohongshuPlatform(platform)) {
+        return getExplicitUserXhsTemplate(platform) || getBestAutoXiaohongshuSearchTemplate();
       }
 
       const preferredTemplates = isMobileViewport()
@@ -10810,6 +11063,10 @@
       } catch (error) {
         console.warn("打开搜索页失败：", error);
         popupBlocked = true;
+      }
+
+      if (isBuiltInXiaohongshuPlatform(platform) && activeEntrance.entranceType === "网页搜索" && !getExplicitUserXhsTemplate(platform)) {
+        scheduleXiaohongshuSearchTemplateBackgroundCheck("search-click");
       }
 
       if (popupBlocked) {
