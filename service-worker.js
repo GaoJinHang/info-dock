@@ -1,4 +1,4 @@
-const CACHE_NAME = "info-dock-app-v061606-p2-same-source-backup";
+const CACHE_NAME = "info-dock-app-v062201-xhs-double-encode-mobile-saved";
 const APP_PAGE = "./info-dock-051904.html";
 const SHARE_TARGET_PAGE = "./share-target/index.html";
 const SHARE_TARGET_DIR = "./share-target/";

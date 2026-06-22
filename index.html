@@ -3053,16 +3053,24 @@
 
     @media (max-width: 480px) {
       .search-row {
-        grid-template-columns: minmax(0, 1fr) 42px 42px;
+        grid-template-columns: minmax(0, 1fr) minmax(58px, max-content) 42px;
         gap: 4px;
       }
 
-      .copy-search-btn,
-      .saved-search-btn {
+      .copy-search-btn {
         width: 42px;
         min-width: 42px;
         max-width: 42px;
         padding: 0;
+        border-radius: 14px;
+        overflow: hidden;
+      }
+
+      .saved-search-btn {
+        width: auto;
+        min-width: 58px;
+        max-width: none;
+        padding: 0 7px;
         border-radius: 14px;
         overflow: hidden;
       }
@@ -3078,12 +3086,19 @@
       .saved-search-label-icon,
       .quick-note-label-icon {
         display: inline;
-        font-size: 18px;
         line-height: 1;
       }
 
+      .saved-search-label-icon {
+        font-size: 15px;
+      }
+
+      .quick-note-label-icon {
+        font-size: 18px;
+      }
+
       .search-input {
-        padding-inline: 11px;
+        padding-inline: 10px;
       }
 
       .inbox-external-tools-entry {
@@ -10508,13 +10523,13 @@
 
       const health = readXiaohongshuSearchTemplateHealth();
       if (!health?.checkedAt) {
-        status.textContent = "尚未检测。没有缓存时，小红书会使用默认 type=51 网页模板，并保留 Bing site 搜索兜底。";
+        status.textContent = "尚未检测。没有缓存时，小红书会使用默认 type=54 双重编码网页模板，并保留 Bing site 搜索兜底。";
         return;
       }
 
       const checkedAtText = formatTime(health.checkedAt);
       if (health.ok) {
-        const templateLabel = health.template.includes("type=51") ? "type=51 主模板" : "备用网页模板";
+        const templateLabel = health.template.includes("type=54") ? "type=54 双重编码网页模板" : "备用网页模板";
         status.textContent = `最近检测：${checkedAtText}；${templateLabel}可用。`;
         status.classList.add("status-ok");
         return;
@@ -10798,10 +10813,32 @@
       renderAll();
     }
 
+function isXiaohongshuWebSearchTemplate(template) {
+      const value = String(template || "").trim();
+      if (!value) return false;
+      try {
+        const parsed = new URL(
+          value.replaceAll("{query}", "").replaceAll("{domain}", "xiaohongshu.com"),
+          window.location.href
+        );
+        const hostname = parsed.hostname.toLowerCase().replace(/^www\./, "");
+        return parsed.protocol.startsWith("http")
+          && /(^|\.)xiaohongshu\.com$/i.test(hostname)
+          && /^\/search_result\/?$/i.test(parsed.pathname);
+      } catch (error) {
+        return /^https?:\/\/(?:www\.)?xiaohongshu\.com\/search_result\/?/i.test(value);
+      }
+    }
+
+    function encodeSearchQueryForTemplate(template, query) {
+      const encoded = encodeURIComponent(query);
+      return isXiaohongshuWebSearchTemplate(template) ? encodeURIComponent(encoded) : encoded;
+    }
+
 function fillUrlTemplate(template, query, domain = "") {
       return String(template)
         .replaceAll("{domain}", domain)
-        .replaceAll("{query}", encodeURIComponent(query));
+        .replaceAll("{query}", encodeSearchQueryForTemplate(template, query));
     }
     function renderEmptyState({ icon = "🔎", title = "", description = "", action = "focus-search", button = "开始", secondaryAction = "", secondaryButton = "" } = {}) {
       const secondaryButtonHtml = secondaryAction && secondaryButton
