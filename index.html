@@ -3133,10 +3133,10 @@
       <section class="card search-card" aria-label="统一搜索入口">
         <div class="search-main">
           <div class="search-row">
-            <input id="searchInput" class="search-input" type="search" placeholder="搜索或保存AI回答、链接、笔记" autocomplete="off" enterkeyhint="search" />
+            <input id="searchInput" class="search-input" type="search" placeholder="搜索或保存AI、链接、笔记" autocomplete="off" enterkeyhint="search" />
             <button class="ghost-btn saved-search-btn" id="savedSearchBtn" type="button" aria-label="搜索已保存内容">
               <span class="saved-search-label-full">📂 已存内容</span>
-              <span class="saved-search-label-short" aria-hidden="true">📂 已存</span>
+              <span class="saved-search-label-short" aria-hidden="true">📂</span>
               <span class="saved-search-label-icon" aria-hidden="true">📂</span>
               <span class="saved-search-state" aria-hidden="true"></span>
             </button>
@@ -3684,8 +3684,8 @@
         goodFor: "消费体验、生活方式、踩坑和清单",
         recommendation: "短词 + 场景词：避坑 / 攻略 / 真实",
         domain: "xiaohongshu.com",
-        urlTemplate: "https://www.xiaohongshu.com/search_result?keyword={query}&type=51",
-        mobileUrlTemplate: "https://www.xiaohongshu.com/search_result?keyword={query}&type=51",
+        urlTemplate: "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_note_detail_r10&type=54",
+        mobileUrlTemplate: "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_note_detail_r10&type=54",
         appUrlTemplate: "xhsdiscover://search/result?keyword={query}"
       },
       {
@@ -3766,8 +3766,8 @@
     const LOCAL_SEARCH_MAX_RESULTS = 10;
     const SAVED_SEARCH_PRECHECK_DELAY_MS = 600;
     const SAVED_SEARCH_RECENT_LIMIT = 8;
-    const SEARCH_PLACEHOLDER_DESKTOP = "搜索或保存AI回答、链接、笔记";
-    const SEARCH_PLACEHOLDER_MOBILE = "搜索或保存AI、链接";
+    const SEARCH_PLACEHOLDER_DESKTOP = "搜索或保存AI、链接、笔记";
+    const SEARCH_PLACEHOLDER_MOBILE = "搜索或保存AI、链接、笔记";
 
     const STORAGE_KEYS = {
       platforms: "infoDock.platforms.v1",
@@ -4127,8 +4127,9 @@
     const FALLBACK_CORS_PROXIES = ["https://corsproxy.io/?url="];
     const PROXY_TEST_URL = "https://www.bing.com";
     const XHS_SEARCH_TEMPLATE_CANDIDATES = [
-      "https://www.xiaohongshu.com/search_result?keyword={query}&type=51",
-      "https://www.xiaohongshu.com/search_result?keyword={query}"
+      "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_note_detail_r10&type=54",
+      "https://www.xiaohongshu.com/search_result/?keyword={query}&type=54",
+      "https://www.xiaohongshu.com/search_result/?keyword={query}"
     ];
     const XHS_SEARCH_TEMPLATE_HEALTH_KEY = "xhsSearchTemplateHealth";
     const XHS_SEARCH_TEMPLATE_HEALTH_TTL_MS = 24 * 60 * 60 * 1000;
@@ -6619,8 +6620,12 @@
       if (!defaultPlatform || defaultPlatform.id !== "xiaohongshu") return "";
 
       const cleanSavedTemplate = String(savedTemplate || "").trim();
-      const legacyXhsTemplate = "https://www.xiaohongshu.com/search_result?keyword={query}";
-      return !cleanSavedTemplate || cleanSavedTemplate === legacyXhsTemplate
+      const legacyXhsTemplates = new Set([
+        "https://www.xiaohongshu.com/search_result?keyword={query}",
+        "https://www.xiaohongshu.com/search_result?keyword={query}&type=51",
+        "https://www.xiaohongshu.com/search_result/?keyword={query}&type=51"
+      ]);
+      return !cleanSavedTemplate || legacyXhsTemplates.has(cleanSavedTemplate)
         ? (defaultPlatform[fieldName] || defaultPlatform.urlTemplate || XHS_SEARCH_TEMPLATE_CANDIDATES[0])
         : "";
     }
@@ -7418,7 +7423,7 @@
     }
 
     function countSavedContentMatches(query) {
-      return searchSavedContent(query, LOCAL_SEARCH_MAX_RESULTS).length;
+      return searchSavedContent(query, Number.MAX_SAFE_INTEGER).length;
     }
 
     function isLocalSearchDropdownVisible() {
@@ -7458,19 +7463,30 @@
       elements.searchInput.placeholder = isMobile ? SEARCH_PLACEHOLDER_MOBILE : SEARCH_PLACEHOLDER_DESKTOP;
     }
 
+    function formatSavedSearchButtonLabel(count, variant = "desktop") {
+      const safeCount = Math.max(0, Number.isFinite(Number(count)) ? Math.floor(Number(count)) : 0);
+      if (variant === "mobile") return safeCount >= 10 ? String(safeCount) : `📂•${safeCount}`;
+      return safeCount >= 100 ? String(safeCount) : `📂 已存内容•${safeCount}`;
+    }
+
     function updateSavedSearchButtonState(state = "idle", count = 0) {
       if (!elements.savedSearchBtn) return;
       const fullLabel = elements.savedSearchBtn.querySelector(".saved-search-label-full");
       const shortLabel = elements.savedSearchBtn.querySelector(".saved-search-label-short");
+      const iconLabel = elements.savedSearchBtn.querySelector(".saved-search-label-icon");
       const stateLabel = elements.savedSearchBtn.querySelector(".saved-search-state");
+      const showCount = state === "match" || state === "none";
+      const safeCount = Math.max(0, Number.isFinite(Number(count)) ? Math.floor(Number(count)) : 0);
+      const accessibleLabel = showCount ? `已保存内容：${safeCount} 条匹配` : "搜索已保存内容";
       elements.savedSearchBtn.classList.remove("has-saved-match", "no-saved-match");
-      if (fullLabel) fullLabel.textContent = "📂 已存内容";
-      if (shortLabel) shortLabel.textContent = "📂 已存";
+      elements.savedSearchBtn.setAttribute("aria-label", accessibleLabel);
+      elements.savedSearchBtn.title = accessibleLabel;
+      if (fullLabel) fullLabel.textContent = showCount ? formatSavedSearchButtonLabel(safeCount, "desktop") : "📂 已存内容";
+      if (shortLabel) shortLabel.textContent = showCount ? formatSavedSearchButtonLabel(safeCount, "mobile") : "📂";
+      if (iconLabel) iconLabel.textContent = showCount ? formatSavedSearchButtonLabel(safeCount, "mobile") : "📂";
       if (stateLabel) stateLabel.textContent = "";
 
       if (state === "match") {
-        if (stateLabel) stateLabel.textContent = " · 有匹配";
-        if (shortLabel) shortLabel.textContent = `📂已存${Math.min(count, 99)}`;
         elements.savedSearchBtn.classList.add("has-saved-match");
         if (currentSavedSearchMatchState !== "match") {
           elements.savedSearchBtn.classList.remove("saved-search-pulse");
@@ -7481,8 +7497,6 @@
       }
 
       if (state === "none") {
-        if (stateLabel) stateLabel.textContent = " · 未匹配";
-        if (shortLabel) shortLabel.textContent = "📂已存0";
         elements.savedSearchBtn.classList.add("no-saved-match");
       }
 
@@ -7609,7 +7623,7 @@
       }
 
       hideSavedSearchHint();
-      updateSavedSearchButtonState("match", results.length);
+      updateSavedSearchButtonState("match", countSavedContentMatches(query));
       const groups = new Map();
       results.forEach((result) => {
         const key = result.localType.key;
@@ -10514,7 +10528,7 @@
       const value = String(content || "").trim();
       if (!value) return false;
       const sample = value.slice(0, 6000);
-      return !/(?:404\s*not\s*found|page\s*not\s*found|页面不存在|链接已失效)/i.test(sample);
+      return !/(?:404\s*not\s*found|page\s*not\s*found|页面不存在|页面不见了|你访问的页面不见了|返回上一页|链接已失效)/i.test(sample);
     }
 
     async function checkXiaohongshuSearchTemplates({ force = false } = {}) {
