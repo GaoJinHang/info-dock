@@ -3699,8 +3699,8 @@
         goodFor: "消费体验、生活方式、踩坑和清单",
         recommendation: "短词 + 场景词：避坑 / 攻略 / 真实",
         domain: "xiaohongshu.com",
-        urlTemplate: "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_note_detail_r10&type=54",
-        mobileUrlTemplate: "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_note_detail_r10&type=54",
+        urlTemplate: "https://www.xiaohongshu.com/search_result/?keyword={query}&m_source=pinpai&source=web_explore_feed&type=51",
+        mobileUrlTemplate: "https://www.xiaohongshu.com/search_result/?keyword={query}&m_source=pinpai&source=web_explore_feed&type=51",
         appUrlTemplate: "xhsdiscover://search/result?keyword={query}"
       },
       {
@@ -3783,6 +3783,14 @@
     const SAVED_SEARCH_RECENT_LIMIT = 8;
     const SEARCH_PLACEHOLDER_DESKTOP = "搜索或保存AI、链接、笔记";
     const SEARCH_PLACEHOLDER_MOBILE = "搜索或保存AI、链接、笔记";
+    const LOCAL_SEARCH_WEAK_QUERY_PHRASES = [
+      "有没有必要", "有必要吗", "有没有", "要不要", "该不该", "值不值得", "值得买吗", "值得买",
+      "为什么", "怎么办", "怎么做", "怎么选", "怎么用", "怎么", "如何",
+      "对比", "比较", "区别", "差别", "优缺点",
+      "推荐", "测评", "评测", "攻略",
+      "什么时候", "什么时间", "哪里", "哪个", "哪种", "哪些", "什么",
+      "是否", "能不能", "可不可以", "可以吗", "有没有用", "有用吗", "必要", "需要吗"
+    ];
 
     const STORAGE_KEYS = {
       platforms: "infoDock.platforms.v1",
@@ -4142,11 +4150,11 @@
     const FALLBACK_CORS_PROXIES = ["https://corsproxy.io/?url="];
     const PROXY_TEST_URL = "https://www.bing.com";
     const XHS_SEARCH_TEMPLATE_CANDIDATES = [
-      "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_note_detail_r10&type=54",
-      "https://www.xiaohongshu.com/search_result/?keyword={query}&type=54",
-      "https://www.xiaohongshu.com/search_result/?keyword={query}"
+      "https://www.xiaohongshu.com/search_result/?keyword={query}&m_source=pinpai&source=web_explore_feed&type=51",
+      "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_explore_feed&type=51",
+      "https://www.xiaohongshu.com/search_result/?keyword={query}&type=51"
     ];
-    const XHS_SEARCH_TEMPLATE_HEALTH_KEY = "xhsSearchTemplateHealth";
+    const XHS_SEARCH_TEMPLATE_HEALTH_KEY = "xhsSearchTemplateHealth.v3.generalSearch";
     const XHS_SEARCH_TEMPLATE_HEALTH_TTL_MS = 24 * 60 * 60 * 1000;
     const XHS_SEARCH_TEMPLATE_CHECK_QUERY = "美食";
     let proxyUrl = DEFAULT_CORS_PROXY;
@@ -6638,7 +6646,9 @@
       const legacyXhsTemplates = new Set([
         "https://www.xiaohongshu.com/search_result?keyword={query}",
         "https://www.xiaohongshu.com/search_result?keyword={query}&type=51",
-        "https://www.xiaohongshu.com/search_result/?keyword={query}&type=51"
+        "https://www.xiaohongshu.com/search_result/?keyword={query}&type=51",
+        "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_note_detail_r10&type=54",
+        "https://www.xiaohongshu.com/search_result/?keyword={query}&type=54"
       ]);
       return !cleanSavedTemplate || legacyXhsTemplates.has(cleanSavedTemplate)
         ? (defaultPlatform[fieldName] || defaultPlatform.urlTemplate || XHS_SEARCH_TEMPLATE_CANDIDATES[0])
@@ -7340,6 +7350,53 @@
       };
     }
 
+    function escapeRegExp(value) {
+      return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function isSingleChineseToken(value) {
+      return /^[㐀-鿿]$/u.test(String(value || ""));
+    }
+
+    function getFocusedLocalSearchQuery(query) {
+      const cleanQuery = String(query || "").trim();
+      if (!cleanQuery) return "";
+      let focused = cleanQuery.toLowerCase();
+
+      LOCAL_SEARCH_WEAK_QUERY_PHRASES
+        .slice()
+        .sort((a, b) => b.length - a.length)
+        .forEach((phrase) => {
+          focused = focused.replace(new RegExp(escapeRegExp(phrase.toLowerCase()), "g"), " ");
+        });
+
+      focused = focused
+        .replace(/[\s\u3000,，.。;；:：、!?！？()[\]{}<>《》“”"‘’'`~…—_+=*#@￥$%^&|/\\-]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      const tokens = focused.match(/[\p{L}\p{N}_]+/gu) || [];
+      const meaningfulTokens = tokens.filter((token) => {
+        if (LOCAL_SEARCH_WEAK_QUERY_PHRASES.includes(token)) return false;
+        if (isSingleChineseToken(token)) return false;
+        return token.length <= 80;
+      });
+
+      const result = meaningfulTokens.join(" ").trim();
+      return result.length >= LOCAL_SEARCH_MIN_QUERY_LENGTH ? result : cleanQuery;
+    }
+
+    function getLocalSearchScore(result = {}) {
+      const score = Number(result.score || 0);
+      return Number.isFinite(score) ? score : 0;
+    }
+
+    function getLocalSearchSortScore(result = {}) {
+      const focusedScore = Number(result.focusedScore || 0);
+      return Number.isFinite(focusedScore) && focusedScore > 0 ? focusedScore : getLocalSearchScore(result);
+    }
+
+
     function getLocalSearchResultSource(result, localType) {
       if (result.itemType === "creator") {
         const source = getCreatorSourceById(result.id);
@@ -7360,10 +7417,13 @@
     function searchLocalContent(query, maxResults = LOCAL_SEARCH_MAX_RESULTS) {
       const cleanQuery = String(query || "").trim();
       if (cleanQuery.length < LOCAL_SEARCH_MIN_QUERY_LENGTH) return [];
+      const focusedQuery = getFocusedLocalSearchQuery(cleanQuery);
       const seen = new Set();
-      const ranked = searchEngine.search(cleanQuery)
+      const ranked = searchEngine.search(focusedQuery)
         .map((result) => ({
           ...result,
+          focusedQuery,
+          focusedScore: getLocalSearchScore(result),
           localType: getLocalSearchResultType(result)
         }))
         .filter((result) => {
@@ -7373,7 +7433,8 @@
           return ["history", "inbox", "knowledge", "source", "research"].includes(result.localType.key);
         })
         .sort((a, b) => {
-          if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
+          const scoreDelta = getLocalSearchSortScore(b) - getLocalSearchSortScore(a);
+          if (scoreDelta !== 0) return scoreDelta;
           return a.localType.order - b.localType.order;
         });
 
@@ -7394,14 +7455,17 @@
     function searchSavedContent(query, maxResults = LOCAL_SEARCH_MAX_RESULTS) {
       const cleanQuery = String(query || "").trim();
       if (cleanQuery.length < LOCAL_SEARCH_MIN_QUERY_LENGTH) return [];
+      const focusedQuery = getFocusedLocalSearchQuery(cleanQuery);
       const seen = new Set();
-      const ranked = searchEngine.search(cleanQuery)
+      const ranked = searchEngine.search(focusedQuery)
         .filter((result) => result.itemType === "later")
         .map((result) => {
           const item = laterItems.find((entry) => entry.id === result.id);
           if (!item) return null;
           return {
             ...result,
+            focusedQuery,
+            focusedScore: getLocalSearchScore(result),
             localType: getSavedLocalTypeForItem(item)
           };
         })
@@ -7412,7 +7476,8 @@
           return ["inbox", "knowledge"].includes(result.localType.key);
         })
         .sort((a, b) => {
-          if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
+          const scoreDelta = getLocalSearchSortScore(b) - getLocalSearchSortScore(a);
+          if (scoreDelta !== 0) return scoreDelta;
           return a.localType.order - b.localType.order;
         });
 
@@ -7626,6 +7691,7 @@
         return;
       }
 
+      const focusedQuery = getFocusedLocalSearchQuery(query);
       const results = searchSavedContent(query, LOCAL_SEARCH_MAX_RESULTS);
       currentLocalSearchResults = results;
       panel.classList.remove("hidden");
@@ -7649,7 +7715,7 @@
       panel.innerHTML = Array.from(groups.values()).map((group) => `
         <div class="local-search-section">
           <div class="local-search-section-title">${escapeHtml(group.label)}</div>
-          ${group.items.map((result) => renderLocalSearchResultItem(result, query)).join("")}
+          ${group.items.map((result) => renderLocalSearchResultItem(result, focusedQuery)).join("")}
         </div>
       `).join("") + `
         <div class="local-search-footer">
@@ -10523,13 +10589,13 @@
 
       const health = readXiaohongshuSearchTemplateHealth();
       if (!health?.checkedAt) {
-        status.textContent = "尚未检测。没有缓存时，小红书会使用默认 type=54 双重编码网页模板，并保留 Bing site 搜索兜底。";
+        status.textContent = "尚未检测。没有缓存时，小红书会使用默认 type=51 通用网页搜索模板，并保留 Bing site 搜索兜底。";
         return;
       }
 
       const checkedAtText = formatTime(health.checkedAt);
       if (health.ok) {
-        const templateLabel = health.template.includes("type=54") ? "type=54 双重编码网页模板" : "备用网页模板";
+        const templateLabel = health.template.includes("type=51") ? "type=51 通用网页搜索模板" : "备用网页模板";
         status.textContent = `最近检测：${checkedAtText}；${templateLabel}可用。`;
         status.classList.add("status-ok");
         return;
@@ -10813,26 +10879,8 @@
       renderAll();
     }
 
-function isXiaohongshuWebSearchTemplate(template) {
-      const value = String(template || "").trim();
-      if (!value) return false;
-      try {
-        const parsed = new URL(
-          value.replaceAll("{query}", "").replaceAll("{domain}", "xiaohongshu.com"),
-          window.location.href
-        );
-        const hostname = parsed.hostname.toLowerCase().replace(/^www\./, "");
-        return parsed.protocol.startsWith("http")
-          && /(^|\.)xiaohongshu\.com$/i.test(hostname)
-          && /^\/search_result\/?$/i.test(parsed.pathname);
-      } catch (error) {
-        return /^https?:\/\/(?:www\.)?xiaohongshu\.com\/search_result\/?/i.test(value);
-      }
-    }
-
-    function encodeSearchQueryForTemplate(template, query) {
-      const encoded = encodeURIComponent(query);
-      return isXiaohongshuWebSearchTemplate(template) ? encodeURIComponent(encoded) : encoded;
+function encodeSearchQueryForTemplate(template, query) {
+      return encodeURIComponent(query);
     }
 
 function fillUrlTemplate(template, query, domain = "") {
