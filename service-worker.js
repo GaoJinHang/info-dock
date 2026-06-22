@@ -1,4 +1,4 @@
-const CACHE_NAME = "info-dock-app-v062205-xhs-mobile-type51-search";
+const CACHE_NAME = "info-dock-app-v062202-xhs-general-search-local-keyword-focus";
 const APP_PAGE = "./info-dock-051904.html";
 const SHARE_TARGET_PAGE = "./share-target/index.html";
 const SHARE_TARGET_DIR = "./share-target/";
