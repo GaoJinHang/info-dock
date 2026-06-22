@@ -3705,7 +3705,7 @@
         recommendation: "短词 + 场景词：避坑 / 攻略 / 真实",
         domain: "xiaohongshu.com",
         urlTemplate: "https://www.xiaohongshu.com/search_result?keyword={query}",
-        mobileUrlTemplate: "https://www.xiaohongshu.com/search_result?keyword={query}",
+        mobileUrlTemplate: "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_note_detail_r10&type=54",
         appUrlTemplate: "xhsdiscover://search/result?keyword={query}"
       },
       {
@@ -4161,6 +4161,7 @@
       "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_explore_feed&type=51",
       "https://www.xiaohongshu.com/search_result/?keyword={query}&type=51"
     ];
+    const XHS_MOBILE_WEB_SEARCH_TEMPLATE = "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_note_detail_r10&type=54";
     const XHS_SEARCH_TEMPLATE_HEALTH_KEY = "xhsSearchTemplateHealth.v4.resilientSearch";
     const XHS_SEARCH_TEMPLATE_HEALTH_TTL_MS = 24 * 60 * 60 * 1000;
     const XHS_SEARCH_TEMPLATE_FAILURE_RETRY_MS = 3 * 60 * 60 * 1000;
@@ -4173,7 +4174,7 @@
       "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_explore_feed&type=51",
       "https://www.xiaohongshu.com/search_result/?keyword={query}&m_source=pinpai&source=web_explore_feed&type=51",
       "https://www.xiaohongshu.com/search_result?keyword={query}&m_source=pinpai&source=web_explore_feed&type=51",
-      "https://www.xiaohongshu.com/search_result/?keyword={query}&source=web_note_detail_r10&type=54",
+      XHS_MOBILE_WEB_SEARCH_TEMPLATE,
       "https://www.xiaohongshu.com/search_result?keyword={query}&source=web_note_detail_r10&type=54",
       "https://www.xiaohongshu.com/search_result/?keyword={query}&type=54",
       "https://www.xiaohongshu.com/search_result?keyword={query}&type=54"
@@ -10699,6 +10700,10 @@
     }
 
     function getBestAutoXiaohongshuSearchTemplate() {
+      if (isMobileViewport()) {
+        return pickSafeXhsTemplate(XHS_MOBILE_WEB_SEARCH_TEMPLATE) || XHS_SEARCH_TEMPLATE_CANDIDATES[0];
+      }
+
       const health = readXiaohongshuSearchTemplateHealth();
       return pickSafeXhsTemplate(health?.lastKnownGoodTemplate) || XHS_SEARCH_TEMPLATE_CANDIDATES[0];
     }
@@ -10706,6 +10711,7 @@
     function getXhsTemplateLabel(template) {
       const normalized = normalizeXhsSearchTemplateForComparison(template);
       const candidateIndex = XHS_SEARCH_TEMPLATE_CANDIDATES.findIndex((item) => normalizeXhsSearchTemplateForComparison(item) === normalized);
+      if (normalized === normalizeXhsSearchTemplateForComparison(XHS_MOBILE_WEB_SEARCH_TEMPLATE)) return "移动端兼容模板";
       if (candidateIndex === 0) return "最简通用模板";
       if (candidateIndex > 0) return `候选模板 ${candidateIndex + 1}`;
       return "用户自定义模板";
@@ -10738,6 +10744,7 @@
       const errorText = truncateXhsHealthError(health?.lastError || "");
       const suffixes = [];
       if (!autoEnabled) suffixes.push("自动更新已关闭，不会在启动、页面恢复或搜索前后台检测");
+      if (isMobileViewport() && !explicitTemplate) suffixes.push("手机端网页搜索会优先使用移动端兼容模板");
       if (explicitTemplate) suffixes.push(`内置小红书已配置安全的${getXhsTemplateLabel(explicitTemplate)}，自动模板不会覆盖它`);
       const suffix = suffixes.length ? ` ${suffixes.join("；")}。` : "";
 
